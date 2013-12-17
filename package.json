@@ -1,0 +1,36 @@
+{
+    "name": "intl-handlebars-helpers",
+    "version": "0.0.1",
+    "description": "implementation of the ECMA 402 proposal for MessageFormat",
+    "keywords": [
+        "intl",
+        "i18n",
+        "MessageFormat"
+    ],
+    "author": "Anthony Pipkin <a.pipkin@yahoo.com>",
+    "contributors": [],
+    "licenses": [
+        {
+            "type": "MIT",
+            "url": "https://github.com/yahoo/intl-handlebars-helpers/blob/master/LICENSE"
+        }
+    ],
+    "bugs": {
+        "url": "https://github.com/yahoo/intl-handlebars-helpers/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:yahoo/intl-handlebars-helpers.git"
+    },
+    "main": "index.js",
+    "directories": {
+        "test": "tests"
+    },
+    "devDependencies": {
+
+    },
+    "scripts": {
+        "pretest": "grunt jshint",
+        "test": "istanbul cover -- _mocha tests/ --reporter spec"
+    }
+}
