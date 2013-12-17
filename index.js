@@ -9,7 +9,7 @@ modules.export.getHelpers = function (location) {
     } else {
         return {};
     }
-}
+};
 
 /**
  Registers the helper on the provided handlebars engine
@@ -24,4 +24,4 @@ modules.expoert.registerHelpers = function (engine) {
             engine.registerHelper(p, helpers[p]);
         }
     }
-}
+};
