@@ -1,0 +1,16 @@
+<testsuite name="Mocha Tests" tests="1" failures="1" errors="1" skipped="0" timestamp="Mon, 06 Jan 2014 21:14:49 GMT" time="0.006">
+<testcase classname="helpers with number formats" name="Simple Number" time="0"><failure message="Missing helper: 'int'"><![CDATA[Error: Missing helper: 'int'
+    at Object.&lt;anonymous&gt; (/Users/apipkin/Projects/handlebars-helpers-intl/node_modules/handlebars/dist/cjs/handlebars/base.js:58:13)
+    at Object.eval (eval at &lt;anonymous&gt; (/Users/apipkin/Projects/handlebars-helpers-intl/node_modules/handlebars/dist/cjs/handlebars/compiler/javascript-compiler.js:179:23), &lt;anonymous&gt;:8:140)
+    at /Users/apipkin/Projects/handlebars-helpers-intl/node_modules/handlebars/dist/cjs/handlebars/runtime.js:92:31
+    at /Users/apipkin/Projects/handlebars-helpers-intl/node_modules/handlebars/dist/cjs/handlebars/compiler/compiler.js:467:21
+    at Context.&lt;anonymous&gt; (/Users/apipkin/Projects/handlebars-helpers-intl/tests/helpers.js:33:43)
+    at Test.Runnable.run (/Users/apipkin/Projects/handlebars-helpers-intl/node_modules/mocha/lib/runnable.js:211:32)
+    at Runner.runTest (/Users/apipkin/Projects/handlebars-helpers-intl/node_modules/mocha/lib/runner.js:372:10)
+    at /Users/apipkin/Projects/handlebars-helpers-intl/node_modules/mocha/lib/runner.js:448:12
+    at next (/Users/apipkin/Projects/handlebars-helpers-intl/node_modules/mocha/lib/runner.js:297:14)
+    at /Users/apipkin/Projects/handlebars-helpers-intl/node_modules/mocha/lib/runner.js:307:7
+    at next (/Users/apipkin/Projects/handlebars-helpers-intl/node_modules/mocha/lib/runner.js:245:23)
+    at Object._onImmediate (/Users/apipkin/Projects/handlebars-helpers-intl/node_modules/mocha/lib/runner.js:274:5)
+    at processImmediate [as _immediateCallback] (timers.js:330:15)]]></failure></testcase>
+</testsuite>

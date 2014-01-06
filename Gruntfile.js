@@ -6,10 +6,23 @@ module.exports = function (grunt) {
         pkg: grunt.file.readJSON('package.json'),
         jshint: {
             all: ['index.js', 'lib/*.js', 'tests/*.js']
+        },
+        uglify: {
+            options: {
+                preserveComments: 'some'
+            },
+            index: {
+                src: 'index.js',
+                dest: 'build/index.min.js'
+            }
         }
     });
 
-    grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadTasks('./tasks');
 
+    grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
+
+    grunt.registerTask('build', ['uglify:index',]);
     grunt.registerTask('default', ['jshint']);
 };
