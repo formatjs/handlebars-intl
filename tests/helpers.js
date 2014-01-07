@@ -6,7 +6,8 @@ function _getLocale() {
 }
 
 var Handlebars = require('handlebars');
-require('../lib/helpers.js').register(Handlebars);
+var Intl = require('intl');
+require('../lib/helpers.js').register(Handlebars, Intl);
 
 
 var tmpl = "color {{color}} x {{intlNumber 4}}";
