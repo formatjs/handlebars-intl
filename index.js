@@ -1,7 +1,5 @@
 var helpers = require('./lib/helpers.js');
 
-console.log(helpers);
-
 
 /**
  Gets helpers in the provided location?
