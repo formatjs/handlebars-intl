@@ -20,8 +20,11 @@ Handlebars helpers for internationalization.
 3. Register the helpers:
 
     ```javascript
-    HandlebarsHelperIntl.register(Handlebars);
+    HandlebarsHelperIntl.register(Handlebars, Intl);
     ```
+
+    Note that you'll need to provide an ECMA-402 (Internationalization) object as the second argument to `register()`.
+    If the browser doesn't have a native implementation you'll need to provide a polyfill.
 
 
 ### Node/CommonJS
@@ -31,7 +34,8 @@ Handlebars helpers for internationalization.
 
     ```javascript
     var Handlebars = require('handlebars');
-    require('handlebars-helper-intl').register(Handlebars);
+    var Intl = require('intl');
+    require('handlebars-helper-intl').register(Handlebars, Intl);
     ```
 
 
@@ -42,7 +46,7 @@ Handlebars helpers for internationalization.
 
     ```javascript
     define(['handlebars', 'handlebars-helper-intl'], function(Handlebars, HandlebarsHelperIntl) {
-        HandlebarsHelperIntl.register(Handlebars);
+        HandlebarsHelperIntl.register(Handlebars, Intl);
     });
     ```
 
