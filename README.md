@@ -31,8 +31,14 @@ Handlebars helpers for internationalization.
 
     ```javascript
     var Handlebars = require('handlebars');
-    require('handlebars-helper-intl').register(Handlebars);
+    var helperIntl = require('handlebars-helper-intl');
+    helperIntl.setIntl({...});
+    helperIntl.register(Handlebars);
     ```
+
+    **NOTE:**  Since node (as of 0.10) doesn't provide the global `Intl` object
+    (ECMA-402) you'll need to provide a polyfill.  (The `intl` NPM package can
+    provide this, so `helperIntl.setIntl(require('intl'))` should work.)
 
 
 ### AMD
