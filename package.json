@@ -24,7 +24,7 @@
     "type": "git",
     "url": "git@github.com:yahoo/handlebars-helper-intl.git"
   },
-  "main": "index.js",
+  "main": "lib/helpers.js",
   "directories": {
     "test": "tests"
   },
