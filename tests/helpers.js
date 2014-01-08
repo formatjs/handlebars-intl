@@ -6,6 +6,7 @@ function _getLocale() {
 }
 
 var Handlebars = require('handlebars');
+global.Intl = require('intl');
 require('../lib/helpers.js').register(Handlebars);
 
 
