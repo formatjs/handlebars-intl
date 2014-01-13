@@ -29,6 +29,8 @@ if (typeof require === 'function') {
 }
 expect = chai.expect;
 
+/* jshint expr:true */
+global.Intl || (global.Intl = intl);
 
 describe('helpers with number formats', function () {
 
