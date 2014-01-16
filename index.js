@@ -4,11 +4,7 @@ var helpers = require('./lib/helpers.js');
  Gets helpers in the provided location?
  */
 module.exports.getHelpers = function (location) {
-    if (location === 'Intl') {
-        return helpers;
-    } else {
-        return {};
-    }
+    return helpers.helpers;
 };
 
 /**
