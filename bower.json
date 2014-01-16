@@ -8,7 +8,7 @@
         "Anthony Pipkin <a.pipkin@yahoo.com>"
     ],
 
-    "description": "Handlebars Helpers leveraging the Intl library and several polyfill packages",
+    "description": "Handlebars Helpers utilizing Intl",
 
     "keywords": [
         "intl",
@@ -22,7 +22,6 @@
         "**/.*",
         "node_modules",
         "bower_components",
-        "test",
         "tests"
     ]
 }
