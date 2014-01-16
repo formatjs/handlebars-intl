@@ -29,17 +29,21 @@
     "test": "tests"
   },
   "devDependencies": {
-    "chai": "~1.8.1",
-    "grunt": "~0.4.2",
-    "grunt-cli": "~0.1.11",
-    "grunt-contrib-jshint": "~0.7.2",
-    "handlebars": "~1.1.2",
-    "intl": "~0.0.2",
-    "istanbul": "~0.1.46",
-    "mocha": "~1.15.1"
+    "chai": "1.8.*",
+    "grunt": "0.4.*",
+    "grunt-cli": "0.1.*",
+    "grunt-contrib-jshint": "0.7.*",
+    "grunt-contrib-uglify": "0.2.*",
+    "handlebars": "1.1.*",
+    "istanbul": "0.1.*",
+    "mocha": "1.15.*",
+    "xunit-file": "*",
+    "intl": "*",
+    "intl-messageformat": "git://github.com/yahoo/intl-messageformat.git#master"
   },
   "scripts": {
-    "pretest": "grunt jshint",
+    "build-data": "grunt build-data",
+    "pretest": "grunt jshint build",
     "test": "istanbul cover -- _mocha tests/ --reporter spec"
   }
 }
