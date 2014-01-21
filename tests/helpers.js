@@ -23,14 +23,20 @@ if (typeof require === 'function') {
     Handlebars = require('handlebars');
 
     intl = require('intl');
-    intlMsg = require('intl-messageformat');
+
+    if (typeof Intl === 'undefined') {
+        global.Intl = intl;
+    }
+
+    // load in message format
+    require('intl-messageformat');
+    require('intl-messageformat/locale-data/en');
 
     require('../index.js').registerHelpers(Handlebars);
 }
+
 expect = chai.expect;
 
-/* jshint expr:true */
-global.Intl || (global.Intl = intl);
 
 describe('helpers with number formats', function () {
 
@@ -97,6 +103,71 @@ describe('helpers with number formats', function () {
         out = Handlebars.compile(tmpl)();
 
         expect(out).to.equal("4%");
+    });
+
+    describe('msg formatting', function () {
+        it('should should make dollahs', function () {
+            var tmpl = '{{intl MSG amount=AMOUNT}}',
+                out;
+
+            out = Handlebars.compile(tmpl)({
+                MSG: "I have {amount, number, currency} in my account.",
+                AMOUNT: 23456
+            });
+
+            expect(out).to.equal('I have $23,456.00 in my account.');
+        });
+        it('should should make euros', function () {
+            var tmpl = '{{intl MSG amount=AMOUNT currency="EUR"}}',
+                out;
+
+            out = Handlebars.compile(tmpl)({
+                MSG: "I have {amount, number, currency} in my account.",
+                AMOUNT: 23456
+            });
+
+            expect(out).to.equal('I have €23,456.00 in my account.');
+        });
+        it('should should make euros within a block', function () {
+            var tmpl = '{{#intl currency="EUR"}}{{intl MSG amount=AMOUNT}}{{/intl}}',
+                out;
+
+            out = Handlebars.compile(tmpl)({
+                MSG: "I have {amount, number, currency} in my account.",
+                AMOUNT: 23456
+            });
+
+            expect(out).to.equal('I have €23,456.00 in my account.');
+
+            out = Handlebars.compile(tmpl)({
+                MSG: "You have {amount, number, currency} in my account.",
+                AMOUNT: 11111
+            });
+
+            expect(out).to.equal('You have €11,111.00 in my account.');
+        });
+        it('should work with each statements', function () {
+            var tmpl = '{{#intl currency="EUR"}}' +
+                        '{{#each messages}} {{intl msg firstName=../firstName lastName=../lastName amount=amount}}{{/each}}' +
+                        '{{/intl}}';
+
+            var out = Handlebars.compile(tmpl)({
+                firstName: 'Anthony',
+                lastName: 'Pipkin',
+                messages: [
+                    {
+                        msg: "{firstName} {lastName} has {amount, number, integer} {amount, plural, one {book} other {books}}.\n",
+                        amount: 234567
+                    },
+                    {
+                        msg: "{firstName} {lastName} has {amount, number, currency}.",
+                        amount: 234567
+                    }
+                ]
+            });
+
+            console.log(out);
+        });
     });
 
 });
