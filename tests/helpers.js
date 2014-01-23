@@ -32,7 +32,7 @@ if (typeof require === 'function') {
     require('intl-messageformat');
     require('intl-messageformat/locale-data/en');
 
-    require('../index.js').registerHelpers(Handlebars);
+    require('../lib/helpers.js').register(Handlebars);
 }
 
 expect = chai.expect;
@@ -146,9 +146,27 @@ describe('helpers with number formats', function () {
 
             expect(out).to.equal('You have €11,111.00 in my account.');
         });
+        it('should should make yen within a deep block', function () {
+            var tmpl = '{{#intl currency="EUR"}}{{#intl currency="JPY"}}{{intl MSG amount=AMOUNT}}{{/intl}}{{/intl}}',
+                out;
+
+            out = Handlebars.compile(tmpl)({
+                MSG: "I have {amount, number, currency} in my account.",
+                AMOUNT: 23456
+            });
+
+            expect(out).to.equal('I have ¥23,456 in my account.');
+
+            out = Handlebars.compile(tmpl)({
+                MSG: "You have {amount, number, currency} in my account.",
+                AMOUNT: 11111
+            });
+
+            expect(out).to.equal('You have ¥11,111 in my account.');
+        });
         it('should work with each statements', function () {
             var tmpl = '{{#intl currency="EUR"}}' +
-                        '{{#each messages}} {{intl msg firstName=../firstName lastName=../lastName amount=amount}}{{/each}}' +
+                        '{{#each messages}}{{intl msg firstName=../firstName lastName=../lastName amount=amount}}{{/each}}' +
                         '{{/intl}}';
 
             var out = Handlebars.compile(tmpl)({
@@ -156,7 +174,7 @@ describe('helpers with number formats', function () {
                 lastName: 'Pipkin',
                 messages: [
                     {
-                        msg: "{firstName} {lastName} has {amount, number, integer} {amount, plural, one {book} other {books}}.\n",
+                        msg: "{firstName} {lastName} has {amount, number, integer} {amount, plural, one {book} other {books}}.",
                         amount: 234567
                     },
                     {
@@ -166,7 +184,7 @@ describe('helpers with number formats', function () {
                 ]
             });
 
-            console.log(out);
+            expect(out).to.equal('Anthony Pipkin has 234,567 books.Anthony Pipkin has $234,567.00.');
         });
     });
 
