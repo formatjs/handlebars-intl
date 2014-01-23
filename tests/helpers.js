@@ -25,7 +25,7 @@ if (typeof require === 'function') {
     intl = require('intl');
     intlMsg = require('intl-messageformat');
 
-    require('../index.js').registerHelpers(Handlebars);
+    require('../lib/helpers.js').register(Handlebars);
 }
 expect = chai.expect;
 
