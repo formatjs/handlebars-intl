@@ -27,7 +27,7 @@ if (typeof require === 'function') {
     intlMsg = require('intl-messageformat');
     require('intl-messageformat/locale-data/en');
 
-    require('../index.js').registerHelpers(Handlebars);
+    require('../lib/helpers.js').register(Handlebars);
 }
 expect = chai.expect;
 

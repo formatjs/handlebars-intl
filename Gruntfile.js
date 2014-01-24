@@ -11,9 +11,9 @@ module.exports = function (grunt) {
             options: {
                 preserveComments: 'some'
             },
-            index: {
-                src: 'index.js',
-                dest: 'build/index.min.js'
+            helpers: {
+                src: 'lib/helpers.js',
+                dest: 'build/helpers.min.js'
             }
         }
     });
@@ -21,6 +21,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-uglify');
 
-    grunt.registerTask('build', ['uglify:index',]);
+    grunt.registerTask('build', ['uglify:helpers',]);
     grunt.registerTask('default', ['jshint']);
 };
