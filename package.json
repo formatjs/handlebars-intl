@@ -41,7 +41,6 @@
     "intl-messageformat": "git://github.com/yahoo/intl-messageformat.git#master"
   },
   "scripts": {
-    "build-data": "grunt build-data",
     "pretest": "grunt jshint build",
     "test": "istanbul cover -- _mocha tests/ --reporter spec"
   }
