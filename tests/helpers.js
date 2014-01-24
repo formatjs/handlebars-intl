@@ -24,15 +24,20 @@ if (typeof require === 'function') {
     Handlebars = require('handlebars');
 
     intl = require('intl');
-    intlMsg = require('intl-messageformat');
+
+    if (typeof Intl === 'undefined') {
+        global.Intl = intl;
+    }
+
+    // load in message format
+    require('intl-messageformat');
     require('intl-messageformat/locale-data/en');
 
     require('../lib/helpers.js').register(Handlebars);
 }
+
 expect = chai.expect;
 
-/* jshint expr:true */
-global.Intl || (global.Intl = intl);
 
 describe('Helper `intlNumber`', function () {
 
@@ -381,5 +386,6 @@ describe('Helper `intl`', function () {
         });
 //*/
     });
+
 });
 
