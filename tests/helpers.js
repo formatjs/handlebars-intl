@@ -44,9 +44,18 @@ describe('Helper `intlNumber`', function () {
         expect(Handlebars.helpers.intlNumber).to.be.a('function');
     });
 
+    it('should throw if called with out a value', function () {
+        try {
+            Handlebars.compile('{{intlNumber}}')();
+        } catch (e) {
+            var err = new ReferenceError('A number must be provided.');
+            expect(e.toString()).to.equal(err.toString());
+        }
+    });
+
     describe('used to format numbers', function () {
         it('should return a string', function () {
-            var tmpl = "{{intl 4}}",
+            var tmpl = "{{intlNumber 4}}",
                 out;
 
             out = Handlebars.compile(tmpl)();
@@ -55,7 +64,7 @@ describe('Helper `intlNumber`', function () {
         });
 
         it('should return a decimal as a string', function () {
-            var tmpl = Handlebars.compile('{{intl NUM}}'),
+            var tmpl = Handlebars.compile('{{intlNumber NUM}}'),
                 out = tmpl({ NUM: 4.004 });
 
             expect(out).to.equal("4.004");
@@ -77,7 +86,7 @@ describe('Helper `intlNumber`', function () {
 
         describe('in another locale', function () {
             it('should return a string', function () {
-                var tmpl = '{{intl 4 locale="de-DE"}}',
+                var tmpl = '{{intlNumber 4 locale="de-DE"}}',
                     out;
 
                 out = Handlebars.compile(tmpl)();
@@ -86,7 +95,7 @@ describe('Helper `intlNumber`', function () {
             });
 
             it('should return a decimal as a string', function () {
-                var tmpl = Handlebars.compile('{{intl NUM locale="de-DE"}}'),
+                var tmpl = Handlebars.compile('{{intlNumber NUM locale="de-DE"}}'),
                     out = tmpl({ NUM: 4.004 });
 
                 expect(out).to.equal("4,004");
@@ -193,6 +202,15 @@ describe('Helper `intlDate`', function () {
         expect(Handlebars.helpers.intlDate).to.be.a('function');
     });
 
+    it('should throw if called with out a value', function () {
+        try {
+            Handlebars.compile('{{intlDate}}')();
+        } catch (e) {
+            var err = new ReferenceError('A date or time stamp must be provided.');
+            expect(e.toString()).to.equal(err.toString());
+        }
+    });
+
     // Use a fixed known date
     var dateStr = 'Thu Jan 23 2014 18:00:44 GMT-0500 (EST)',
         timeStamp = 1390518044403;
@@ -234,6 +252,15 @@ describe('Helper `intlMessage`', function () {
 
     it('should be a function', function () {
         expect(Handlebars.helpers.intlMessage).to.be.a('function');
+    });
+
+    it('should throw if called with out a value', function () {
+        try {
+            Handlebars.compile('{{intlMessage}}')();
+        } catch (e) {
+            var err = new ReferenceError('A string must be provided.');
+            expect(e.toString()).to.equal(err.toString());
+        }
     });
 
     it('should return a formatted string', function () {
