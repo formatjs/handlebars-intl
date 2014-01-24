@@ -16,6 +16,7 @@ global.currency = "USD";
 var chai,
     expect,
     Handlebars,
+    Helpers,
     intl,
     intlMsg;
 
@@ -33,7 +34,8 @@ if (typeof require === 'function') {
     require('intl-messageformat');
     require('intl-messageformat/locale-data/en');
 
-    require('../lib/helpers.js').register(Handlebars);
+    Helpers = require('../lib/helpers.js');
+    Helpers.register(Handlebars);
 }
 
 expect = chai.expect;
@@ -318,6 +320,58 @@ describe('Helper `intlMessage`', function () {
         expect(out).to.equal(' Allison harvested 10 apples. Jeremy harvested 60 apples.');
     });
 
+    it('should supply its own currency value for messages', function () {
+        var tmp = Handlebars.compile('{{intlMessage MSG amount=amount currency="EUR"}}'),
+            out = tmp({
+                MSG: 'I have {amount, number, currency}.',
+                amount: 23.45
+            });
+
+        expect(out).to.equal('I have €23.45.');
+    });
+
+    it('should return an error if no token is provided', function () {
+        try {
+            var tmp = Handlebars.compile('{{intl amount=amount}}'),
+                out = tmp({
+                    MSG: 'I have {amount, number, currency}.',
+                    amount: 23.45
+                });
+        } catch (e) {
+            var err = new SyntaxError('A value or a token must be provided.');
+
+            expect(e.toString()).to.equal(err.toString());
+        }
+    });
+
+    describe('with a token', function () {
+
+        it('should return a message', function () {
+            var tmp = Handlebars.compile('{{intl token="MSG" amount=amount}}'),
+                out = tmp({
+                    MSG: 'I have {amount, number, currency}.',
+                    amount: 23.45
+                });
+
+            expect(out).to.equal('I have $23.45.');
+        });
+
+        it('should return an error if the token is not found', function () {
+            try {
+                var tmp = Handlebars.compile('{{intl token="BAD_TOKEN" amount=amount}}'),
+                    out = tmp({
+                        MSG: 'I have {amount, number, currency}.',
+                        amount: 23.45
+                    });
+            } catch (e) {
+                var err = new ReferenceError('Could not find path BAD_TOKEN in [object Object] at BAD_TOKEN');
+
+                expect(e.toString()).to.equal(err.toString());
+            }
+        });
+
+    });
+
 });
 
 describe('Helper `intl`', function () {
@@ -368,24 +422,94 @@ describe('Helper `intl`', function () {
             expect(out).to.equal('40,000.004 40.000,004 40,000.004');
         });
 
-/** TO COME AFTER PR #10 **
         it('should maintain a currency', function () {
-            var str = '{{intl NUM style="currency"}}{{#intl currency="EUR"}}{{intl ../NUM style="currency"}}{{/intl}} {{intl NUM style="currency"}}',
+            var str = '{{intl NUM style="currency"}}' +
+                      '{{#intl currency="EUR"}} {{intl ../NUM style="currency"}} {{/intl}}' +
+                      '{{intl NUM style="currency"}}',
                 tmp = Handlebars.compile(str),
-                out = tmp({ NUM: 40000.004});
+                out = tmp({ NUM: 40000.006});
+
+            expect(out).to.equal('$40,000.01 €40,000.01 $40,000.01');
+        });
+
+        it('should maintain context regardless of depth', function () {
+            var str = '{{#intl locale="de-DE"}}' +
+                       '{{#intl locale="en-US"}}{{intl NUM}} {{/intl}}' +
+                       '{{intl NUM}}' +
+                      '{{/intl}} ' +
+                      '{{intl NUM}}',
+                tmp = Handlebars.compile(str),
+                out = tmp({ NUM: 40000.004 });
 
             expect(out).to.equal('40,000.004 40.000,004 40,000.004');
         });
 
-        it('should maintain context regardless of depth', function () {
-            var str = '{{#intl locale="de-DE"}}{{#intl locale="en-US"}} {{intl NUM}} {{/intl}}{{intl NUM}}{{/intl}} {{intl NUM}}',
-                tmp = Handlebars.compile(str),
-                out = tmp({ NUM: 40000.004 });
+    });
+});
 
-            expect(out).to.equal('40,000.004 40.000,004 40,000.04');
+describe('Helper formatters', function () {
+    describe('for intlDate', function () {
+        it('should return null when asked for an unset key', function () {
+            var format = Helpers.getDateTimeFormat('time_short');
+
+            expect(format).to.equal(null);
         });
-//*/
+
+        it('should return the object after it is set', function () {
+            Helpers.setDateTimeFormat('time_short', {
+                timeZone: 'UTC',
+                hour    : 'numeric',
+                minute  : 'numeric'
+            });
+
+            var format = Helpers.getDateTimeFormat('time_short');
+
+            expect(format).to.be.an('object');
+        });
+
+        it('should format a date using the formatter', function () {
+            Helpers.setDateTimeFormat('time_short', {
+                timeZone: 'UTC',
+                hour    : 'numeric',
+                minute  : 'numeric'
+            });
+
+            var tmp = Handlebars.compile('{{intlDate DATE format="time_short"}}'),
+                out = tmp({ DATE: new Date('Thu Jan 23 2014 18:00:44 GMT-0500 (EST)')});
+
+            expect(out).to.equal('6:00 PM');
+        });
     });
 
+    describe('for Number', function () {
+        it('should return null when asked for an unset key', function () {
+            var format = Helpers.getNumberFormat('euros');
+
+            expect(format).to.equal(null);
+        });
+
+        it('should return the object after it is set', function () {
+            Helpers.setNumberFormat('euros', {
+                currency: 'EUR',
+                style   : 'currency'
+            });
+
+            var format = Helpers.getNumberFormat('euros');
+
+            expect(format).to.be.an('object');
+        });
+
+        it('should format a date using the formatter', function () {
+            Helpers.setNumberFormat('euros', {
+                currency: 'EUR',
+                style   : 'currency'
+            });
+
+            var tmp = Handlebars.compile('{{intlNumber MONEY format="euros"}}'),
+                out = tmp({ MONEY: 45.39 });
+
+            expect(out).to.equal('€45.39');
+        });
+    });
 });
 
