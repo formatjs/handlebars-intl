@@ -15,10 +15,11 @@ global.currency = "USD";
 
 var chai,
     expect,
+    assert,
+
     Handlebars,
     Helpers,
-    intl,
-    intlMsg;
+    intl;
 
 if (typeof require === 'function') {
     chai = require('chai');
@@ -39,6 +40,7 @@ if (typeof require === 'function') {
 }
 
 expect = chai.expect;
+assert = chai.assert;
 
 
 describe('Helper `intlNumber`', function () {
@@ -52,12 +54,8 @@ describe('Helper `intlNumber`', function () {
     });
 
     it('should throw if called with out a value', function () {
-        try {
-            Handlebars.compile('{{intlNumber}}')();
-        } catch (e) {
-            var err = new ReferenceError('A number must be provided.');
-            expect(e.toString()).to.equal(err.toString());
-        }
+        assert.throw(Handlebars.compile('{{intlNumber}}'), ReferenceError, 'A number must be provided.');
+
     });
 
     describe('used to format numbers', function () {
@@ -210,12 +208,7 @@ describe('Helper `intlDate`', function () {
     });
 
     it('should throw if called with out a value', function () {
-        try {
-            Handlebars.compile('{{intlDate}}')();
-        } catch (e) {
-            var err = new ReferenceError('A date or time stamp must be provided.');
-            expect(e.toString()).to.equal(err.toString());
-        }
+        assert.throw(Handlebars.compile('{{intlDate}}'), ReferenceError, 'A date or time stamp must be provided.');
     });
 
     // Use a fixed known date
@@ -262,12 +255,7 @@ describe('Helper `intlMessage`', function () {
     });
 
     it('should throw if called with out a value', function () {
-        try {
-            Handlebars.compile('{{intlMessage}}')();
-        } catch (e) {
-            var err = new ReferenceError('A string must be provided.');
-            expect(e.toString()).to.equal(err.toString());
-        }
+        assert.throw(Handlebars.compile('{{intlMessage}}'), ReferenceError, 'A string must be provided.');
     });
 
     it('should return a formatted string', function () {
