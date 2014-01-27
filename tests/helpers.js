@@ -9,17 +9,13 @@
 
 'use strict';
 
-// set locale
-global.locale = "en";
-global.currency = "USD";
-
 var chai,
     expect,
     assert,
 
     Handlebars,
-    Helpers,
-    intl;
+    intl,
+    IntlHelpers;
 
 if (typeof require === 'function') {
     chai = require('chai');
@@ -35,8 +31,13 @@ if (typeof require === 'function') {
     require('intl-messageformat');
     require('intl-messageformat/locale-data/en');
 
-    Helpers = require('../lib/helpers.js');
-    Helpers.register(Handlebars);
+
+    IntlHelpers = require('../lib/helpers.js');
+    IntlHelpers.register(Handlebars);
+    IntlHelpers.setDefault({
+        locale: 'en',
+        currency: 'USD'
+    });
 }
 
 expect = chai.expect;
@@ -431,25 +432,25 @@ describe('Helper `intl`', function () {
 describe('Helper formatters', function () {
     describe('for intlDate', function () {
         it('should return null when asked for an unset key', function () {
-            var format = Helpers.getDateTimeFormat('time_short');
+            var format = IntlHelpers.getDateTimeFormat('time_short');
 
             expect(format).to.equal(null);
         });
 
         it('should return the object after it is set', function () {
-            Helpers.setDateTimeFormat('time_short', {
+            IntlHelpers.setDateTimeFormat('time_short', {
                 timeZone: 'UTC',
                 hour    : 'numeric',
                 minute  : 'numeric'
             });
 
-            var format = Helpers.getDateTimeFormat('time_short');
+            var format = IntlHelpers.getDateTimeFormat('time_short');
 
             expect(format).to.be.an('object');
         });
 
         it('should format a date using the formatter', function () {
-            Helpers.setDateTimeFormat('time_short', {
+            IntlHelpers.setDateTimeFormat('time_short', {
                 timeZone: 'UTC',
                 hour    : 'numeric',
                 minute  : 'numeric'
@@ -464,24 +465,24 @@ describe('Helper formatters', function () {
 
     describe('for Number', function () {
         it('should return null when asked for an unset key', function () {
-            var format = Helpers.getNumberFormat('euros');
+            var format = IntlHelpers.getNumberFormat('euros');
 
             expect(format).to.equal(null);
         });
 
         it('should return the object after it is set', function () {
-            Helpers.setNumberFormat('euros', {
+            IntlHelpers.setNumberFormat('euros', {
                 currency: 'EUR',
                 style   : 'currency'
             });
 
-            var format = Helpers.getNumberFormat('euros');
+            var format = IntlHelpers.getNumberFormat('euros');
 
             expect(format).to.be.an('object');
         });
 
         it('should format a date using the formatter', function () {
-            Helpers.setNumberFormat('euros', {
+            IntlHelpers.setNumberFormat('euros', {
                 currency: 'EUR',
                 style   : 'currency'
             });
