@@ -319,17 +319,13 @@ describe('Helper `intlMessage`', function () {
     });
 
     it('should return an error if no token is provided', function () {
-        try {
+        assert.throw(function () {
             var tmp = Handlebars.compile('{{intl amount=amount}}'),
                 out = tmp({
                     MSG: 'I have {amount, number, currency}.',
                     amount: 23.45
                 });
-        } catch (e) {
-            var err = new SyntaxError('A value or a token must be provided.');
-
-            expect(e.toString()).to.equal(err.toString());
-        }
+        }, SyntaxError, 'A value or a token must be provided.');
     });
 
     describe('with a token', function () {
@@ -345,17 +341,14 @@ describe('Helper `intlMessage`', function () {
         });
 
         it('should return an error if the token is not found', function () {
-            try {
+            assert.throw(function () {
                 var tmp = Handlebars.compile('{{intl token="BAD_TOKEN" amount=amount}}'),
                     out = tmp({
                         MSG: 'I have {amount, number, currency}.',
                         amount: 23.45
                     });
-            } catch (e) {
-                var err = new ReferenceError('Could not find path BAD_TOKEN in [object Object] at BAD_TOKEN');
+            }, ReferenceError, 'Could not find path BAD_TOKEN in [object Object] at BAD_TOKEN');
 
-                expect(e.toString()).to.equal(err.toString());
-            }
         });
 
     });
