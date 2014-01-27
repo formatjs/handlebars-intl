@@ -9,15 +9,11 @@
 
 'use strict';
 
-// set locale
-global.locale = "en";
-global.currency = "USD";
-
 var chai,
     expect,
     Handlebars,
     intl,
-    intlMsg;
+    intlHelpers;
 
 if (typeof require === 'function') {
     chai = require('chai');
@@ -33,7 +29,12 @@ if (typeof require === 'function') {
     require('intl-messageformat');
     require('intl-messageformat/locale-data/en');
 
-    require('../lib/helpers.js').register(Handlebars);
+    intlHelpers = require('../lib/helpers.js');
+    intlHelpers.register(Handlebars);
+    intlHelpers.registerDefault({
+        locale: 'en',
+        currency: 'USD'
+    });
 }
 
 expect = chai.expect;
