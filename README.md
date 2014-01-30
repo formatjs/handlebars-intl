@@ -3,6 +3,8 @@ handlebars-helper-intl
 
 Handlebars helpers for internationalization.
 
+[![Build Status](https://travis-ci.org/yahoo/handlebars-helper-intl.png)](https://travis-ci.org/yahoo/handlebars-helper-intl)
+
 
 ## Installation
 
