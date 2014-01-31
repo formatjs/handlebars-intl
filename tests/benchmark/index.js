@@ -31,38 +31,43 @@ var data = {
         messages: {
             foo: [
                 'The number is: ',
-                // {
-                //     valueName: 'num',
-                //     type     : 'number',
-                //     format   : 'integer'
-                // }
+                {
+                    valueName: 'num',
+                    type     : 'number',
+                    format   : 'integer'
+                }
             ]
         }
     }
 };
 
-var now = new Date();
+var nf = new Intl.NumberFormat('en-US');
+
+var now = new Date(),
+    df  = new Intl.DateTimeFormat('en-US', {
+        weekday: 'long',
+        year   : 'numeric',
+        month  : 'long',
+        day    : 'numeric'
+    });
 
 new Benchmark.Suite('NumberFormat', suiteConfig)
-    .add('NumberFormat', function () {
-        new Intl.NumberFormat('en-US', {
-            currency: 'USD',
-            style   : 'currency'
-        }).format(4000);
+    .add('new NumberFormat', function () {
+        new Intl.NumberFormat('en-US').format(4000);
     })
-    .add('intlNumber', function () {
+    .add('cached NumberFormat#format', function () {
+        nf.format(4000);
+    })
+    .add('intlNumber helper', function () {
         intlNumber(4000, {
             data: data,
-            hash: {
-                style   : 'currency',
-                currency: 'USD'
-            }
+            hash: {}
         });
     })
     .run();
 
 new Benchmark.Suite('DateTimeFormat', suiteConfig)
-    .add('DateTimeFormat', function () {
+    .add('new DateTimeFormat', function () {
         new Intl.DateTimeFormat('en-US', {
             weekday: 'long',
             year   : 'numeric',
@@ -70,7 +75,10 @@ new Benchmark.Suite('DateTimeFormat', suiteConfig)
             day    : 'numeric'
         }).format(now);
     })
-    .add('intlDate', function () {
+    .add('cached DateTimeFormat#format', function () {
+        df.format(now);
+    })
+    .add('intlDate helper', function () {
         intlDate(now, {
             data: data,
             hash: {
@@ -84,7 +92,7 @@ new Benchmark.Suite('DateTimeFormat', suiteConfig)
     .run();
 
 new Benchmark.Suite('MessageFormat', suiteConfig)
-    .add('intlMessage', function () {
+    .add('intlMessage helper literal', function () {
         intlMessage('The number is: {num, number, integer}', {
             data: data,
             hash: {
@@ -92,7 +100,7 @@ new Benchmark.Suite('MessageFormat', suiteConfig)
             }
         });
     })
-    .add('intlMessage Cache', function () {
+    .add('intlMessage helper reference', function () {
         intlMessage({
             data: data,
             hash: {
