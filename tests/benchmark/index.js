@@ -3,13 +3,13 @@
 
 global.Intl || (global.Intl = require('intl'));
 
-var Benchmark   = require('benchmark'),
-    intlMsg     = require('intl-messageformat'),
-    Handlebars  = require('handlebars'),
-    hbsIntl     = require('../../'),
-    intlNumber  = hbsIntl.helpers.intlNumber,
-    intlDate    = hbsIntl.helpers.intlDate,
-    intlMessage = hbsIntl.helpers.intlMessage;
+var Benchmark         = require('benchmark'),
+    IntlMessageFormat = require('intl-messageformat'),
+    Handlebars        = require('handlebars'),
+    hbsIntl           = require('../../'),
+    intlNumber        = hbsIntl.helpers.intlNumber,
+    intlDate          = hbsIntl.helpers.intlDate,
+    intlMessage       = hbsIntl.helpers.intlMessage;
 
 var suiteConfig = {
     onStart: function (e) {
@@ -50,6 +50,8 @@ var now = new Date(),
         month  : 'long',
         day    : 'numeric'
     });
+
+var mf = new IntlMessageFormat('The number is: {num, number, integer}', 'en');
 
 new Benchmark.Suite('NumberFormat', suiteConfig)
     .add('new NumberFormat', function () {
@@ -100,12 +102,20 @@ new Benchmark.Suite('MessageFormat', suiteConfig)
             }
         });
     })
-    .add('intlMessage helper reference', function () {
+    .add('intlMessage helper reference (parsed)', function () {
         intlMessage({
             data: data,
             hash: {
                 num     : 4000,
                 intlName: 'foo'
+            }
+        });
+    })
+    .add('intlMessage helper reference (cached)', function () {
+        intlMessage(mf, {
+            data: data,
+            hash: {
+                num: 4000
             }
         });
     })
