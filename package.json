@@ -38,6 +38,7 @@
     "istanbul": "0.1.*",
     "mocha": "1.15.*",
     "intl": "*",
+    "xunit-file": "*",
     "intl-messageformat": "git://github.com/yahoo/intl-messageformat.git#master"
   },
   "scripts": {
