@@ -15,6 +15,7 @@ if (typeof require === 'function') {
     // Intl and IntlMessageFormat
     global.Intl || (global.Intl = require('intl'));
     IntlMessageFormat = require('intl-messageformat');
+    require('intl-messageformat/locale-data/en');
 
     require('../lib/helpers.js').registerWith(Handlebars);
 }
