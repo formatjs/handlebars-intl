@@ -9,7 +9,9 @@
   ],
   "author": "Anthony Pipkin <a.pipkin@yahoo.com>",
   "contributors": [
-    "Drew Folta <drew@folta.net>"
+    "Drew Folta <drew@folta.net>",
+    "Eric Ferraiuolo <eferraiuolo@gmail.com>",
+    "Caridy Patino <caridy@gmail.com>"
   ],
   "licenses": [
     {
@@ -38,7 +40,8 @@
     "istanbul": "0.1.*",
     "mocha": "1.15.*",
     "intl": "*",
-    "intl-messageformat": "git://github.com/yahoo/intl-messageformat.git#master"
+    "intl-messageformat": "git://github.com/yahoo/intl-messageformat.git#master",
+    "benchmark": "~1.0.0"
   },
   "scripts": {
     "pretest": "grunt jshint build",

@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Intl Benchmarks</title>
+</head>
+<body>
+    <script src="https://rawgithub.com/lodash/lodash/master/lodash.js"></script>
+    <script src="https://rawgithub.com/bestiejs/benchmark.js/master/benchmark.js"></script>
+    <script src="../../node_modules/intl/Intl.complete.js"></script>
+    <script>
+        var suiteConfig = {
+            onStart: function (e) {
+                console.log(e.currentTarget.name + ':');
+            },
+
+            onCycle: function (e) {
+                console.log(String(e.target));
+            },
+
+            onComplete: function () {
+                console.log('');
+            }
+        };
+
+        var nf = new Intl.NumberFormat('en-US', {
+            currency: 'USD',
+            style   : 'currency'
+        });
+
+        var nfp = new IntlPolyfill.NumberFormat('en-US', {
+            currency: 'USD',
+            style   : 'currency'
+        });
+
+        new Benchmark.Suite('NumberFormat', suiteConfig)
+            .add('Number#toLocaleString()', function () {
+                (4000).toLocaleString('en-US', {
+                    currency: 'USD',
+                    style   : 'currency'
+                });
+            })
+            .add('NumberFormat', function () {
+                new Intl.NumberFormat('en-US', {
+                    currency: 'USD',
+                    style   : 'currency'
+                }).format(4000);
+            })
+            .add('NumberFormat cached', function () {
+                nf.format(4000);
+            })
+            .add('NumberFormat PolyFill', function () {
+                new IntlPolyfill.NumberFormat('en-US', {
+                    currency: 'USD',
+                    style   : 'currency'
+                }).format(4000);
+            })
+            .add('NumberFormat PolyFill cached', function () {
+                nfp.format(4000);
+            })
+            .run();
+    </script>
+</body>
+</html>
