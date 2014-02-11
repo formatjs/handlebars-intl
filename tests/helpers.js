@@ -1,46 +1,41 @@
-/*
- * Copyright (c) 2011-2013, Yahoo! Inc. All rights reserved.
- * Copyrights licensed under the New BSD License.
- * See the accompanying LICENSE file for terms.
- */
-
-/* jshint node:true */
 /* global describe, it, locale */
+/* jshint node:true, expr:true */
 
 'use strict';
-
-// set locale
-global.locale = "en";
-global.currency = "USD";
 
 var chai,
     expect,
     Handlebars,
-    intl,
-    intlMsg;
+    IntlMessageFormat;
 
 if (typeof require === 'function') {
     chai = require('chai');
     Handlebars = require('handlebars');
 
-    intl = require('intl');
+    // Intl and IntlMessageFormat
+    global.Intl || (global.Intl = require('intl'));
+    IntlMessageFormat = require('intl-messageformat');
 
-    if (typeof Intl === 'undefined') {
-        global.Intl = intl;
-    }
-
-    // load in message format
-    require('intl-messageformat');
-    require('intl-messageformat/locale-data/en');
-
-    require('../lib/helpers.js').register(Handlebars);
+    require('../lib/helpers.js').registerWith(Handlebars);
 }
 
 expect = chai.expect;
 
+function intlBlock(content, options) {
+    var hash = [],
+        option, open, close;
+
+    for (option in options) {
+        hash.push(option + '=' + '"' + options[option] + '"');
+    }
+
+    open  = '{{#intl ' + hash.join(' ') + '}}';
+    close = '{{/intl}}';
+
+    return Handlebars.compile(open + content + close);
+}
 
 describe('Helper `intlNumber`', function () {
-
     it('should be added to Handlebars', function () {
         expect(Handlebars.helpers).to.include.keys('intlNumber');
     });
@@ -50,113 +45,83 @@ describe('Helper `intlNumber`', function () {
     });
 
     it('should throw if called with out a value', function () {
-        try {
-            Handlebars.compile('{{intlNumber}}')();
-        } catch (e) {
-            var err = new ReferenceError('A number must be provided.');
-            expect(e.toString()).to.equal(err.toString());
-        }
+        expect(Handlebars.compile('{{intlNumber}}')).to.throw(TypeError);
     });
 
     describe('used to format numbers', function () {
         it('should return a string', function () {
-            var tmpl = "{{intlNumber 4}}",
-                out;
-
-            out = Handlebars.compile(tmpl)();
-
-            expect(out).to.equal("4");
+            var tmpl = intlBlock('{{intlNumber 4}}', {locales: 'en-US'});
+            expect(tmpl()).to.equal('4');
         });
 
         it('should return a decimal as a string', function () {
-            var tmpl = Handlebars.compile('{{intlNumber NUM}}'),
-                out = tmpl({ NUM: 4.004 });
-
-            expect(out).to.equal("4.004");
+            var tmpl = intlBlock('{{intlNumber NUM}}', {locales: 'en-US'});
+            expect(tmpl({ NUM: 4.004 })).to.equal('4.004');
         });
 
         it('should return a formatted string with a thousand separator', function () {
-            var tmp = Handlebars.compile('{{intlNumber NUM}}'),
-                out = tmp({ NUM: 40000 });
-
-            expect(out).to.equal('40,000');
+            var tmpl = intlBlock('{{intlNumber NUM}}', {locales: 'en-US'});
+            expect(tmpl({ NUM: 40000 })).to.equal('40,000');
         });
 
         it('should return a formatted string with a thousand separator and decimal', function () {
-            var tmp = Handlebars.compile('{{intlNumber NUM}}'),
-                out = tmp({ NUM: 40000.004 });
-
-            expect(out).to.equal('40,000.004');
+            var tmpl = intlBlock('{{intlNumber NUM}}', {locales: 'en-US'});
+            expect(tmpl({ NUM: 40000.004 })).to.equal('40,000.004');
         });
 
         describe('in another locale', function () {
             it('should return a string', function () {
-                var tmpl = '{{intlNumber 4 locale="de-DE"}}',
-                    out;
-
-                out = Handlebars.compile(tmpl)();
-
-                expect(out).to.equal("4");
+                var tmpl = intlBlock('{{intlNumber 4}}', {locales: 'de-DE'});
+                expect(tmpl()).to.equal('4');
             });
 
             it('should return a decimal as a string', function () {
-                var tmpl = Handlebars.compile('{{intlNumber NUM locale="de-DE"}}'),
-                    out = tmpl({ NUM: 4.004 });
-
-                expect(out).to.equal("4,004");
+                var tmpl = intlBlock('{{intlNumber NUM}}', {locales: 'de-DE'});
+                expect(tmpl({ NUM: 4.004 })).to.equal('4,004');
             });
 
             it('should return a formatted string with a thousand separator', function () {
-                var tmp = Handlebars.compile('{{intlNumber NUM locale="de-DE"}}'),
-                    out = tmp({ NUM: 40000 });
-
-                expect(out).to.equal('40.000');
+                var tmpl = intlBlock('{{intlNumber NUM}}', {locales: 'de-DE'});
+                expect(tmpl({ NUM: 40000 })).to.equal('40.000');
             });
 
             it('should return a formatted string with a thousand separator and decimal', function () {
-                var tmp = Handlebars.compile('{{intlNumber NUM locale="de-DE"}}'),
-                    out = tmp({ NUM: 40000.004 });
-
-                expect(out).to.equal('40.000,004');
+                var tmpl = intlBlock('{{intlNumber NUM}}', {locales: 'de-DE'});
+                expect(tmpl({ NUM: 40000.004 })).to.equal('40.000,004');
             });
         });
-
     });
 
     describe('used to format currency', function () {
         it('should return a string formatted to currency', function () {
-            var tmp = Handlebars.compile('{{intlNumber 40000 style="currency" currency=CURRENCY}}'),
-                out = tmp({ CURRENCY: 'USD' });
+            var tmpl;
 
-            expect(out, 'USD').to.equal('$40,000.00');
+            tmpl = intlBlock('{{intlNumber 40000 style="currency" currency="USD"}}', {locales: 'en-US'});
+            expect(tmpl()).to.equal('$40,000.00');
 
-            tmp = Handlebars.compile('{{intlNumber 40000 style="currency" currency=CURRENCY}}');
-            out = tmp({ CURRENCY: 'EUR'});
-            expect(out, 'EUR').to.equal('€40,000.00');
+            tmpl = intlBlock('{{intlNumber 40000 style="currency" currency="EUR"}}', {locales: 'en-US'});
+            expect(tmpl()).to.equal('€40,000.00');
 
-            tmp = Handlebars.compile('{{intlNumber 40000 style="currency" currency=CURRENCY}}');
-            out = tmp({ CURRENCY: 'JPY'});
-            expect(out, 'JPY').to.equal('¥40,000');
+            tmpl = intlBlock('{{intlNumber 40000 style="currency" currency="JPY"}}', {locales: 'en-US'});
+            expect(tmpl()).to.equal('¥40,000');
         });
 
         it('should return a string formatted to currency with code', function () {
-            var tmp = Handlebars.compile('{{intlNumber 40000 style="currency" currency=CURRENCY currencyDisplay="code"}}'),
-                out = tmp({ CURRENCY: 'USD' });
+            var tmpl;
 
-            expect(out, 'USD').to.equal('USD40,000.00');
+            tmpl = intlBlock('{{intlNumber 40000 style="currency" currency="USD" currencyDisplay="code"}}', {locales: 'en-US'});
+            expect(tmpl()).to.equal('USD40,000.00');
 
-            tmp = Handlebars.compile('{{intlNumber 40000 style="currency" currency=CURRENCY currencyDisplay="code"}}');
-            out = tmp({ CURRENCY: 'EUR'});
-            expect(out, 'EUR').to.equal('EUR40,000.00');
+            tmpl = intlBlock('{{intlNumber 40000 style="currency" currency="EUR" currencyDisplay="code"}}', {locales: 'en-US'});
+            expect(tmpl()).to.equal('EUR40,000.00');
 
-            tmp = Handlebars.compile('{{intlNumber 40000 style="currency" currency=CURRENCY currencyDisplay="code"}}');
-            out = tmp({ CURRENCY: 'JPY'});
-            expect(out, 'JPY').to.equal('JPY40,000');
+            tmpl = intlBlock('{{intlNumber 40000 style="currency" currency="JPY" currencyDisplay="code"}}', {locales: 'en-US'});
+            expect(tmpl()).to.equal('JPY40,000');
         });
 
         it('should function within an `each` block helper', function () {
-            var tmp = Handlebars.compile('{{#each currencies}} {{intlNumber AMOUNT style="currency" currency=CURRENCY}}{{/each}}'),
-                out = tmp({ currencies: [
+            var tmpl = intlBlock('{{#each currencies}} {{intlNumber AMOUNT style="currency" currency=CURRENCY}}{{/each}}', {locales: 'en-US'}),
+                out  = tmpl({ currencies: [
                         { AMOUNT: 3, CURRENCY: 'USD'},
                         { AMOUNT: 8, CURRENCY: 'EUR'},
                         { AMOUNT: 10, CURRENCY: 'JPY'}
@@ -167,38 +132,35 @@ describe('Helper `intlNumber`', function () {
         });
 
         it('should return a currency even when using a different locale', function (){
-            var tmp = Handlebars.compile('{{intlNumber 40000 locale="de-DE" style="currency" currency=CURRENCY}}'),
-                out = tmp({ CURRENCY: 'USD' });
+            var tmpl = intlBlock('{{intlNumber 40000 style="currency" currency=CURRENCY}}', {locales: 'de-DE'}),
+                out  = tmpl({ CURRENCY: 'USD' });
 
             expect(out, 'USD->de-DE').to.equal('40.000,00 $');
 
-            tmp = Handlebars.compile('{{intlNumber 40000 locale="de-DE" style="currency" currency=CURRENCY}}');
-            out = tmp({ CURRENCY: 'EUR'});
+            tmpl = intlBlock('{{intlNumber 40000 style="currency" currency=CURRENCY}}', {locales: 'de-DE'});
+            out  = tmpl({ CURRENCY: 'EUR'});
             expect(out, 'EUR->de-DE').to.equal('40.000,00 €');
 
-            tmp = Handlebars.compile('{{intlNumber 40000 locale="de-DE" style="currency" currency=CURRENCY}}');
-            out = tmp({ CURRENCY: 'JPY'});
+            tmpl = intlBlock('{{intlNumber 40000 style="currency" currency=CURRENCY}}', {locales: 'de-DE'});
+            out  = tmpl({ CURRENCY: 'JPY'});
             expect(out, 'JPY->de-DE').to.equal('40.000 ¥');
         });
     });
 
     describe('used to format percentages', function () {
         it('should return a string formatted to a percent', function () {
-            var tmp = Handlebars.compile('{{intlNumber 400 style="percent"}}');
-
-            expect(tmp()).to.equal('40,000%');
+            var tmpl = intlBlock('{{intlNumber 400 style="percent"}}', {locales: 'en-US'});
+            expect(tmpl()).to.equal('40,000%');
         });
 
         it('should return a perctage when using a different locale', function () {
-            var tmp = Handlebars.compile('{{intlNumber 400 locale="de-DE" style="percent"}}');
-
-            expect(tmp()).to.equal('40.000 %');
+            var tmpl = intlBlock('{{intlNumber 400 style="percent"}}', {locales: 'de-DE'});
+            expect(tmpl()).to.equal('40.000 %');
         });
-
     });
 });
-describe('Helper `intlDate`', function () {
 
+describe('Helper `intlDate`', function () {
     it('should be added to Handlebars', function () {
         expect(Handlebars.helpers).to.include.keys('intlDate');
     });
@@ -208,49 +170,29 @@ describe('Helper `intlDate`', function () {
     });
 
     it('should throw if called with out a value', function () {
-        try {
-            Handlebars.compile('{{intlDate}}')();
-        } catch (e) {
-            var err = new ReferenceError('A date or time stamp must be provided.');
-            expect(e.toString()).to.equal(err.toString());
-        }
+        expect(Handlebars.compile('{{intlDate}}')).to.throw(TypeError);
     });
 
     // Use a fixed known date
-    var dateStr = 'Thu Jan 23 2014 18:00:44 GMT-0500 (EST)',
+    var dateStr   = 'Thu Jan 23 2014 18:00:44 GMT-0500 (EST)',
         timeStamp = 1390518044403;
 
     it('should return a formatted string', function () {
-        var tmp = Handlebars.compile('{{intlDate "' + dateStr + '"}}');
-
-        expect(tmp()).to.equal('1/23/2014');
+        var tmpl = intlBlock('{{intlDate "' + dateStr + '"}}', {locales: 'en-US'});
+        expect(tmpl()).to.equal('1/23/2014');
 
         // note timestamp is passed as a number
-        tmp = Handlebars.compile('{{intlDate ' + timeStamp + '}}');
-
-        expect(tmp()).to.equal('1/23/2014');
+        tmpl = intlBlock('{{intlDate ' + timeStamp + '}}', {locales: 'en-US'});
+        expect(tmpl()).to.equal('1/23/2014');
     });
-
-    /** SINGLE VALUES ARE MUTED FOR NOW :: https://github.com/andyearnshaw/Intl.js/issues/56
-    it('should return a formatted string of option requested', function () {
-        // year
-        var tmp = Handlebars.compile('{{intlDate DATE year="numeric"}}'),
-            out = tmp({ DATE: dateStr });
-
-        expect(out).to.equal('2014');
-    });
-    */
 
     it('should return a formatted string of just the time', function () {
-        var tmp = Handlebars.compile('{{intlDate ' + timeStamp + ' hour="numeric" minute="numeric"}}');
-
-        expect(tmp()).to.equal('6:00 PM');
+        var tmpl = intlBlock('{{intlDate ' + timeStamp + ' hour="numeric" minute="numeric"}}', {locales: 'en-US'});
+        expect(tmpl()).to.equal('6:00 PM');
     });
-
 });
 
 describe('Helper `intlMessage`', function () {
-
     it('should be added to Handlebars', function () {
         expect(Handlebars.helpers).to.include.keys('intlMessage');
     });
@@ -260,56 +202,51 @@ describe('Helper `intlMessage`', function () {
     });
 
     it('should throw if called with out a value', function () {
-        try {
-            Handlebars.compile('{{intlMessage}}')();
-        } catch (e) {
-            var err = new ReferenceError('A string must be provided.');
-            expect(e.toString()).to.equal(err.toString());
-        }
+        expect(Handlebars.compile('{{intlMessage}}')).to.throw(ReferenceError);
     });
 
     it('should return a formatted string', function () {
-        var tmp = Handlebars.compile('{{intlMessage MSG firstName=firstName lastName=lastName}}'),
-            out = tmp({
-                MSG: 'Hi, my name is {firstName} {lastName}.',
+        var tmpl = intlBlock('{{intlMessage MSG firstName=firstName lastName=lastName}}', {locales: 'en-US'}),
+            out  = tmpl({
+                MSG      : 'Hi, my name is {firstName} {lastName}.',
                 firstName: 'Anthony',
-                lastName: 'Pipkin'
+                lastName : 'Pipkin'
             });
 
         expect(out).to.equal('Hi, my name is Anthony Pipkin.');
     });
 
     it('should return a formatted string with formatted numbers and dates', function () {
-        var tmp = Handlebars.compile('{{intlMessage POP_MSG city=city population=population census_date=census_date timeZone=timeZone}}'),
-            out = tmp({
-                POP_MSG: '{city} has a population of {population, number, integer} as of {census_date, date, medium}.',
-                city: 'Atlanta',
-                population: 5475213,
+        var tmpl = intlBlock('{{intlMessage POP_MSG city=city population=population census_date=census_date timeZone=timeZone}}', {locales: 'en-US'}),
+            out  = tmpl({
+                POP_MSG    : '{city} has a population of {population, number, integer} as of {census_date, date, medium}.',
+                city       : 'Atlanta',
+                population : 5475213,
                 census_date: (new Date('1/1/2010')).getTime(),
-                timeZone: 'UTC'
+                timeZone   : 'UTC'
             });
 
         expect(out).to.equal('Atlanta has a population of 5,475,213 as of Jan 1, 2010.');
     });
 
     it('should return a formatted string with formatted numbers and dates in a different locale', function () {
-        var tmp = Handlebars.compile('{{intlMessage POP_MSG locale="de-DE" city=city population=population census_date=census_date timeZone=timeZone}}'),
-            out = tmp({
-                POP_MSG: '{city} has a population of {population, number, integer} as of {census_date, date, medium}.',
-                city: 'Atlanta',
-                population: 5475213,
+        var tmpl = intlBlock('{{intlMessage POP_MSG city=city population=population census_date=census_date timeZone=timeZone}}', {locales: 'de-DE'}),
+            out  = tmpl({
+                POP_MSG    : '{city} has a population of {population, number, integer} as of {census_date, date, medium}.',
+                city       : 'Atlanta',
+                population : 5475213,
                 census_date: (new Date('1/1/2010')),
-                timeZone: 'UTC'
+                timeZone   : 'UTC'
             });
 
         expect(out).to.equal('Atlanta has a population of 5.475.213 as of 1. Jan. 2010.');
     });
 
     it('should return a formatted string with an `each` block', function () {
-        var tmp = Handlebars.compile('{{#each harvest}} {{intlMessage ../HARVEST_MSG person=person count=count }}{{/each}}'),
-            out = tmp({
+        var tmpl = intlBlock('{{#each harvest}} {{intlMessage ../HARVEST_MSG person=person count=count }}{{/each}}', {locales: 'en-US'}),
+            out  = tmpl({
                 HARVEST_MSG: '{person} harvested {count, plural, one {# apple} other {# apples}}.',
-                harvest: [
+                harvest    : [
                     { person: 'Allison', count: 10 },
                     { person: 'Jeremy', count: 60 }
                 ]
@@ -317,11 +254,9 @@ describe('Helper `intlMessage`', function () {
 
         expect(out).to.equal(' Allison harvested 10 apples. Jeremy harvested 60 apples.');
     });
-
 });
 
 describe('Helper `intl`', function () {
-
     it('should be added to Handlebars', function () {
         expect(Handlebars.helpers).to.include.keys('intl');
     });
@@ -329,63 +264,4 @@ describe('Helper `intl`', function () {
     it('should be a function', function () {
         expect(Handlebars.helpers.intl).to.be.a('function');
     });
-
-    it('should pass off to format a number', function () {
-        var tmp = Handlebars.compile('{{intl NUM locale="de-DE"}}'),
-            out = tmp({ NUM: 40000.004 });
-
-        expect(out).to.equal('40.000,004');
-    });
-
-    it('should pass off to format a date', function (){
-        var tmp = Handlebars.compile('{{intl date}}'),
-            out = tmp({
-                    date: new Date('Thu Jan 23 2014 18:00:44 GMT-0500 (EST)')
-                });
-
-        expect(out).to.equal('1/23/2014');
-    });
-
-    it('should pass off to format a message', function () {
-        var tmp = Handlebars.compile('{{#each harvest}} {{intl ../HARVEST_MSG person=person count=count }}{{/each}}'),
-            out = tmp({
-                HARVEST_MSG: '{person} harvested {count, plural, one {# apple} other {# apples}}.',
-                harvest: [
-                    { person: 'Allison', count: 10 },
-                    { person: 'Jeremy', count: 60 }
-                ]
-            });
-
-        expect(out).to.equal(' Allison harvested 10 apples. Jeremy harvested 60 apples.');
-    });
-
-    describe('as a block helper', function () {
-        it('should maintain a locale', function () {
-            var str = '{{intl NUM}} {{#intl locale="de-DE"}}{{intl ../NUM}}{{/intl}} {{intl NUM}}',
-                tmp = Handlebars.compile(str),
-                out = tmp({ NUM: 40000.004});
-
-            expect(out).to.equal('40,000.004 40.000,004 40,000.004');
-        });
-
-/** TO COME AFTER PR #10 **
-        it('should maintain a currency', function () {
-            var str = '{{intl NUM style="currency"}}{{#intl currency="EUR"}}{{intl ../NUM style="currency"}}{{/intl}} {{intl NUM style="currency"}}',
-                tmp = Handlebars.compile(str),
-                out = tmp({ NUM: 40000.004});
-
-            expect(out).to.equal('40,000.004 40.000,004 40,000.004');
-        });
-
-        it('should maintain context regardless of depth', function () {
-            var str = '{{#intl locale="de-DE"}}{{#intl locale="en-US"}} {{intl NUM}} {{/intl}}{{intl NUM}}{{/intl}} {{intl NUM}}',
-                tmp = Handlebars.compile(str),
-                out = tmp({ NUM: 40000.004 });
-
-            expect(out).to.equal('40,000.004 40.000,004 40,000.04');
-        });
-//*/
-    });
-
 });
-
