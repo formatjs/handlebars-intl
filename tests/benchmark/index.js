@@ -6,10 +6,14 @@ global.Intl || (global.Intl = require('intl'));
 var Benchmark         = require('benchmark'),
     IntlMessageFormat = require('intl-messageformat'),
     Handlebars        = require('handlebars'),
-    hbsIntl           = require('../../'),
-    intlNumber        = hbsIntl.helpers.intlNumber,
-    intlDate          = hbsIntl.helpers.intlDate,
-    intlMessage       = hbsIntl.helpers.intlMessage;
+    hbsIntlHelpers    = require('../../');
+
+require('intl-messageformat/locale-data/en');
+hbsIntlHelpers.registerWith(Handlebars);
+
+var intlNumber        = Handlebars.helpers.intlNumber,
+    intlDate          = Handlebars.helpers.intlDate,
+    intlMessage       = Handlebars.helpers.intlMessage;
 
 var suiteConfig = {
     onStart: function (e) {
@@ -107,7 +111,7 @@ new Benchmark.Suite('MessageFormat', suiteConfig)
             data: data,
             hash: {
                 num     : 4000,
-                intlName: 'foo'
+                intlName: 'messages.foo'
             }
         });
     })
