@@ -188,8 +188,8 @@ describe('Helper `intlDate`', function () {
     });
 
     it('should return a formatted string of just the time', function () {
-        var tmpl = intlBlock('{{intlDate ' + timeStamp + ' hour="numeric" minute="numeric"}}', {locales: 'en-US'});
-        expect(tmpl()).to.equal('6:00 PM');
+        var tmpl = intlBlock('{{intlDate ' + timeStamp + ' hour="numeric" minute="numeric" timeZone="UTC"}}', {locales: 'en-US'});
+        expect(tmpl()).to.equal('11:00 PM');
     });
 });
 
