@@ -1,5 +1,5 @@
 {
-    "name": "handlebars-helpers-intl",
+    "name": "handlebars-helper-intl",
     "main": "lib/helpers.js",
     "version": "0.1.0-rc-1",
     "homepage": "https://github.com/yahoo/handlebars-helpers-intl",
