@@ -6,7 +6,8 @@
 var chai,
     expect,
     Handlebars,
-    IntlMessageFormat;
+    IntlMessageFormat,
+    timeStamp = 1390518044403;
 
 if (typeof require === 'function') {
     chai = require('chai');
@@ -264,5 +265,58 @@ describe('Helper `intl`', function () {
 
     it('should be a function', function () {
         expect(Handlebars.helpers.intl).to.be.a('function');
+    });
+
+    describe('should provide formats', function () {
+        it('for intlNumber', function () {
+            var tmpl = '{{#intl formats=intl.formats locales="en-US"}}{{intlNumber NUM "usd"}} {{intlNumber NUM "eur"}} {{intlNumber NUM style="currency" currency="USD"}}{{/intl}}',
+                ctx = {
+                    intl: {
+                        formats: {
+                            number: {
+                                eur: { style: 'currency', currency: 'EUR' },
+                                usd: { style: 'currency', currency: 'USD' }
+                            }
+                        }
+                    },
+                    NUM: 40000.004
+                };
+            expect(Handlebars.compile(tmpl)(ctx)).to.equal('$40,000.00 €40,000.00 $40,000.00');
+        });
+
+        it('for intlDate', function () {
+            var tmpl = '{{#intl formats=intl.formats locales="en-US"}}{{intlDate ' + timeStamp + ' "hm" timeZone="UTC"}}{{/intl}}',
+                ctx = {
+                    intl: {
+                        formats: {
+                            date: {
+                                hm: { hour: 'numeric', minute: 'numeric' }
+                            }
+                        }
+                    }
+                },
+                d = new Date(timeStamp);
+            expect(Handlebars.compile(tmpl)(ctx)).to.equal("11:00 PM");
+        });
+
+        it('for intlMessage', function () {
+            var tmpl = '{{#intl formats=intl.formats locales="en-US"}}{{intlMessage MSG product=PRODUCT price=PRICE deadline=DEADLINE timeZone=TZ}}{{/intl}}',
+                ctx = {
+                    MSG: '{product} cost {price, number, usd} (or {price, number, eur}) if ordered by {deadline, date, medium}',
+                    intl: {
+                        formats: {
+                            number: {
+                                eur: { style: 'currency', currency: 'EUR' },
+                                usd: { style: 'currency', currency: 'USD' }
+                            }
+                        }
+                    },
+                    PRODUCT: 'oranges',
+                    PRICE: 40000.004,
+                    DEADLINE: timeStamp,
+                    TZ: 'UTC'
+                };
+            expect(Handlebars.compile(tmpl)(ctx)).to.equal("oranges cost $40,000.00 (or €40,000.00) if ordered by Jan 23, 2014");
+        });
     });
 });
