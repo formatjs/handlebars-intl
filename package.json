@@ -40,7 +40,7 @@
     "istanbul": "0.1.*",
     "mocha": "1.15.*",
     "intl": "*",
-    "intl-messageformat": "yahoo/intl-messageformat#master",
+    "intl-messageformat": "~0.1.0",
     "benchmark": "~1.0.0",
     "xunit-file": "*"
   },
