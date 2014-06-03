@@ -70,6 +70,7 @@ in order to have the `intl` context in handlebars.
 ### @intlNumber
 
 #### Basic (en-US)
+( `{{#intl locales='en-US'}}` )
 
 Template:
 
@@ -82,3 +83,111 @@ Output:
 ```html
 <b>40,000</b>
 ```
+
+#### Basic (de-DE)
+( `{{#intl locales='de-DE'}}` )
+
+
+Template:
+
+```js
+var tmpl = '<b>{{intlNumber 40000.004}}</b>'
+
+```
+
+Output:
+
+```html
+<b>40.000,004</b>
+```
+
+
+#### Currency (USD)
+
+Template:
+
+```js
+var tmpl = `<b>{{intlNumber 40000 style="currency" currency="USD"}}</b>`;
+```
+
+Output:
+
+```html
+<b>$40,000.00</b>
+```
+
+
+#### Currency (EUR)
+
+Template:
+
+```js
+var tmpl = `<b>{{intlNumber 40000 style="currency" currency="EUR"}}</b>`;
+```
+
+Output:
+
+```html
+<b>€40,000.00</b>
+```
+
+#### Currency (JPY)
+
+Template:
+
+```js
+var tmpl = `<b>{{intlNumber 40000 style="currency" currency="JPY"}}</b>`;
+```
+
+Output:
+
+```html
+<b>¥40,000</b>
+```
+
+#### Currency (USD) with code
+
+Template:
+
+```js
+var tmpl = `<b>{{intlNumber 40000 style="currency" currency="USD" currencyDisplay="code"}}</b>`;
+```
+
+Output:
+
+```html
+<b>USD40,000.00</b>
+```
+
+
+#### Percentages (en-US)
+
+Template:
+
+```js
+var tmpl = `<b>{{intlNumber 400 style="percent"}}</b>`;
+```
+
+Output:
+
+```html
+<b>40,000 %</b>
+```
+
+
+#### Percentages (de-DE)
+( `{{#intl locales='de-DE'}}` )
+
+Template:
+
+```js
+var tmpl = `<b>{{intlNumber 400 style="percent"}}</b>`;
+```
+
+Output:
+
+```html
+<b>40.000 %</b>
+```
+
+
