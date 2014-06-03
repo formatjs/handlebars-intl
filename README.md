@@ -60,9 +60,25 @@ Handlebars helpers for internationalization.
 
 NOTE: All the examples below should be assumed to be wrapped by
 
-```
+```html
 {{#intl locales='[somelocale]'}}
 [content here]
 {{/intl}}
 ```
 in order to have the `intl` context in handlebars.
+
+### @intlNumber
+
+#### Basic (en-US)
+
+Template:
+
+```js
+var tmpl = '<b>{{intlNumber 40000}}</b>';
+```
+
+Output:
+
+```html
+<b>40,000</b>
+```
