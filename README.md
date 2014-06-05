@@ -190,4 +190,147 @@ Output:
 <b>40.000 %</b>
 ```
 
+### @intlDate
+
+Note: Examples below use
+
+```js
+var dateStr   = 'Thu Jan 23 2014 18:00:44 GMT-0500 (EST)',
+        timeStamp = 1390518044403;
+```
+
+#### Convert from date string
+
+Template:
+
+```js
+var tmpl = `<p>Date: {{intlDate dateStr}}</p>`;
+```
+
+Output:
+
+```html
+<p>Date: 1/23/2014</p>
+```
+
+#### Convert from timestamp
+
+Template:
+
+```js
+var tmpl = `<p>Date: {{intlDate timeStamp}}</p>`;
+```
+
+Output:
+
+```html
+<p>Date: 1/23/2014</p>
+```
+
+#### Formatting the output
+
+Template:
+
+```js
+var tmpl = `<p>Time: {{intlDate timeStamp hour="numeric" minute="numeric" timeZone="UTC"}}</p>`;
+```
+
+Output:
+
+```html
+<p>Time: 11:00 PM</p>
+```
+
+#####Configuration properties
+
+| Property    | Allowed values                                   |
+| ----------: | :----------------------------------------------- |
+|      weekday| "narrow", "short", "long"                        |
+|          era| "narrow", "short", "long"                        |
+|         year| "2-digit", "numeric"                             |
+|        month| "2-digit", "numeric", "narrow", "short", "long"  |
+|          day| "2-digit", "numeric"                             |
+|         hour| "2-digit", "numeric"                             |
+|       minute| "2-digit", "numeric"                             |
+|       second| "2-digit", "numeric"                             |
+| timeZoneName| "short", "long"                                  |
+
+[Source](https://github.com/andyearnshaw/Intl.js/blob/17ad3e99a821e5121cafaa117517ebd3ca4c0804/Intl.js#L2121).
+
+
+
+
+
+### @intlMessage
+
+NOTE: `var ctx` is the context passed into the handlebars template.
+
+#### Basic String
+
+Template:
+
+```js
+var tmpl = `<b>{{intlMessage "Hi, my name is {firstName} {lastName}." firstName="Anthony" lastName="Pipkin"}}</b>`
+```
+
+Output:
+
+```html
+<b>Hi, my name is Anthony Pipkin</b>
+```
+
+
+#### Formatted String (en-US)
+
+Template:
+
+```js
+var tmpl='<p>{{intlMessage "{city} has a population of {population, number, integer} as of {census_date,date,medium}" city=city population=population census_date=census_date timeZone=timeZone}}</p>';
+
+var ctx={
+    city: 'Atlanta',
+    population: 5475213,
+    census_date: (new Date('1/1/2010')).getTime(),
+    timeZone: 'UTC'
+};
+```
+
+Output:
+
+```html
+<p>Atlanta has a population of 5,475,213 as of Jan 1, 2010.</p>
+```
+
+
+
+#### String plurals
+
+Template:
+
+```js
+
+var tmpl = '<p>{{intlMessage HARVEST_MSG person=person count=count }}</p>',
+    ctx = {
+        HARVEST_MSG: '{person} harvested {count, plural, one {# apple} other {# apples}}.',
+        person: 'Allison',
+        count: 10
+    };
+
+```
+or
+
+```html
+<b>{{intlMessage "{person} harvested {count, plural, one {# apple} other {# apples}}" person="Jeremy" count=1}}</b>
+```
+
+
+Output:
+
+```html
+<p>Jeremy harvested 1 apple.</p>
+```
+
+
+
+
 
