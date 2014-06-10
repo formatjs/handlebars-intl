@@ -338,7 +338,7 @@ Wrapper:
 ```html
 {{#intl locales=intl.locale messages=intl.messages}}
    ...
-  {{/intl}}
+{{/intl}}
 ```
 
 Template:
