@@ -165,13 +165,14 @@ Output:
 Template:
 
 ```js
-var tmpl = `<b>{{intlNumber 400 style="percent"}}</b>`;
+var ctx = {NUM: 40.5, OTHER: .50}; //context passed into the template
+var tmpl = `<b>{{intlNumber NUM style="percent"}} and {{intlNumber OTHER style="percent"}} </b>`;
 ```
 
 Output:
 
 ```html
-<b>40,000 %</b>
+<b>4,050% and 50%</b>
 ```
 
 
@@ -181,13 +182,14 @@ Output:
 Template:
 
 ```js
-var tmpl = `<b>{{intlNumber 400 style="percent"}}</b>`;
+var ctx = {NUM: 40.5, OTHER: .50}; //context passed into the template
+var tmpl = `<b>{{intlNumber NUM style="percent"}} and {{intlNumber OTHER style="percent"}} </b>`;
 ```
 
 Output:
 
 ```html
-<b>40.000 %</b>
+<b>4 050 % and 50 %</b>
 ```
 
 ### @intlDate
