@@ -354,6 +354,8 @@ var tmpl = '<title>{{intlMessage (intlGet "messages.TITLE")}}</title>';
 
 ```
 
+Output:
+
 ```html
 <title>Welcome to the Internet</title>
 ```
