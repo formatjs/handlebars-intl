@@ -334,6 +334,8 @@ Output:
 
 ### @intlGet
 
+Allows you to access your translated strings by name. Helps with modularizing your translations.
+
 Wrapper:
 ```html
 {{#intl locales=intl.locale messages=intl.messages}}
@@ -360,6 +362,22 @@ Output:
 <title>Welcome to the Internet</title>
 ```
 
+
+### @intlHTMLMessage
+
+Returns an unescaped Handlebars `SafeString`.
+
+Template:
+
+```js
+var tmpl=`{{intlHTMLMessage "<a href='https://example.com/test/demo_form.asp?name1=value1&name2=value2'>hi</a>"}}`;
+```
+
+Output (unescaped):
+
+```html
+<a href='https://example.com/test/demo_form.asp?name1=value1&name2=value2'>hi</a>
+```
 
 ## License
 
