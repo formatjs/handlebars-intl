@@ -331,6 +331,34 @@ Output:
 ```html
 <p>Jeremy harvested 1 apple.</p>
 ```
+
+### @intlGet
+
+Wrapper:
+```html
+{{#intl locales=intl.locale messages=intl.messages}}
+   ...
+  {{/intl}}
+```
+
+Template:
+```js
+
+var intl {
+    messages: {
+        TITLE: 'Welcome to the Internet'
+    }
+};
+
+var tmpl = '<title>{{intlMessage (intlGet "messages.TITLE")}}</title>';
+
+```
+
+```html
+<title>Welcome to the Internet</title>
+```
+
+
 ## License
 
 This software is free to use under the Yahoo! Inc. BSD license.
