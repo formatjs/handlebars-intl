@@ -18,6 +18,10 @@
 
     "license": "Yahoo BSD",
 
+    "dependencies": {
+        "intl-messageformat": "~0.1.0"
+    },
+
     "ignore": [
         "**/.*",
         "coverage",
