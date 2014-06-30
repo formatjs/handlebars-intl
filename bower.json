@@ -1,6 +1,6 @@
 {
     "name": "handlebars-helper-intl",
-    "main": "lib/helpers.js",
+    "main": "dist/helpers.js",
     "version": "0.1.1",
     "homepage": "https://github.com/yahoo/handlebars-helpers-intl",
 
@@ -28,7 +28,5 @@
         "node_modules",
         "bower_components",
         "tests"
-    ],
-
-    "main": "dist/helpers.js"
+    ]
 }
