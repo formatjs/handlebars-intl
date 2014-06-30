@@ -1,6 +1,6 @@
 {
   "name": "handlebars-helper-intl",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "handlebars helpers for internationalization",
   "keywords": [
     "intl",
@@ -37,6 +37,7 @@
     "chai": "1.8.*",
     "grunt": "0.4.*",
     "grunt-cli": "0.1.*",
+    "grunt-contrib-copy": "0.5.*",
     "grunt-contrib-jshint": "0.7.*",
     "grunt-contrib-uglify": "0.2.*",
     "handlebars": "1.3.*",
