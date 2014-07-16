@@ -8,7 +8,6 @@ module.exports = function (grunt) {
             "all": ['src/*.js', 'tests/*.js']
         },
         "compile-modules": {
-            "cwd": './',
             "src": 'src/umd.js',
             "dest": 'dist/helpers.js'
         },

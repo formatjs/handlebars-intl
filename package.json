@@ -29,7 +29,10 @@
   "main": "dist/helpers.js",
   "dist": "dist/helpers.js",
   "jsnext:main": "src/helper.js",
-  "files": ["dist/", "src/"],
+  "files": [
+    "dist/",
+    "src/"
+  ],
   "directories": {
     "test": "tests"
   },
@@ -50,7 +53,8 @@
     "benchmark": "~1.0.0",
     "xunit-file": "*",
     "es6-module-transpiler": "^0.5.1",
-    "recast": "^0.5.27"
+    "recast": "^0.5.27",
+    "es6-module-transpiler-npm-resolver": "~0.0.1"
   },
   "scripts": {
     "pretest": "grunt jshint build",
