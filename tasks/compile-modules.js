@@ -59,21 +59,58 @@ module.exports = function(grunt) {
      * @return {string}
      */
     NPMResolver.prototype.resolvePath = function(importedModuleName, fromModule) {
-        var main,
-            pkg = libpath.join(importedModuleName , 'package.json');
+        var main, parent, resolved,
+            parentPackagePath = this.resolvePackage(fromModule ? fromModule.path : libpath.resolve("./")),
+            packagePath, pkg;
+
+        if (!parentPackagePath) {
+            console.error('ERROR: Parent module not found for: "%s"', importedModuleName);
+            return null;
+        }
 
         try {
-            main = require(pkg)["jsnext:main"];
+            packagePath = this.resolvePackage(libmodule._resolveFilename(importedModuleName, libmodule._cache[parentPackagePath]));
+        } catch (e1) {
+            console.error('ERROR: Unable to resolve package information for module: "%s"', importedModuleName);
+            return null;
+        }
+
+        try {
+            pkg = require(packagePath);
+            main = pkg["jsnext:main"].toString();
         } catch (e) {
             console.error('ERROR: External module without "jsnext:main" directive at: "%s"', importedModuleName);
             return null;
         }
-        var resolved = libpath.resolve(libpath.dirname(require.resolve(pkg)), main);
+
+        resolved = libpath.resolve(libpath.dirname(packagePath), main);
         if (libfs.existsSync(resolved)) {
           return resolved;
         }
 
-        console.error('ERROR: External module undefined at: "%s"', resolved);
+        console.error('ERROR: Lookup fails for module "%s" at "%s"', importedModuleName, resolved);
+        return null;
+    };
+
+    /**
+     * Resolves the fullpath to the nearest `package.json` for a given module path.
+     *
+     * @private
+     * @param {string} modulePath
+     * @return {string}
+     */
+    NPMResolver.prototype.resolvePackage = function(modulePath) {
+        var paths = libmodule._nodeModulePaths(libpath.dirname(modulePath)),
+            i, p;
+
+        for (i = 0; i < paths.length; i++) {
+            p = libpath.resolve(paths[i], '../package.json');
+            if (libfs.existsSync(p)) {
+                require(p);
+                return p;
+            }
+        }
+
         return null;
     };
 
