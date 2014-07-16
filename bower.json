@@ -1,7 +1,7 @@
 {
     "name": "handlebars-helper-intl",
     "main": "dist/helpers.js",
-    "version": "0.1.1",
+    "version": "0.2.0",
     "homepage": "https://github.com/yahoo/handlebars-helpers-intl",
 
     "authors": [
@@ -18,15 +18,8 @@
 
     "license": "Yahoo BSD",
 
-    "dependencies": {
-        "intl-messageformat": "~0.1.0"
-    },
-
     "ignore": [
         "**/.*",
-        "coverage",
-        "node_modules",
-        "bower_components",
-        "tests"
+        "!dist/*.js"
     ]
 }

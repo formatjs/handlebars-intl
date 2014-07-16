@@ -3,36 +3,38 @@ module.exports = function (grunt) {
     var libpath = require('path');
 
     grunt.initConfig({
-        pkg: grunt.file.readJSON('package.json'),
-        jshint: {
-            all: ['index.js', 'lib/*.js', 'tests/*.js']
+        "pkg": grunt.file.readJSON('package.json'),
+        "jshint": {
+            "all": ['src/*.js', 'tests/*.js']
         },
-        copy: {
-            lib: {
-                files: [{
-                    expand: true,
-                    cwd: 'lib/',
-                    src: ['*.js'],
-                    dest: 'dist/',
-                    filter: 'isFile'
-                }]
-            }
+        "compile-modules": {
+            "cwd": './',
+            "src": 'src/umd.js',
+            "dest": 'dist/helpers.js'
         },
-        uglify: {
-            options: {
-                preserveComments: 'some'
+        "uglify": {
+            "options": {
+                "preserveComments": 'some'
             },
-            helpers: {
-                src: 'dist/helpers.js',
-                dest: 'dist/helpers.min.js'
+            "all": {
+                "expand": true,
+                "flatten": true,
+                "src": ['dist/*.js', '!dist/*.min.js'],
+                "dest": 'dist',
+                "rename": function(dest, src) {
+                    var ext = libpath.extname(src),
+                        base = libpath.basename(src, ext);
+                    return libpath.resolve(dest, base + '.min' + ext);
+                }
             }
         }
     });
 
+    grunt.loadTasks('./tasks');
+
     grunt.loadNpmTasks('grunt-contrib-jshint');
-    grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-uglify');
 
-    grunt.registerTask('build', ['copy', 'uglify:helpers']);
+    grunt.registerTask('build', ['compile-modules', 'uglify:all']);
     grunt.registerTask('default', ['jshint']);
 };

@@ -6,19 +6,16 @@
 var chai,
     expect,
     Handlebars,
-    IntlMessageFormat,
     timeStamp = 1390518044403;
 
 if (typeof require === 'function') {
     chai = require('chai');
     Handlebars = require('handlebars');
 
-    // Intl and IntlMessageFormat
+    // Intl
     global.Intl || (global.Intl = require('intl'));
-    IntlMessageFormat = require('intl-messageformat');
-    require('intl-messageformat/locale-data/en');
 
-    require('../lib/helpers.js').registerWith(Handlebars);
+    require('../').registerWith(Handlebars);
 }
 
 expect = chai.expect;
@@ -221,27 +218,27 @@ describe('Helper `intlMessage`', function () {
     it('should return a formatted string with formatted numbers and dates', function () {
         var tmpl = intlBlock('{{intlMessage POP_MSG city=city population=population census_date=census_date timeZone=timeZone}}', {locales: 'en-US'}),
             out  = tmpl({
-                POP_MSG    : '{city} has a population of {population, number, integer} as of {census_date, date, medium}.',
+                POP_MSG    : '{city} has a population of {population, number, integer} as of {census_date, date, long}.',
                 city       : 'Atlanta',
                 population : 5475213,
                 census_date: (new Date('1/1/2010')).getTime(),
                 timeZone   : 'UTC'
             });
 
-        expect(out).to.equal('Atlanta has a population of 5,475,213 as of Jan 1, 2010.');
+        expect(out).to.equal('Atlanta has a population of 5,475,213 as of January 1, 2010.');
     });
 
     it('should return a formatted string with formatted numbers and dates in a different locale', function () {
         var tmpl = intlBlock('{{intlMessage POP_MSG city=city population=population census_date=census_date timeZone=timeZone}}', {locales: 'de-DE'}),
             out  = tmpl({
-                POP_MSG    : '{city} has a population of {population, number, integer} as of {census_date, date, medium}.',
+                POP_MSG    : '{city} hat eine Bevölkerung von {population, number, integer} zum {census_date, date, long}.',
                 city       : 'Atlanta',
                 population : 5475213,
                 census_date: (new Date('1/1/2010')),
                 timeZone   : 'UTC'
             });
 
-        expect(out).to.equal('Atlanta has a population of 5.475.213 as of 1. Jan. 2010.');
+        expect(out).to.equal('Atlanta hat eine Bevölkerung von 5.475.213 zum 1. Januar 2010.');
     });
 
     it('should return a formatted string with an `each` block', function () {
@@ -302,7 +299,7 @@ describe('Helper `intl`', function () {
         it('for intlMessage', function () {
             var tmpl = '{{#intl formats=intl.formats locales="en-US"}}{{intlMessage MSG product=PRODUCT price=PRICE deadline=DEADLINE timeZone=TZ}}{{/intl}}',
                 ctx = {
-                    MSG: '{product} cost {price, number, usd} (or {price, number, eur}) if ordered by {deadline, date, medium}',
+                    MSG: '{product} cost {price, number, usd} (or {price, number, eur}) if ordered by {deadline, date, long}',
                     intl: {
                         formats: {
                             number: {
@@ -316,7 +313,7 @@ describe('Helper `intl`', function () {
                     DEADLINE: timeStamp,
                     TZ: 'UTC'
                 };
-            expect(Handlebars.compile(tmpl)(ctx)).to.equal("oranges cost $40,000.00 (or €40,000.00) if ordered by Jan 23, 2014");
+            expect(Handlebars.compile(tmpl)(ctx)).to.equal("oranges cost $40,000.00 (or €40,000.00) if ordered by January 23, 2014");
         });
     });
 });

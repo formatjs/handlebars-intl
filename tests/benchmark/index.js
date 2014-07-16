@@ -8,7 +8,6 @@ var Benchmark         = require('benchmark'),
     Handlebars        = require('handlebars'),
     hbsIntlHelpers    = require('../../');
 
-require('intl-messageformat/locale-data/en');
 hbsIntlHelpers.registerWith(Handlebars);
 
 var intlNumber        = Handlebars.helpers.intlNumber,
