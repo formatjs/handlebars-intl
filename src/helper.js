@@ -6,7 +6,7 @@ See the accompanying LICENSE file for terms.
 
 /* jshint esnext: true */
 
-import IntlMessageFormat from "../node_modules/intl-messageformat/src/full";
+import IntlMessageFormat from "intl-messageformat";
 
 function registerWith(Handlebars) {
     var SafeString  = Handlebars.SafeString,
