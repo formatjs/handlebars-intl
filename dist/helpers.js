@@ -1025,7 +1025,7 @@
     $$core$$default.__addLocaleData({locale:"zu", messageformat:{pluralFunction:intl$messageformat$$funcs[3]}});
     var intl$messageformat$$default = $$core$$default;
 
-    function $$helper$$registerWith(Handlebars) {
+    function $$register$with$$registerWith(Handlebars) {
         var SafeString  = Handlebars.SafeString,
             createFrame = Handlebars.createFrame,
             escape      = Handlebars.Utils.escapeExpression;
@@ -1058,7 +1058,7 @@
             // data object and extend it with `options.data.intl` and
             // `options.hash`.
             var data     = createFrame(options.data),
-                intlData = $$helper$$extend({}, data.intl, options.hash);
+                intlData = $$register$with$$extend({}, data.intl, options.hash);
 
             data.intl = intlData;
 
@@ -1087,12 +1087,12 @@
                     formatOptions = intlGet('formats.date.' + formatOptions, options);
                 }
 
-                formatOptions = $$helper$$extend({}, formatOptions, hash);
+                formatOptions = $$register$with$$extend({}, formatOptions, hash);
             } else {
                 formatOptions = hash;
             }
 
-            return $$helper$$getFormat('date', locales, formatOptions).format(date);
+            return $$register$with$$getFormat('date', locales, formatOptions).format(date);
         }
 
         function intlNumber(num, formatOptions, options) {
@@ -1114,12 +1114,12 @@
                     formatOptions = intlGet('formats.number.' + formatOptions, options);
                 }
 
-                formatOptions = $$helper$$extend({}, formatOptions, hash);
+                formatOptions = $$register$with$$extend({}, formatOptions, hash);
             } else {
                 formatOptions = hash;
             }
 
-            return $$helper$$getFormat('number', locales, formatOptions).format(num);
+            return $$register$with$$getFormat('number', locales, formatOptions).format(num);
         }
 
         function intlGet(path, options) {
@@ -1216,12 +1216,12 @@
     // -- Internals ------------------------------------------------------------
 
     // Cache to hold NumberFormat and DateTimeFormat instances for reuse.
-    var $$helper$$formats = {
+    var $$register$with$$formats = {
         number: {},
         date  : {}
     };
 
-    function $$helper$$getFormat(type, locales, options) {
+    function $$register$with$$getFormat(type, locales, options) {
         var orderedOptions, option, key, i, len, id, format;
 
         // When JSON is available in the environment, use it build a cache-id
@@ -1253,7 +1253,7 @@
         }
 
         // Check for a cached format instance, and use it.
-        format = $$helper$$formats[type][id];
+        format = $$register$with$$formats[type][id];
         if (format) { return format; }
 
         switch (type) {
@@ -1267,7 +1267,7 @@
 
         // Cache format for reuse.
         if (id) {
-            $$helper$$formats[type][id] = format;
+            $$register$with$$formats[type][id] = format;
         }
 
         return format;
@@ -1275,7 +1275,7 @@
 
     // -- Utilities ------------------------------------------------------------
 
-    function $$helper$$extend(obj) {
+    function $$register$with$$extend(obj) {
         var sources = Array.prototype.slice.call(arguments, 1),
             i, len, source, key;
 
@@ -1293,18 +1293,17 @@
         return obj;
     }
 
-    var $$helper$$default = $$helper$$registerWith;
+    var $$register$with$$default = $$register$with$$registerWith;
 
-    var src$umd$$mod = {
-        registerWith: $$helper$$default
+    var src$main$$default = {
+      registerWith: $$register$with$$default
     };
 
-    /* global define:true module:true window: true */
     if (typeof define === 'function' && define.amd) {
-      define(function() { return src$umd$$mod; });
+      define(function() { return src$main$$default; });
     } else if (typeof module !== 'undefined' && module.exports) {
-      module.exports = src$umd$$mod;
+      module.exports = src$main$$default;
     } else if (typeof this !== 'undefined') {
-      this.HandlebarsHelperIntl = src$umd$$mod;
+      this['HandlebarsHelperIntl'] = src$main$$default;
     }
 }).call(this);
