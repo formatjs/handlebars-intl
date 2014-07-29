@@ -8,6 +8,8 @@ See the accompanying LICENSE file for terms.
 
 import IntlMessageFormat from "intl-messageformat";
 
+export default registerWith;
+
 function registerWith(Handlebars) {
     var SafeString  = Handlebars.SafeString,
         createFrame = Handlebars.createFrame,
@@ -275,6 +277,3 @@ function extend(obj) {
 
     return obj;
 }
-
-// Export utility function to register all the helpers.
-export default registerWith;

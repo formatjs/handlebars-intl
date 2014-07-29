@@ -17,16 +17,9 @@ module.exports = function (grunt) {
             options: {
                 preserveComments: 'some'
             },
-            all: {
-                expand: true,
-                flatten: true,
-                src: ['dist/*.js', '!dist/*.min.js'],
-                dest: 'dist',
-                rename: function(dest, src) {
-                    var ext = libpath.extname(src),
-                        base = libpath.basename(src, ext);
-                    return libpath.resolve(dest, base + '.min' + ext);
-                }
+            dist: {
+                src: ['dist/helpers.js'],
+                dest: 'dist/helpers.min.js'
             }
         }
     });
@@ -35,6 +28,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-bundle-jsnext-lib');
 
-    grunt.registerTask('build', ['bundle_jsnext', 'uglify:all']);
+    grunt.registerTask('build', ['bundle_jsnext', 'uglify:dist']);
     grunt.registerTask('default', ['jshint']);
 };

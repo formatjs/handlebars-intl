@@ -9,5 +9,5 @@ See the accompanying LICENSE file for terms.
 import registerWith from "./register-with";
 
 export default {
-  registerWith: registerWith
+    registerWith: registerWith
 };
