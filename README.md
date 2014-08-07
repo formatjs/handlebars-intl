@@ -33,7 +33,7 @@ Handlebars helpers for internationalization.
 
     ```javascript
     var Handlebars = require('handlebars');
-    global.Intl = require('intl');
+    global.Intl = global.Intl || require('intl');
     require('handlebars-helper-intl').register(Handlebars);
     ```
 
@@ -59,5 +59,3 @@ Handlebars helpers for internationalization.
 ## Usage
 
 TODO
-
-
