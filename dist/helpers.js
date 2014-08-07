@@ -2233,13 +2233,7 @@
         registerWith: $$register$with$$default
     };
 
-    if (typeof define === 'function' && define.amd) {
-      define(function() { return src$main$$default; });
-    } else if (typeof module !== 'undefined' && module.exports) {
-      module.exports = src$main$$default;
-    } else if (typeof this !== 'undefined') {
-      this['HandlebarsHelperIntl'] = src$main$$default;
-    }
+    this['HandlebarsHelperIntl'] = src$main$$default;
 }).call(this);
 
 //# sourceMappingURL=helpers.js.map

@@ -13,6 +13,9 @@ module.exports = function (grunt) {
             },
             dest: 'dist/helpers.js'
         },
+        cjs_jsnext: {
+            dest: 'lib/'
+        },
         uglify: {
             options: {
                 preserveComments: 'some'
@@ -28,6 +31,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-bundle-jsnext-lib');
 
-    grunt.registerTask('build', ['bundle_jsnext', 'uglify:dist']);
+    grunt.registerTask('build', ['bundle_jsnext', 'cjs_jsnext', 'uglify:dist']);
     grunt.registerTask('default', ['jshint']);
 };
