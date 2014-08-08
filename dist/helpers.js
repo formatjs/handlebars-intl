@@ -1,8 +1,8 @@
 (function() {
     "use strict";
-    var $$utils$$hop = Object.prototype.hasOwnProperty;
+    var $$utils1$$hop = Object.prototype.hasOwnProperty;
 
-    function $$utils$$extend(obj) {
+    function $$utils1$$extend(obj) {
         var sources = Array.prototype.slice.call(arguments, 1),
             i, len, source, key;
 
@@ -11,7 +11,7 @@
             if (!source) { continue; }
 
             for (key in source) {
-                if ($$utils$$hop.call(source, key)) {
+                if ($$utils1$$hop.call(source, key)) {
                     obj[key] = source[key];
                 }
             }
@@ -35,7 +35,7 @@
 
         if ('get' in desc && obj.__defineGetter__) {
             obj.__defineGetter__(name, desc.get);
-        } else if (!$$utils$$hop.call(obj, name) || 'value' in desc) {
+        } else if (!$$utils1$$hop.call(obj, name) || 'value' in desc) {
             obj[name] = desc.value;
         }
     };
@@ -48,7 +48,7 @@
         obj = new F();
 
         for (k in props) {
-            if ($$utils$$hop.call(props, k)) {
+            if ($$utils1$$hop.call(props, k)) {
                 $$es5$$defineProperty(obj, k, props[k]);
             }
         }
@@ -1678,7 +1678,7 @@
             id = part.id;
 
             // Enforce that all required values are provided by the caller.
-            if (!(values && $$utils$$hop.call(values, id))) {
+            if (!(values && $$utils1$$hop.call(values, id))) {
                 throw new Error('A value must be provided for: ' + id);
             }
 
@@ -1702,12 +1702,12 @@
             type, mergedType;
 
         for (type in defaults) {
-            if (!$$utils$$hop.call(defaults, type)) { continue; }
+            if (!$$utils1$$hop.call(defaults, type)) { continue; }
 
             mergedFormats[type] = mergedType = $$es5$$objCreate(defaults[type]);
 
-            if (formats && $$utils$$hop.call(formats, type)) {
-                $$utils$$extend(mergedType, formats[type]);
+            if (formats && $$utils1$$hop.call(formats, type)) {
+                $$utils1$$extend(mergedType, formats[type]);
             }
         }
 
@@ -1979,10 +1979,88 @@
     $$core$$default.__addLocaleData({locale:"zh", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
     $$core$$default.__addLocaleData({locale:"zu", messageformat:{pluralFunction:intl$messageformat$$funcs[3]}});
     var intl$messageformat$$default = $$core$$default;
-    var $$register$with$$default = $$register$with$$registerWith;
-    var $$register$with$$default = $$register$with$$registerWith;
 
-    function $$register$with$$registerWith(Handlebars) {
+    // Cache to hold NumberFormat and DateTimeFormat instances for reuse.
+    var $$formatters$$formatters = {
+        number: {},
+        date  : {}
+    };
+
+    function $$formatters$$getFormatter(type, locales, options) {
+        var orderedOptions, option, key, i, len, id, formatter;
+
+        // When JSON is available in the environment, use it build a cache-id
+        // to reuse formatters for increased performance.
+        if (JSON) {
+            // Order the keys in `options` to create a serialized semantic
+            // representation which is reproducible.
+            if (options) {
+                orderedOptions = [];
+
+                for (key in options) {
+                    if (options.hasOwnProperty(key)) {
+                        orderedOptions.push(key);
+                    }
+                }
+
+                orderedOptions.sort();
+
+                for (i = 0, len = orderedOptions.length; i < len; i += 1) {
+                    key    = orderedOptions[i];
+                    option = {};
+
+                    option[key] = options[key];
+                    orderedOptions[i] = option;
+                }
+            }
+
+            id = JSON.stringify([locales, orderedOptions]);
+        }
+
+        // Check for a cached formatter instance, and use it.
+        formatter = $$formatters$$formatters[type][id];
+        if (formatter) { return formatter; }
+
+        switch (type) {
+            case 'number':
+                formatter = new Intl.NumberFormat(locales, options);
+                break;
+            case 'date':
+                formatter = new Intl.DateTimeFormat(locales, options);
+                break;
+        }
+
+        // Cache formatter for reuse.
+        if (id) {
+            $$formatters$$formatters[type][id] = formatter;
+        }
+
+        return formatter;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    function $$utils$$extend(obj) {
+        var sources = Array.prototype.slice.call(arguments, 1),
+            i, len, source, key;
+
+        for (i = 0, len = sources.length; i < len; i += 1) {
+            source = sources[i];
+            if (!source) { continue; }
+
+            for (key in source) {
+                if (source.hasOwnProperty(key)) {
+                    obj[key] = source[key];
+                }
+            }
+        }
+
+        return obj;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    function $$helpers$$registerWith(Handlebars) {
         var SafeString  = Handlebars.SafeString,
             createFrame = Handlebars.createFrame,
             escape      = Handlebars.Utils.escapeExpression;
@@ -1994,15 +2072,15 @@
             intlGet        : intlGet,
             intlMessage    : intlMessage,
             intlHTMLMessage: intlHTMLMessage
-        }, name;
+        };
 
-        for (name in helpers) {
+        for (var name in helpers) {
             if (helpers.hasOwnProperty(name)) {
                 Handlebars.registerHelper(name, helpers[name]);
             }
         }
 
-        // -- Helpers ----------------------------------------------------------
+        // -- Helpers --------------------------------------------------------------
 
         function intl(options) {
             /* jshint validthis:true */
@@ -2015,7 +2093,7 @@
             // data object and extend it with `options.data.intl` and
             // `options.hash`.
             var data     = createFrame(options.data),
-                intlData = $$register$with$$extend({}, data.intl, options.hash);
+                intlData = $$utils$$extend({}, data.intl, options.hash);
 
             data.intl = intlData;
 
@@ -2044,12 +2122,12 @@
                     formatOptions = intlGet('formats.date.' + formatOptions, options);
                 }
 
-                formatOptions = $$register$with$$extend({}, formatOptions, hash);
+                formatOptions = $$utils$$extend({}, formatOptions, hash);
             } else {
                 formatOptions = hash;
             }
 
-            return $$register$with$$getFormat('date', locales, formatOptions).format(date);
+            return $$formatters$$getFormatter('date', locales, formatOptions).format(date);
         }
 
         function intlNumber(num, formatOptions, options) {
@@ -2071,12 +2149,12 @@
                     formatOptions = intlGet('formats.number.' + formatOptions, options);
                 }
 
-                formatOptions = $$register$with$$extend({}, formatOptions, hash);
+                formatOptions = $$utils$$extend({}, formatOptions, hash);
             } else {
                 formatOptions = hash;
             }
 
-            return $$register$with$$getFormat('number', locales, formatOptions).format(num);
+            return $$formatters$$getFormatter('number', locales, formatOptions).format(num);
         }
 
         function intlGet(path, options) {
@@ -2170,88 +2248,8 @@
         }
     }
 
-    // -- Internals ------------------------------------------------------------
-
-    // Cache to hold NumberFormat and DateTimeFormat instances for reuse.
-    var $$register$with$$formats = {
-        number: {},
-        date  : {}
-    };
-
-    function $$register$with$$getFormat(type, locales, options) {
-        var orderedOptions, option, key, i, len, id, format;
-
-        // When JSON is available in the environment, use it build a cache-id
-        // to reuse formats for increased performance.
-        if (JSON) {
-            // Order the keys in `options` to create a serialized semantic
-            // representation which is reproducible.
-            if (options) {
-                orderedOptions = [];
-
-                for (key in options) {
-                    if (options.hasOwnProperty(key)) {
-                        orderedOptions.push(key);
-                    }
-                }
-
-                orderedOptions.sort();
-
-                for (i = 0, len = orderedOptions.length; i < len; i += 1) {
-                    key    = orderedOptions[i];
-                    option = {};
-
-                    option[key] = options[key];
-                    orderedOptions[i] = option;
-                }
-            }
-
-            id = JSON.stringify([locales, orderedOptions]);
-        }
-
-        // Check for a cached format instance, and use it.
-        format = $$register$with$$formats[type][id];
-        if (format) { return format; }
-
-        switch (type) {
-            case 'number':
-                format = new Intl.NumberFormat(locales, options);
-                break;
-            case 'date':
-                format = new Intl.DateTimeFormat(locales, options);
-                break;
-        }
-
-        // Cache format for reuse.
-        if (id) {
-            $$register$with$$formats[type][id] = format;
-        }
-
-        return format;
-    }
-
-    // -- Utilities ------------------------------------------------------------
-
-    function $$register$with$$extend(obj) {
-        var sources = Array.prototype.slice.call(arguments, 1),
-            i, len, source, key;
-
-        for (i = 0, len = sources.length; i < len; i += 1) {
-            source = sources[i];
-            if (!source) { continue; }
-
-            for (key in source) {
-                if (source.hasOwnProperty(key)) {
-                    obj[key] = source[key];
-                }
-            }
-        }
-
-        return obj;
-    }
-
     var src$main$$default = {
-        registerWith: $$register$with$$default
+        registerWith: $$helpers$$registerWith
     };
 
     this['HandlebarsHelperIntl'] = src$main$$default;
