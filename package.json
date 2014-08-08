@@ -27,7 +27,6 @@
     "url": "git@github.com:yahoo/handlebars-helper-intl.git"
   },
   "main": "index.js",
-  "dist": "dist/helpers.js",
   "jsnext:main": "src/main.js",
   "dependencies": {
     "intl-messageformat": "^1.0.0-rc-2"
