@@ -1,4 +1,4 @@
-var m = require('./lib/main.js');
+'use strict';
 
-// providing an idiomatic api for the nodejs version of this module
-module.exports = exports = m.default;
+exports = module.exports = require('./lib/main').default;
+exports.default = exports;

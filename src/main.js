@@ -6,7 +6,7 @@ See the accompanying LICENSE file for terms.
 
 /* jshint esnext: true */
 
-import registerWith from "./register-with";
+import registerWith from './register-with';
 
 export default {
     registerWith: registerWith

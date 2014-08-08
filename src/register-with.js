@@ -6,7 +6,12 @@ See the accompanying LICENSE file for terms.
 
 /* jshint esnext: true */
 
-import IntlMessageFormat from "intl-messageformat";
+import IntlMessageFormat from 'intl-messageformat';
+
+// Export utility function to register all the helpers.
+export default registerWith;
+
+// -----------------------------------------------------------------------------
 
 export default registerWith;
 
