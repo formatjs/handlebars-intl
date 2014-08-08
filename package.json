@@ -30,7 +30,7 @@
   "dist": "dist/helpers.js",
   "jsnext:main": "src/main.js",
   "dependencies": {
-    "intl-messageformat": "git://github.com/yahoo/intl-messageformat#v1.0.0-rc-1"
+    "intl-messageformat": "^1.0.0-rc-2"
   },
   "devDependencies": {
     "benchmark": "^1.0.0",
