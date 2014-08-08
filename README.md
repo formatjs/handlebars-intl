@@ -42,20 +42,6 @@ Handlebars helpers for internationalization.
     provide this or you can use another.
 
 
-### AMD
-
-1. Install with [bower](http://bower.io/): `bower install handlebars-form-helpers`
-3. Load in the module and register it:
-
-    ```javascript
-    define(['handlebars', 'handlebars-helper-intl'], function(Handlebars, HandlebarsHelperIntl) {
-        HandlebarsHelperIntl.register(Handlebars);
-    });
-    ```
-
-(Thanks to the `handlebars-form-helpers` package for figuring out how to register helpers in multiple environments.)
-
-
 ## Usage
 
 TODO

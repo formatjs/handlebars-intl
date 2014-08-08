@@ -1,5 +1,4 @@
-npm-debug.log
-node_modules
-coverage
-build
-xunit.xml
+coverage/
+lib/
+node_modules/
+tmp/

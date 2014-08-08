@@ -46,6 +46,8 @@
     "chai": "~1.8.1",
     "grunt": "^0.4.5",
     "grunt-cli": "~0.1.13",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-copy": "^0.5.0",
     "grunt-contrib-jshint": "^0.10.0",
     "grunt-contrib-uglify": "^0.5.0",
     "grunt-bundle-jsnext-lib": "^0.2.0",
@@ -57,7 +59,7 @@
     "xunit-file": "*"
   },
   "scripts": {
-    "pretest": "grunt jshint build",
-    "test": "istanbul cover -- _mocha tests/ --reporter spec"
+    "test": "istanbul cover -- _mocha tests/ --reporter spec",
+    "prepublish": "grunt && npm test"
   }
 }
