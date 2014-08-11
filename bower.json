@@ -1,25 +1,30 @@
 {
-    "name": "handlebars-helper-intl",
-    "main": "dist/helpers.js",
-    "version": "0.2.0",
-    "homepage": "https://github.com/yahoo/handlebars-helpers-intl",
-
-    "authors": [
-        "Anthony Pipkin <a.pipkin@yahoo.com>"
-    ],
-
-    "description": "handlebars helpers for internationalization",
-
-    "keywords": [
-        "intl",
-        "i18n",
-        "handlebars"
-    ],
-
-    "license": "Yahoo BSD",
-
-    "ignore": [
-        "**/.*",
-        "!dist/*.js"
-    ]
+  "name": "handlebars-helper-intl",
+  "main": "dist/helpers.js",
+  "version": "0.2.0",
+  "homepage": "https://github.com/yahoo/handlebars-helpers-intl",
+  "authors": [
+    "Eric Ferraiuolo <eferraiuolo@gmail.com>",
+    "Caridy Patino <caridy@gmail.com>",
+    "Anthony Pipkin <a.pipkin@yahoo.com>"
+  ],
+  "description": "Handlebars helpers for internationalization.",
+  "keywords": [
+    "intl",
+    "i18n",
+    "handlebars"
+  ],
+  "license": "BSD",
+  "ignore": [
+    "**/.*",
+    "!dist/*.js",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "moduleType": [
+    "es6",
+    "globals"
+  ]
 }
