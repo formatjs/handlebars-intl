@@ -1,7 +1,6 @@
+'use strict';
+
 module.exports = function (grunt) {
-
-    var libpath = require('path');
-
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
 
@@ -24,11 +23,18 @@ module.exports = function (grunt) {
             all: ['src/*.js', 'tests/*.js']
         },
 
+        benchmark: {
+            all: {
+                src: ['tests/benchmark/*.js']
+            }
+        },
+
         bundle_jsnext: {
+            dest: 'dist/helpers.js',
+
             options: {
                 namespace: 'HandlebarsHelperIntl'
-            },
-            dest: 'dist/helpers.js'
+            }
         },
 
         cjs_jsnext: {
@@ -36,12 +42,13 @@ module.exports = function (grunt) {
         },
 
         uglify: {
-            options: {
-                preserveComments: 'some'
-            },
-            dist: {
+            all: {
                 src: 'dist/helpers.js',
-                dest: 'dist/helpers.min.js'
+                dest: 'dist/helpers.min.js',
+
+                options: {
+                    preserveComments: 'some'
+                }
             }
         }
     });
@@ -50,6 +57,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-benchmark');
     grunt.loadNpmTasks('grunt-bundle-jsnext-lib');
 
     grunt.registerTask('default', [

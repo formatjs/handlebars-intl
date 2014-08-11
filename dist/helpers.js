@@ -1,8 +1,8 @@
 (function() {
     "use strict";
-    var $$utils$$hop = Object.prototype.hasOwnProperty;
+    var $$utils1$$hop = Object.prototype.hasOwnProperty;
 
-    function $$utils$$extend(obj) {
+    function $$utils1$$extend(obj) {
         var sources = Array.prototype.slice.call(arguments, 1),
             i, len, source, key;
 
@@ -11,7 +11,7 @@
             if (!source) { continue; }
 
             for (key in source) {
-                if ($$utils$$hop.call(source, key)) {
+                if ($$utils1$$hop.call(source, key)) {
                     obj[key] = source[key];
                 }
             }
@@ -35,7 +35,7 @@
 
         if ('get' in desc && obj.__defineGetter__) {
             obj.__defineGetter__(name, desc.get);
-        } else if (!$$utils$$hop.call(obj, name) || 'value' in desc) {
+        } else if (!$$utils1$$hop.call(obj, name) || 'value' in desc) {
             obj[name] = desc.value;
         }
     };
@@ -48,7 +48,7 @@
         obj = new F();
 
         for (k in props) {
-            if ($$utils$$hop.call(props, k)) {
+            if ($$utils1$$hop.call(props, k)) {
                 $$es5$$defineProperty(obj, k, props[k]);
             }
         }
@@ -63,6 +63,200 @@
         return function () {
             fn.apply(thisObj, args.concat([].slice.call(arguments)));
         };
+    };
+    var $$compiler$$default = $$compiler$$Compiler;
+
+    function $$compiler$$Compiler(locales, formats, pluralFn) {
+        this.locales  = locales;
+        this.formats  = formats;
+        this.pluralFn = pluralFn;
+    }
+
+    $$compiler$$Compiler.prototype.compile = function (ast) {
+        this.pluralStack        = [];
+        this.currentPlural      = null;
+        this.pluralNumberFormat = null;
+
+        return this.compileMessage(ast);
+    };
+
+    $$compiler$$Compiler.prototype.compileMessage = function (ast) {
+        if (!(ast && ast.type === 'messageFormatPattern')) {
+            throw new Error('Message AST is not of type: "messageFormatPattern"');
+        }
+
+        var elements = ast.elements,
+            pattern  = [];
+
+        var i, len, element;
+
+        for (i = 0, len = elements.length; i < len; i += 1) {
+            element = elements[i];
+
+            switch (element.type) {
+                case 'messageTextElement':
+                    pattern.push(this.compileMessageText(element));
+                    break;
+
+                case 'argumentElement':
+                    pattern.push(this.compileArgument(element));
+                    break;
+
+                default:
+                    throw new Error('Message element does not have a valid type');
+            }
+        }
+
+        return pattern;
+    };
+
+    $$compiler$$Compiler.prototype.compileMessageText = function (element) {
+        // When this `element` is part of plural sub-pattern and its value
+        // contains an unescaped '#', use a `PluralOffsetString` helper to
+        // properly output the number with the correct offset in the string.
+        if (this.currentPlural && /(^|[^\\])#/g.test(element.value)) {
+            // Create a cache a NumberFormat instance that can be reused for any
+            // PluralOffsetString instance in this message.
+            if (!this.pluralNumberFormat) {
+                this.pluralNumberFormat = new Intl.NumberFormat(this.locales);
+            }
+
+            return new $$compiler$$PluralOffsetString(
+                    this.currentPlural.id,
+                    this.currentPlural.format.offset,
+                    this.pluralNumberFormat,
+                    element.value);
+        }
+
+        // Unescape the escaped '#'s in the message text.
+        return element.value.replace(/\\#/g, '#');
+    };
+
+    $$compiler$$Compiler.prototype.compileArgument = function (element) {
+        var format   = element.format,
+            formats  = this.formats,
+            locales  = this.locales,
+            pluralFn = this.pluralFn,
+            options;
+
+        if (!format) {
+            return new $$compiler$$StringFormat(element.id);
+        }
+
+        switch (format.type) {
+            case 'numberFormat':
+                options = formats.number[format.style];
+                return {
+                    id    : element.id,
+                    format: new Intl.NumberFormat(locales, options).format
+                };
+
+            case 'dateFormat':
+                options = formats.date[format.style];
+                return {
+                    id    : element.id,
+                    format: new Intl.DateTimeFormat(locales, options).format
+                };
+
+            case 'timeFormat':
+                options = formats.time[format.style];
+                return {
+                    id    : element.id,
+                    format: new Intl.DateTimeFormat(locales, options).format
+                };
+
+            case 'pluralFormat':
+                options = this.compileOptions(element);
+                return new $$compiler$$PluralFormat(element.id, format.offset, options, pluralFn);
+
+            case 'selectFormat':
+                options = this.compileOptions(element);
+                return new $$compiler$$SelectFormat(element.id, options);
+
+            default:
+                throw new Error('Message element does not have a valid format type');
+        }
+    };
+
+    $$compiler$$Compiler.prototype.compileOptions = function (element) {
+        var format      = element.format,
+            options     = format.options,
+            optionsHash = {};
+
+        // Save the current plural element, if any, then set it to a new value
+        // when compiling the options sub-patterns. This conform's the spec's
+        // algorithm for handling `"#"` synax in message text.
+        this.pluralStack.push(this.currentPlural);
+        this.currentPlural = format.type === 'pluralFormat' ? element : null;
+
+        var i, len, option;
+
+        for (i = 0, len = options.length; i < len; i += 1) {
+            option = options[i];
+
+            // Compile the sub-pattern and save it under the options's selector.
+            optionsHash[option.selector] = this.compileMessage(option.value);
+        }
+
+        // Pop the plural stack to put back the original currnet plural value.
+        this.currentPlural = this.pluralStack.pop();
+
+        return optionsHash;
+    };
+
+    // -- Compiler Helper Classes --------------------------------------------------
+
+    function $$compiler$$StringFormat(id) {
+        this.id = id;
+    }
+
+    $$compiler$$StringFormat.prototype.format = function (value) {
+        if (!value) {
+            return '';
+        }
+
+        return typeof value === 'string' ? value : String(value);
+    };
+
+    function $$compiler$$PluralFormat(id, offset, options, pluralFn) {
+        this.id       = id;
+        this.offset   = offset;
+        this.options  = options;
+        this.pluralFn = pluralFn;
+    }
+
+    $$compiler$$PluralFormat.prototype.getOption = function (value) {
+        var options = this.options;
+
+        var option = options['=' + value] ||
+                options[this.pluralFn(value - this.offset)];
+
+        return option || options.other;
+    };
+
+    function $$compiler$$PluralOffsetString(id, offset, numberFormat, string) {
+        this.id           = id;
+        this.offset       = offset;
+        this.numberFormat = numberFormat;
+        this.string       = string;
+    }
+
+    $$compiler$$PluralOffsetString.prototype.format = function (value) {
+        var number = this.numberFormat.format(value - this.offset);
+
+        return this.string
+                .replace(/(^|[^\\])#/g, '$1' + number)
+                .replace(/\\#/g, '#');
+    };
+
+    function $$compiler$$SelectFormat(id, options) {
+        this.id      = id;
+        this.options = options;
+    }
+
+    $$compiler$$SelectFormat.prototype.getOption = function (value) {
+        var options = this.options;
+        return options[value] || options.other;
     };
 
     var intl$messageformat$parser$$default = (function() {
@@ -1464,128 +1658,8 @@
     };
 
     $$core$$MessageFormat.prototype._compilePattern = function (ast, locales, formats, pluralFn) {
-        var pluralStack        = [],
-            currentPlural      = null,
-            pluralNumberFormat = null;
-
-        function compile(ast) {
-            var elements = ast.elements,
-                pattern  = [];
-
-            var i, len, element;
-
-            for (i = 0, len = elements.length; i < len; i += 1) {
-                element = elements[i];
-
-                switch (element.type) {
-                    case 'messageTextElement':
-                        pattern.push(compileMessageText(element));
-                        break;
-
-                    case 'argumentElement':
-                        pattern.push(compileArgument(element));
-                        break;
-
-                    default:
-                        throw new Error('Message element does not have a valid type');
-                }
-            }
-
-            return pattern;
-        }
-
-        function compileMessageText(element) {
-            // When this `element` is part of plural sub-pattern and its value
-            // contains an unescaped '#', use a `PluralOffsetString` helper to
-            // properly output the number with the correct offset in the string.
-            if (currentPlural && /(^|[^\\])#/g.test(element.value)) {
-                // Create a cache a NumberFormat instance that can be reused for any
-                // PluralOffsetString instance in this message.
-                if (!pluralNumberFormat) {
-                    pluralNumberFormat = new Intl.NumberFormat(locales);
-                }
-
-                return new $$core$$PluralOffsetString(
-                        currentPlural.id,
-                        currentPlural.format.offset,
-                        pluralNumberFormat,
-                        element.value);
-            }
-
-            // Unescape the escaped '#'s in the message text.
-            return element.value.replace(/\\#/g, '#');
-        }
-
-        function compileArgument(element) {
-            var format = element.format,
-                options;
-
-            if (!format) {
-                return new $$core$$StringFormat(element.id);
-            }
-
-            switch (format.type) {
-                case 'numberFormat':
-                    options = formats.number[format.style];
-                    return {
-                        id    : element.id,
-                        format: new Intl.NumberFormat(locales, options).format
-                    };
-
-                case 'dateFormat':
-                    options = formats.date[format.style];
-                    return {
-                        id    : element.id,
-                        format: new Intl.DateTimeFormat(locales, options).format
-                    };
-
-                case 'timeFormat':
-                    options = formats.time[format.style];
-                    return {
-                        id    : element.id,
-                        format: new Intl.DateTimeFormat(locales, options).format
-                    };
-
-                case 'pluralFormat':
-                    options = compileOptions(element);
-                    return new $$core$$PluralFormat(element.id, format.offset, options, pluralFn);
-
-                case 'selectFormat':
-                    options = compileOptions(element);
-                    return new $$core$$SelectFormat(element.id, options);
-
-                default:
-                    throw new Error('Message element does not have a valid format type');
-            }
-        }
-
-        function compileOptions(element) {
-            var format      = element.format,
-                options     = format.options,
-                optionsHash = {};
-
-            // Save the current plural element, if any, then set it to a new value
-            // when compiling the options sub-patterns. This conform's the spec's
-            // algorithm for handling `"#"` synax in message text.
-            pluralStack.push(currentPlural);
-            currentPlural = format.type === 'pluralFormat' ? element : null;
-
-            var i, len, option;
-
-            for (i = 0, len = options.length; i < len; i += 1) {
-                option = options[i];
-
-                // Compile the sub-pattern and save it under the options's selector.
-                optionsHash[option.selector] = compile(option.value);
-            }
-
-            // Pop the plural stack to put back the original currnet plural value.
-            currentPlural = pluralStack.pop();
-
-            return optionsHash;
-        }
-
-        return compile(ast);
+        var compiler = new $$compiler$$default(locales, formats, pluralFn);
+        return compiler.compile(ast);
     };
 
     $$core$$MessageFormat.prototype._format = function (pattern, values) {
@@ -1604,7 +1678,7 @@
             id = part.id;
 
             // Enforce that all required values are provided by the caller.
-            if (!(values && $$utils$$hop.call(values, id))) {
+            if (!(values && $$utils1$$hop.call(values, id))) {
                 throw new Error('A value must be provided for: ' + id);
             }
 
@@ -1628,12 +1702,12 @@
             type, mergedType;
 
         for (type in defaults) {
-            if (!$$utils$$hop.call(defaults, type)) { continue; }
+            if (!$$utils1$$hop.call(defaults, type)) { continue; }
 
             mergedFormats[type] = mergedType = $$es5$$objCreate(defaults[type]);
 
-            if (formats && $$utils$$hop.call(formats, type)) {
-                $$utils$$extend(mergedType, formats[type]);
+            if (formats && $$utils1$$hop.call(formats, type)) {
+                $$utils1$$extend(mergedType, formats[type]);
             }
         }
 
@@ -1670,80 +1744,25 @@
 
         return locale || $$core$$MessageFormat.defaultLocale;
     };
-
-    // -- MessageFormat Helper Classes ---------------------------------------------
-
-    function $$core$$StringFormat(id) {
-        this.id = id;
-    }
-
-    $$core$$StringFormat.prototype.format = function (value) {
-        if (!value) {
-            return '';
-        }
-
-        return typeof value === 'string' ? value : String(value);
-    };
-
-    function $$core$$PluralFormat(id, offset, options, pluralFn) {
-        this.id       = id;
-        this.offset   = offset;
-        this.options  = options;
-        this.pluralFn = pluralFn;
-    }
-
-    $$core$$PluralFormat.prototype.getOption = function (value) {
-        var options = this.options;
-
-        var option = options['=' + value] ||
-                options[this.pluralFn(value - this.offset)];
-
-        return option || options.other;
-    };
-
-    function $$core$$PluralOffsetString(id, offset, numberFormat, string) {
-        this.id           = id;
-        this.offset       = offset;
-        this.numberFormat = numberFormat;
-        this.string       = string;
-    }
-
-    $$core$$PluralOffsetString.prototype.format = function (value) {
-        var number = this.numberFormat.format(value - this.offset);
-
-        return this.string
-                .replace(/(^|[^\\])#/g, '$1' + number)
-                .replace(/\\#/g, '#');
-    };
-
-    function $$core$$SelectFormat(id, options) {
-        this.id      = id;
-        this.options = options;
-    }
-
-    $$core$$SelectFormat.prototype.getOption = function (value) {
-        var options = this.options;
-        return options[value] || options.other;
-    };
     var intl$messageformat$$funcs = [
     function (n) {  },
     function (n) { n=Math.floor(n);if(n===1)return"one";return"other"; },
     function (n) { n=Math.floor(n);if(n>=0&&n<=1)return"one";return"other"; },
     function (n) { var i=Math.floor(Math.abs(n));n=Math.floor(n);if(i===0||n===1)return"one";return"other"; },
     function (n) { n=Math.floor(n);if(n===0)return"zero";if(n===1)return"one";if(n===2)return"two";if(n%100>=3&&n%100<=10)return"few";if(n%100>=11&&n%100<=99)return"many";return"other"; },
+    function (n) { var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(i===1&&v===0)return"one";return"other"; },
     function (n) { n=Math.floor(n);if(n%10===1&&(n%100!==11))return"one";if(n%10>=2&&n%10<=4&&!(n%100>=12&&n%100<=14))return"few";if(n%10===0||n%10>=5&&n%10<=9||n%100>=11&&n%100<=14)return"many";return"other"; },
     function (n) { return"other"; },
     function (n) { n=Math.floor(n);if(n%10===1&&!(n%100===11||n%100===71||n%100===91))return"one";if(n%10===2&&!(n%100===12||n%100===72||n%100===92))return"two";if((n%10>=3&&n%10<=4||n%10===9)&&!(n%100>=10&&n%100<=19||n%100>=70&&n%100<=79||n%100>=90&&n%100<=99))return"few";if((n!==0)&&n%1e6===0)return"many";return"other"; },
     function (n) { var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length,f=parseInt(n.toString().replace(/^[^.]*\.?/,""),10);n=Math.floor(n);if(v===0&&i%10===1&&((i%100!==11)||f%10===1&&(f%100!==11)))return"one";if(v===0&&i%10>=2&&i%10<=4&&(!(i%100>=12&&i%100<=14)||f%10>=2&&f%10<=4&&!(f%100>=12&&f%100<=14)))return"few";return"other"; },
-    function (n) { var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(i===1&&v===0)return"one";return"other"; },
     function (n) { var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(i===1&&v===0)return"one";if(i>=2&&i<=4&&v===0)return"few";if((v!==0))return"many";return"other"; },
     function (n) { n=Math.floor(n);if(n===0)return"zero";if(n===1)return"one";if(n===2)return"two";if(n===3)return"few";if(n===6)return"many";return"other"; },
     function (n) { var i=Math.floor(Math.abs(n)),t=parseInt(n.toString().replace(/^[^.]*\.?|0+$/g,""),10);n=Math.floor(n);if(n===1||(t!==0)&&(i===0||i===1))return"one";return"other"; },
     function (n) { var i=Math.floor(Math.abs(n));n=Math.floor(n);if(i===0||i===1)return"one";return"other"; },
-    function (n) { var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(i>=0&&i<=1&&v===0)return"one";return"other"; },
+    function (n) { var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length,f=parseInt(n.toString().replace(/^[^.]*\.?/,""),10);n=Math.floor(n);if(v===0&&(i===1||i===2||i===3||v===0&&(!(i%10===4||i%10===6||i%10===9)||(v!==0)&&!(f%10===4||f%10===6||f%10===9))))return"one";return"other"; },
     function (n) { n=Math.floor(n);if(n===1)return"one";if(n===2)return"two";if(n>=3&&n<=6)return"few";if(n>=7&&n<=10)return"many";return"other"; },
     function (n) { n=Math.floor(n);if(n===1||n===11)return"one";if(n===2||n===12)return"two";if(n>=3&&n<=10||n>=13&&n<=19)return"few";return"other"; },
-    function (n) { n=Math.floor(n);if(n%10===1)return"one";if(n%10===2)return"two";if(n%100===0||n%100===20||n%100===40||n%100===60)return"few";return"other"; },
+    function (n) { var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(v===0&&i%10===1)return"one";if(v===0&&i%10===2)return"two";if(v===0&&(i%100===0||i%100===20||i%100===40||i%100===60||i%100===80))return"few";if((v!==0))return"many";return"other"; },
     function (n) { var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(i===1&&v===0)return"one";if(i===2&&v===0)return"two";if(v===0&&!(n>=0&&n<=10)&&n%10===0)return"many";return"other"; },
     function (n) { var i=Math.floor(Math.abs(n)),t=parseInt(n.toString().replace(/^[^.]*\.?|0+$/g,""),10);n=Math.floor(n);if(t===0&&i%10===1&&((i%100!==11)||(t!==0)))return"one";return"other"; },
     function (n) { n=Math.floor(n);if(n===0)return"zero";if(n===1)return"one";return"other"; },
@@ -1756,12 +1775,11 @@
     function (n) { var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(i===1&&v===0)return"one";if(v===0&&i%10>=2&&i%10<=4&&!(i%100>=12&&i%100<=14))return"few";if(v===0&&(i!==1)&&(i%10>=0&&i%10<=1||v===0&&(i%10>=5&&i%10<=9||v===0&&i%100>=12&&i%100<=14)))return"many";return"other"; },
     function (n) { var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length,t=parseInt(n.toString().replace(/^[^.]*\.?|0+$/g,""),10);n=Math.floor(n);if(i===1&&(v===0||i===0&&t===1))return"one";return"other"; },
     function (n) { var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(i===1&&v===0)return"one";if((v!==0)||n===0||(n!==1)&&n%100>=1&&n%100<=19)return"few";return"other"; },
-    function (n) { var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(v===0&&i%10===1&&(i%100!==11))return"one";if(v===0&&(i%10===0||v===0&&(i%10>=5&&i%10<=9||v===0&&i%100>=11&&i%100<=14)))return"many";return"other"; },
+    function (n) { var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(v===0&&i%10===1&&(i%100!==11))return"one";if(v===0&&i%10>=2&&i%10<=4&&!(i%100>=12&&i%100<=14))return"few";if(v===0&&(i%10===0||v===0&&(i%10>=5&&i%10<=9||v===0&&i%100>=11&&i%100<=14)))return"many";return"other"; },
     function (n) { var i=Math.floor(Math.abs(n));n=Math.floor(n);if(i===0||n===1)return"one";if(n>=2&&n<=10)return"few";return"other"; },
     function (n) { var i=Math.floor(Math.abs(n)),f=parseInt(n.toString().replace(/^[^.]*\.?/,""),10);n=Math.floor(n);if(n===0||n===1||i===0&&f===1)return"one";return"other"; },
     function (n) { var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(v===0&&i%100===1)return"one";if(v===0&&i%100===2)return"two";if(v===0&&(i%100>=3&&i%100<=4||(v!==0)))return"few";return"other"; },
-    function (n) { n=Math.floor(n);if(n>=0&&n<=1||n>=11&&n<=99)return"one";return"other"; },
-    function (n) { var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(v===0&&i%10===1&&(i%100!==11))return"one";if(v===0&&i%10>=2&&i%10<=4&&!(i%100>=12&&i%100<=14))return"few";if(v===0&&(i%10===0||v===0&&(i%10>=5&&i%10<=9||v===0&&i%100>=11&&i%100<=14)))return"many";return"other"; }
+    function (n) { n=Math.floor(n);if(n>=0&&n<=1||n>=11&&n<=99)return"one";return"other"; }
     ];
     $$core$$default.__addLocaleData({locale:"aa", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
     $$core$$default.__addLocaleData({locale:"af", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
@@ -1769,53 +1787,54 @@
     $$core$$default.__addLocaleData({locale:"ak", messageformat:{pluralFunction:intl$messageformat$$funcs[2]}});
     $$core$$default.__addLocaleData({locale:"am", messageformat:{pluralFunction:intl$messageformat$$funcs[3]}});
     $$core$$default.__addLocaleData({locale:"ar", messageformat:{pluralFunction:intl$messageformat$$funcs[4]}});
-    $$core$$default.__addLocaleData({locale:"as", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
+    $$core$$default.__addLocaleData({locale:"as", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
     $$core$$default.__addLocaleData({locale:"asa", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"ast", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
+    $$core$$default.__addLocaleData({locale:"ast", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
     $$core$$default.__addLocaleData({locale:"az", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"bas", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"be", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
+    $$core$$default.__addLocaleData({locale:"be", messageformat:{pluralFunction:intl$messageformat$$funcs[6]}});
     $$core$$default.__addLocaleData({locale:"bem", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"bez", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"bg", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"bm", messageformat:{pluralFunction:intl$messageformat$$funcs[6]}});
+    $$core$$default.__addLocaleData({locale:"bm", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
     $$core$$default.__addLocaleData({locale:"bn", messageformat:{pluralFunction:intl$messageformat$$funcs[3]}});
-    $$core$$default.__addLocaleData({locale:"bo", messageformat:{pluralFunction:intl$messageformat$$funcs[6]}});
-    $$core$$default.__addLocaleData({locale:"br", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
+    $$core$$default.__addLocaleData({locale:"bo", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
+    $$core$$default.__addLocaleData({locale:"br", messageformat:{pluralFunction:intl$messageformat$$funcs[8]}});
     $$core$$default.__addLocaleData({locale:"brx", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"bs", messageformat:{pluralFunction:intl$messageformat$$funcs[8]}});
+    $$core$$default.__addLocaleData({locale:"bs", messageformat:{pluralFunction:intl$messageformat$$funcs[9]}});
     $$core$$default.__addLocaleData({locale:"byn", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"ca", messageformat:{pluralFunction:intl$messageformat$$funcs[9]}});
+    $$core$$default.__addLocaleData({locale:"ca", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
     $$core$$default.__addLocaleData({locale:"cgg", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"chr", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"cs", messageformat:{pluralFunction:intl$messageformat$$funcs[10]}});
     $$core$$default.__addLocaleData({locale:"cy", messageformat:{pluralFunction:intl$messageformat$$funcs[11]}});
     $$core$$default.__addLocaleData({locale:"da", messageformat:{pluralFunction:intl$messageformat$$funcs[12]}});
     $$core$$default.__addLocaleData({locale:"dav", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"de", messageformat:{pluralFunction:intl$messageformat$$funcs[9]}});
+    $$core$$default.__addLocaleData({locale:"de", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
     $$core$$default.__addLocaleData({locale:"dje", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
     $$core$$default.__addLocaleData({locale:"dua", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
     $$core$$default.__addLocaleData({locale:"dyo", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"dz", messageformat:{pluralFunction:intl$messageformat$$funcs[6]}});
+    $$core$$default.__addLocaleData({locale:"dz", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
     $$core$$default.__addLocaleData({locale:"ebu", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
     $$core$$default.__addLocaleData({locale:"ee", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"el", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"en", messageformat:{pluralFunction:intl$messageformat$$funcs[9]}});
+    $$core$$default.__addLocaleData({locale:"en", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
     $$core$$default.__addLocaleData({locale:"eo", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"es", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"et", messageformat:{pluralFunction:intl$messageformat$$funcs[9]}});
+    $$core$$default.__addLocaleData({locale:"et", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
     $$core$$default.__addLocaleData({locale:"eu", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"ewo", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
     $$core$$default.__addLocaleData({locale:"fa", messageformat:{pluralFunction:intl$messageformat$$funcs[3]}});
     $$core$$default.__addLocaleData({locale:"ff", messageformat:{pluralFunction:intl$messageformat$$funcs[13]}});
-    $$core$$default.__addLocaleData({locale:"fi", messageformat:{pluralFunction:intl$messageformat$$funcs[14]}});
+    $$core$$default.__addLocaleData({locale:"fi", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
     $$core$$default.__addLocaleData({locale:"fil", messageformat:{pluralFunction:intl$messageformat$$funcs[14]}});
     $$core$$default.__addLocaleData({locale:"fo", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"fr", messageformat:{pluralFunction:intl$messageformat$$funcs[13]}});
     $$core$$default.__addLocaleData({locale:"fur", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
+    $$core$$default.__addLocaleData({locale:"fy", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
     $$core$$default.__addLocaleData({locale:"ga", messageformat:{pluralFunction:intl$messageformat$$funcs[15]}});
     $$core$$default.__addLocaleData({locale:"gd", messageformat:{pluralFunction:intl$messageformat$$funcs[16]}});
-    $$core$$default.__addLocaleData({locale:"gl", messageformat:{pluralFunction:intl$messageformat$$funcs[9]}});
+    $$core$$default.__addLocaleData({locale:"gl", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
     $$core$$default.__addLocaleData({locale:"gsw", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"gu", messageformat:{pluralFunction:intl$messageformat$$funcs[3]}});
     $$core$$default.__addLocaleData({locale:"guz", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
@@ -1824,32 +1843,32 @@
     $$core$$default.__addLocaleData({locale:"haw", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"he", messageformat:{pluralFunction:intl$messageformat$$funcs[18]}});
     $$core$$default.__addLocaleData({locale:"hi", messageformat:{pluralFunction:intl$messageformat$$funcs[3]}});
-    $$core$$default.__addLocaleData({locale:"hr", messageformat:{pluralFunction:intl$messageformat$$funcs[8]}});
+    $$core$$default.__addLocaleData({locale:"hr", messageformat:{pluralFunction:intl$messageformat$$funcs[9]}});
     $$core$$default.__addLocaleData({locale:"hu", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"hy", messageformat:{pluralFunction:intl$messageformat$$funcs[13]}});
     $$core$$default.__addLocaleData({locale:"ia", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"id", messageformat:{pluralFunction:intl$messageformat$$funcs[6]}});
-    $$core$$default.__addLocaleData({locale:"ig", messageformat:{pluralFunction:intl$messageformat$$funcs[6]}});
-    $$core$$default.__addLocaleData({locale:"ii", messageformat:{pluralFunction:intl$messageformat$$funcs[6]}});
+    $$core$$default.__addLocaleData({locale:"id", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
+    $$core$$default.__addLocaleData({locale:"ig", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
+    $$core$$default.__addLocaleData({locale:"ii", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
     $$core$$default.__addLocaleData({locale:"is", messageformat:{pluralFunction:intl$messageformat$$funcs[19]}});
-    $$core$$default.__addLocaleData({locale:"it", messageformat:{pluralFunction:intl$messageformat$$funcs[9]}});
-    $$core$$default.__addLocaleData({locale:"ja", messageformat:{pluralFunction:intl$messageformat$$funcs[6]}});
+    $$core$$default.__addLocaleData({locale:"it", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
+    $$core$$default.__addLocaleData({locale:"ja", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
     $$core$$default.__addLocaleData({locale:"jgo", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"jmc", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"ka", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"kab", messageformat:{pluralFunction:intl$messageformat$$funcs[13]}});
     $$core$$default.__addLocaleData({locale:"kam", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"kde", messageformat:{pluralFunction:intl$messageformat$$funcs[6]}});
-    $$core$$default.__addLocaleData({locale:"kea", messageformat:{pluralFunction:intl$messageformat$$funcs[6]}});
+    $$core$$default.__addLocaleData({locale:"kde", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
+    $$core$$default.__addLocaleData({locale:"kea", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
     $$core$$default.__addLocaleData({locale:"khq", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
     $$core$$default.__addLocaleData({locale:"ki", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
     $$core$$default.__addLocaleData({locale:"kk", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"kkj", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"kl", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"kln", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"km", messageformat:{pluralFunction:intl$messageformat$$funcs[6]}});
+    $$core$$default.__addLocaleData({locale:"km", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
     $$core$$default.__addLocaleData({locale:"kn", messageformat:{pluralFunction:intl$messageformat$$funcs[3]}});
-    $$core$$default.__addLocaleData({locale:"ko", messageformat:{pluralFunction:intl$messageformat$$funcs[6]}});
+    $$core$$default.__addLocaleData({locale:"ko", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
     $$core$$default.__addLocaleData({locale:"kok", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
     $$core$$default.__addLocaleData({locale:"ks", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"ksb", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
@@ -1859,9 +1878,9 @@
     $$core$$default.__addLocaleData({locale:"ky", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"lag", messageformat:{pluralFunction:intl$messageformat$$funcs[22]}});
     $$core$$default.__addLocaleData({locale:"lg", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"lkt", messageformat:{pluralFunction:intl$messageformat$$funcs[6]}});
+    $$core$$default.__addLocaleData({locale:"lkt", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
     $$core$$default.__addLocaleData({locale:"ln", messageformat:{pluralFunction:intl$messageformat$$funcs[2]}});
-    $$core$$default.__addLocaleData({locale:"lo", messageformat:{pluralFunction:intl$messageformat$$funcs[6]}});
+    $$core$$default.__addLocaleData({locale:"lo", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
     $$core$$default.__addLocaleData({locale:"lt", messageformat:{pluralFunction:intl$messageformat$$funcs[23]}});
     $$core$$default.__addLocaleData({locale:"lu", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
     $$core$$default.__addLocaleData({locale:"luo", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
@@ -1877,15 +1896,15 @@
     $$core$$default.__addLocaleData({locale:"ml", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"mn", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"mr", messageformat:{pluralFunction:intl$messageformat$$funcs[3]}});
-    $$core$$default.__addLocaleData({locale:"ms", messageformat:{pluralFunction:intl$messageformat$$funcs[6]}});
+    $$core$$default.__addLocaleData({locale:"ms", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
     $$core$$default.__addLocaleData({locale:"mt", messageformat:{pluralFunction:intl$messageformat$$funcs[26]}});
     $$core$$default.__addLocaleData({locale:"mua", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"my", messageformat:{pluralFunction:intl$messageformat$$funcs[6]}});
+    $$core$$default.__addLocaleData({locale:"my", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
     $$core$$default.__addLocaleData({locale:"naq", messageformat:{pluralFunction:intl$messageformat$$funcs[21]}});
     $$core$$default.__addLocaleData({locale:"nb", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"nd", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"ne", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"nl", messageformat:{pluralFunction:intl$messageformat$$funcs[9]}});
+    $$core$$default.__addLocaleData({locale:"nl", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
     $$core$$default.__addLocaleData({locale:"nmg", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
     $$core$$default.__addLocaleData({locale:"nn", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"nnh", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
@@ -1907,13 +1926,13 @@
     $$core$$default.__addLocaleData({locale:"ru", messageformat:{pluralFunction:intl$messageformat$$funcs[30]}});
     $$core$$default.__addLocaleData({locale:"rw", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
     $$core$$default.__addLocaleData({locale:"rwk", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"sah", messageformat:{pluralFunction:intl$messageformat$$funcs[6]}});
+    $$core$$default.__addLocaleData({locale:"sah", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
     $$core$$default.__addLocaleData({locale:"saq", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"sbp", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
     $$core$$default.__addLocaleData({locale:"se", messageformat:{pluralFunction:intl$messageformat$$funcs[21]}});
     $$core$$default.__addLocaleData({locale:"seh", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"ses", messageformat:{pluralFunction:intl$messageformat$$funcs[6]}});
-    $$core$$default.__addLocaleData({locale:"sg", messageformat:{pluralFunction:intl$messageformat$$funcs[6]}});
+    $$core$$default.__addLocaleData({locale:"ses", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
+    $$core$$default.__addLocaleData({locale:"sg", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
     $$core$$default.__addLocaleData({locale:"shi", messageformat:{pluralFunction:intl$messageformat$$funcs[31]}});
     $$core$$default.__addLocaleData({locale:"si", messageformat:{pluralFunction:intl$messageformat$$funcs[32]}});
     $$core$$default.__addLocaleData({locale:"sk", messageformat:{pluralFunction:intl$messageformat$$funcs[10]}});
@@ -1921,32 +1940,33 @@
     $$core$$default.__addLocaleData({locale:"sn", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"so", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"sq", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"sr", messageformat:{pluralFunction:intl$messageformat$$funcs[8]}});
+    $$core$$default.__addLocaleData({locale:"sr", messageformat:{pluralFunction:intl$messageformat$$funcs[9]}});
     $$core$$default.__addLocaleData({locale:"ss", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"ssy", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"st", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"sv", messageformat:{pluralFunction:intl$messageformat$$funcs[9]}});
-    $$core$$default.__addLocaleData({locale:"sw", messageformat:{pluralFunction:intl$messageformat$$funcs[9]}});
+    $$core$$default.__addLocaleData({locale:"sv", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
+    $$core$$default.__addLocaleData({locale:"sw", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
     $$core$$default.__addLocaleData({locale:"swc", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
     $$core$$default.__addLocaleData({locale:"ta", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"te", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"teo", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"tg", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"th", messageformat:{pluralFunction:intl$messageformat$$funcs[6]}});
+    $$core$$default.__addLocaleData({locale:"th", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
     $$core$$default.__addLocaleData({locale:"ti", messageformat:{pluralFunction:intl$messageformat$$funcs[2]}});
     $$core$$default.__addLocaleData({locale:"tig", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"tn", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"to", messageformat:{pluralFunction:intl$messageformat$$funcs[6]}});
+    $$core$$default.__addLocaleData({locale:"to", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
     $$core$$default.__addLocaleData({locale:"tr", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"ts", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"twq", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
     $$core$$default.__addLocaleData({locale:"tzm", messageformat:{pluralFunction:intl$messageformat$$funcs[34]}});
-    $$core$$default.__addLocaleData({locale:"uk", messageformat:{pluralFunction:intl$messageformat$$funcs[35]}});
-    $$core$$default.__addLocaleData({locale:"ur", messageformat:{pluralFunction:intl$messageformat$$funcs[9]}});
+    $$core$$default.__addLocaleData({locale:"ug", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
+    $$core$$default.__addLocaleData({locale:"uk", messageformat:{pluralFunction:intl$messageformat$$funcs[30]}});
+    $$core$$default.__addLocaleData({locale:"ur", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
     $$core$$default.__addLocaleData({locale:"uz", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"vai", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
     $$core$$default.__addLocaleData({locale:"ve", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"vi", messageformat:{pluralFunction:intl$messageformat$$funcs[6]}});
+    $$core$$default.__addLocaleData({locale:"vi", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
     $$core$$default.__addLocaleData({locale:"vo", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"vun", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"wae", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
@@ -1954,14 +1974,93 @@
     $$core$$default.__addLocaleData({locale:"xh", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"xog", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
     $$core$$default.__addLocaleData({locale:"yav", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"yo", messageformat:{pluralFunction:intl$messageformat$$funcs[6]}});
+    $$core$$default.__addLocaleData({locale:"yo", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
     $$core$$default.__addLocaleData({locale:"zgh", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"zh", messageformat:{pluralFunction:intl$messageformat$$funcs[6]}});
+    $$core$$default.__addLocaleData({locale:"zh", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
     $$core$$default.__addLocaleData({locale:"zu", messageformat:{pluralFunction:intl$messageformat$$funcs[3]}});
     var intl$messageformat$$default = $$core$$default;
-    var $$register$with$$default = $$register$with$$registerWith;
 
-    function $$register$with$$registerWith(Handlebars) {
+    // Cache to hold NumberFormat and DateTimeFormat instances for reuse.
+    var $$formatters$$formatters = {
+        number: {},
+        date  : {}
+    };
+
+    function $$formatters$$getFormatter(type, locales, options) {
+        var orderedOptions, option, key, i, len, id, formatter;
+
+        // When JSON is available in the environment, use it build a cache-id
+        // to reuse formatters for increased performance.
+        if (JSON) {
+            // Order the keys in `options` to create a serialized semantic
+            // representation which is reproducible.
+            if (options) {
+                orderedOptions = [];
+
+                for (key in options) {
+                    if (options.hasOwnProperty(key)) {
+                        orderedOptions.push(key);
+                    }
+                }
+
+                orderedOptions.sort();
+
+                for (i = 0, len = orderedOptions.length; i < len; i += 1) {
+                    key    = orderedOptions[i];
+                    option = {};
+
+                    option[key] = options[key];
+                    orderedOptions[i] = option;
+                }
+            }
+
+            id = JSON.stringify([locales, orderedOptions]);
+        }
+
+        // Check for a cached formatter instance, and use it.
+        formatter = $$formatters$$formatters[type][id];
+        if (formatter) { return formatter; }
+
+        switch (type) {
+            case 'number':
+                formatter = new Intl.NumberFormat(locales, options);
+                break;
+            case 'date':
+                formatter = new Intl.DateTimeFormat(locales, options);
+                break;
+        }
+
+        // Cache formatter for reuse.
+        if (id) {
+            $$formatters$$formatters[type][id] = formatter;
+        }
+
+        return formatter;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    function $$utils$$extend(obj) {
+        var sources = Array.prototype.slice.call(arguments, 1),
+            i, len, source, key;
+
+        for (i = 0, len = sources.length; i < len; i += 1) {
+            source = sources[i];
+            if (!source) { continue; }
+
+            for (key in source) {
+                if (source.hasOwnProperty(key)) {
+                    obj[key] = source[key];
+                }
+            }
+        }
+
+        return obj;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    function $$helpers$$registerWith(Handlebars) {
         var SafeString  = Handlebars.SafeString,
             createFrame = Handlebars.createFrame,
             escape      = Handlebars.Utils.escapeExpression;
@@ -1973,15 +2072,15 @@
             intlGet        : intlGet,
             intlMessage    : intlMessage,
             intlHTMLMessage: intlHTMLMessage
-        }, name;
+        };
 
-        for (name in helpers) {
+        for (var name in helpers) {
             if (helpers.hasOwnProperty(name)) {
                 Handlebars.registerHelper(name, helpers[name]);
             }
         }
 
-        // -- Helpers ----------------------------------------------------------
+        // -- Helpers --------------------------------------------------------------
 
         function intl(options) {
             /* jshint validthis:true */
@@ -1994,7 +2093,7 @@
             // data object and extend it with `options.data.intl` and
             // `options.hash`.
             var data     = createFrame(options.data),
-                intlData = $$register$with$$extend({}, data.intl, options.hash);
+                intlData = $$utils$$extend({}, data.intl, options.hash);
 
             data.intl = intlData;
 
@@ -2023,12 +2122,12 @@
                     formatOptions = intlGet('formats.date.' + formatOptions, options);
                 }
 
-                formatOptions = $$register$with$$extend({}, formatOptions, hash);
+                formatOptions = $$utils$$extend({}, formatOptions, hash);
             } else {
                 formatOptions = hash;
             }
 
-            return $$register$with$$getFormat('date', locales, formatOptions).format(date);
+            return $$formatters$$getFormatter('date', locales, formatOptions).format(date);
         }
 
         function intlNumber(num, formatOptions, options) {
@@ -2050,12 +2149,12 @@
                     formatOptions = intlGet('formats.number.' + formatOptions, options);
                 }
 
-                formatOptions = $$register$with$$extend({}, formatOptions, hash);
+                formatOptions = $$utils$$extend({}, formatOptions, hash);
             } else {
                 formatOptions = hash;
             }
 
-            return $$register$with$$getFormat('number', locales, formatOptions).format(num);
+            return $$formatters$$getFormatter('number', locales, formatOptions).format(num);
         }
 
         function intlGet(path, options) {
@@ -2149,88 +2248,8 @@
         }
     }
 
-    // -- Internals ------------------------------------------------------------
-
-    // Cache to hold NumberFormat and DateTimeFormat instances for reuse.
-    var $$register$with$$formats = {
-        number: {},
-        date  : {}
-    };
-
-    function $$register$with$$getFormat(type, locales, options) {
-        var orderedOptions, option, key, i, len, id, format;
-
-        // When JSON is available in the environment, use it build a cache-id
-        // to reuse formats for increased performance.
-        if (JSON) {
-            // Order the keys in `options` to create a serialized semantic
-            // representation which is reproducible.
-            if (options) {
-                orderedOptions = [];
-
-                for (key in options) {
-                    if (options.hasOwnProperty(key)) {
-                        orderedOptions.push(key);
-                    }
-                }
-
-                orderedOptions.sort();
-
-                for (i = 0, len = orderedOptions.length; i < len; i += 1) {
-                    key    = orderedOptions[i];
-                    option = {};
-
-                    option[key] = options[key];
-                    orderedOptions[i] = option;
-                }
-            }
-
-            id = JSON.stringify([locales, orderedOptions]);
-        }
-
-        // Check for a cached format instance, and use it.
-        format = $$register$with$$formats[type][id];
-        if (format) { return format; }
-
-        switch (type) {
-            case 'number':
-                format = new Intl.NumberFormat(locales, options);
-                break;
-            case 'date':
-                format = new Intl.DateTimeFormat(locales, options);
-                break;
-        }
-
-        // Cache format for reuse.
-        if (id) {
-            $$register$with$$formats[type][id] = format;
-        }
-
-        return format;
-    }
-
-    // -- Utilities ------------------------------------------------------------
-
-    function $$register$with$$extend(obj) {
-        var sources = Array.prototype.slice.call(arguments, 1),
-            i, len, source, key;
-
-        for (i = 0, len = sources.length; i < len; i += 1) {
-            source = sources[i];
-            if (!source) { continue; }
-
-            for (key in source) {
-                if (source.hasOwnProperty(key)) {
-                    obj[key] = source[key];
-                }
-            }
-        }
-
-        return obj;
-    }
-
     var src$main$$default = {
-        registerWith: $$register$with$$default
+        registerWith: $$helpers$$registerWith
     };
 
     this['HandlebarsHelperIntl'] = src$main$$default;
