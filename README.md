@@ -22,7 +22,7 @@ Handlebars helpers for internationalization.
 3. Register the helpers:
 
     ```javascript
-    HandlebarsHelperIntl.register(Handlebars);
+    HandlebarsIntl.register(Handlebars);
     ```
 
 

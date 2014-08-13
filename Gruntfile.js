@@ -33,7 +33,7 @@ module.exports = function (grunt) {
             dest: 'dist/helpers.js',
 
             options: {
-                namespace: 'HandlebarsHelperIntl'
+                namespace: 'HandlebarsIntl'
             }
         },
 
