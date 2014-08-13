@@ -6,9 +6,11 @@ See the accompanying LICENSE file for terms.
 
 /* jshint esnext: true */
 
+import IntlMessageFormat from 'intl-messageformat';
 import {registerWith} from './helpers';
 
-// Re-export as default for
+// TODO: Fix this default export "hack", by updating the Grunt plugin.
 export default {
-    registerWith: registerWith
+    IntlMessageFormat: IntlMessageFormat,
+    registerWith     : registerWith
 };
