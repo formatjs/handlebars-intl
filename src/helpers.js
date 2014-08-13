@@ -6,7 +6,6 @@ See the accompanying LICENSE file for terms.
 
 /* jshint esnext: true */
 
-import IntlMessageFormat from 'intl-messageformat';
 import {getFormatter} from './formatters';
 import {extend} from './utils';
 
@@ -43,9 +42,8 @@ function registerWith(Handlebars) {
             throw new ReferenceError('{{#intl}} must be invoked as a block helper');
         }
 
-        // Create a new data frame linked the parent and create a new intl
-        // data object and extend it with `options.data.intl` and
-        // `options.hash`.
+        // Create a new data frame linked the parent and create a new intl data
+        // object and extend it with `options.data.intl` and `options.hash`.
         var data     = createFrame(options.data),
             intlData = extend({}, data.intl, options.hash);
 
@@ -113,11 +111,12 @@ function registerWith(Handlebars) {
 
     function intlGet(path, options) {
         var intlData  = options.data && options.data.intl,
-            pathParts = path.split('.'),
-            obj, len, i;
+            pathParts = path.split('.');
 
-        // Use the path to walk the Intl data to find the object at the
-        // given path, and throw a descriptive error if it's not found.
+        var obj, len, i;
+
+        // Use the path to walk the Intl data to find the object at the given
+        // path, and throw a descriptive error if it's not found.
         try {
             for (i = 0, len = pathParts.length; i < len; i++) {
                 obj = intlData = intlData[pathParts[i]];
@@ -139,39 +138,29 @@ function registerWith(Handlebars) {
 
         var hash = options.hash;
 
-        // Support a message being passed as a string argument or pre-prased
-        // array. When there's no `message` argument, ensure a message path
-        // name was provided at `intlName` in the `hash`.
-        //
-        // TODO: remove support form `hash.intlName` once Handlebars bugs
-        // with subexpressions are fixed.
-        if (!(message || typeof message === 'string' || hash.intlName)) {
+        // TODO: remove support form `hash.intlName` once Handlebars bugs with
+        // subexpressions are fixed.
+        if (!(message || hash.intlName)) {
             throw new ReferenceError('{{intlMessage}} must be provided a message or intlName');
         }
 
-        var intlData = options.data.intl || {},
-            locales  = intlData.locales,
-            formats  = intlData.formats;
-
-        // Lookup message by path name. User must supply the full path to
-        // the message on `options.data.intl`.
+        // Lookup message by path name. The caller must supply the full path to
+        // the  message on `options.data.intl`.
         if (!message && hash.intlName) {
             message = intlGet(hash.intlName, options);
         }
 
         // When `message` is a function, assume it's an IntlMessageFormat
-        // instance's `format()` method passed by reference, and call it.
-        // This is possible because its `this` will be pre-bound to the
-        // instance.
+        // instance's `format()` method passed by reference, and call it. This
+        // is possible because its `this` will be pre-bound to the instance.
         if (typeof message === 'function') {
             return message(hash);
         }
 
-        // Assume that an object with a `format()` method is already an
-        // IntlMessageFormat instance, and use it; otherwise create a new
-        // one.
+        // Assume that an object with a `format()` method is an
+        // IntlMessageFormat instance, otherwise throw.
         if (typeof message.format !== 'function') {
-            message = new IntlMessageFormat(message, locales, formats);
+            throw new ReferenceError('{{intlMessage}} must be provided an IntlMessageFormat instance');
         }
 
         return message.format(hash);
@@ -180,8 +169,9 @@ function registerWith(Handlebars) {
     function intlHTMLMessage() {
         /* jshint validthis:true */
         var options = [].slice.call(arguments).pop(),
-            hash    = options.hash,
-            key, value;
+            hash    = options.hash;
+
+        var key, value;
 
         // Replace string properties in `options.hash` with HTML-escaped
         // strings.
@@ -196,8 +186,8 @@ function registerWith(Handlebars) {
             }
         }
 
-        // Return a Handlebars `SafeString`. This first unwraps the result
-        // to make sure it's not returning a double-wrapped `SafeString`.
+        // Return a Handlebars `SafeString`. This first unwraps the result to
+        // make sure it's not returning a double-wrapped `SafeString`.
         return new SafeString(String(intlMessage.apply(this, arguments)));
     }
 }
