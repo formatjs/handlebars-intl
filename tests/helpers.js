@@ -6,6 +6,7 @@
 var chai,
     expect,
     Handlebars,
+    IntlMessageFormat,
     timeStamp = 1390518044403;
 
 if (typeof require === 'function') {
@@ -14,6 +15,7 @@ if (typeof require === 'function') {
 
     // Intl
     global.Intl || (global.Intl = require('intl'));
+    IntlMessageFormat = require('intl-messageformat');
 
     require('../').registerWith(Handlebars);
 }
@@ -207,7 +209,7 @@ describe('Helper `intlMessage`', function () {
     it('should return a formatted string', function () {
         var tmpl = intlBlock('{{intlMessage MSG firstName=firstName lastName=lastName}}', {locales: 'en-US'}),
             out  = tmpl({
-                MSG      : 'Hi, my name is {firstName} {lastName}.',
+                MSG      : new IntlMessageFormat('Hi, my name is {firstName} {lastName}.', 'en-US'),
                 firstName: 'Anthony',
                 lastName : 'Pipkin'
             });
@@ -218,7 +220,7 @@ describe('Helper `intlMessage`', function () {
     it('should return a formatted string with formatted numbers and dates', function () {
         var tmpl = intlBlock('{{intlMessage POP_MSG city=city population=population census_date=census_date timeZone=timeZone}}', {locales: 'en-US'}),
             out  = tmpl({
-                POP_MSG    : '{city} has a population of {population, number, integer} as of {census_date, date, long}.',
+                POP_MSG    : new IntlMessageFormat('{city} has a population of {population, number, integer} as of {census_date, date, long}.', 'en-US'),
                 city       : 'Atlanta',
                 population : 5475213,
                 census_date: (new Date('1/1/2010')).getTime(),
@@ -231,7 +233,7 @@ describe('Helper `intlMessage`', function () {
     it('should return a formatted string with formatted numbers and dates in a different locale', function () {
         var tmpl = intlBlock('{{intlMessage POP_MSG city=city population=population census_date=census_date timeZone=timeZone}}', {locales: 'de-DE'}),
             out  = tmpl({
-                POP_MSG    : '{city} hat eine Bevölkerung von {population, number, integer} zum {census_date, date, long}.',
+                POP_MSG    : new IntlMessageFormat('{city} hat eine Bevölkerung von {population, number, integer} zum {census_date, date, long}.', 'de-DE'),
                 city       : 'Atlanta',
                 population : 5475213,
                 census_date: (new Date('1/1/2010')),
@@ -244,7 +246,7 @@ describe('Helper `intlMessage`', function () {
     it('should return a formatted string with an `each` block', function () {
         var tmpl = intlBlock('{{#each harvest}} {{intlMessage ../HARVEST_MSG person=person count=count }}{{/each}}', {locales: 'en-US'}),
             out  = tmpl({
-                HARVEST_MSG: '{person} harvested {count, plural, one {# apple} other {# apples}}.',
+                HARVEST_MSG: new IntlMessageFormat('{person} harvested {count, plural, one {# apple} other {# apples}}.', 'en-US'),
                 harvest    : [
                     { person: 'Allison', count: 10 },
                     { person: 'Jeremy', count: 60 }
@@ -297,16 +299,18 @@ describe('Helper `intl`', function () {
         });
 
         it('for intlMessage', function () {
+            var formats = {
+                number: {
+                    eur: { style: 'currency', currency: 'EUR' },
+                    usd: { style: 'currency', currency: 'USD' }
+                }
+            };
+
             var tmpl = '{{#intl formats=intl.formats locales="en-US"}}{{intlMessage MSG product=PRODUCT price=PRICE deadline=DEADLINE timeZone=TZ}}{{/intl}}',
                 ctx = {
-                    MSG: '{product} cost {price, number, usd} (or {price, number, eur}) if ordered by {deadline, date, long}',
+                    MSG: new IntlMessageFormat('{product} cost {price, number, usd} (or {price, number, eur}) if ordered by {deadline, date, long}', 'en-US', formats),
                     intl: {
-                        formats: {
-                            number: {
-                                eur: { style: 'currency', currency: 'EUR' },
-                                usd: { style: 'currency', currency: 'USD' }
-                            }
-                        }
+                        formats: formats
                     },
                     PRODUCT: 'oranges',
                     PRICE: 40000.004,

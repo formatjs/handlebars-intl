@@ -17,8 +17,8 @@ var formatters = {
 function getFormatter(type, locales, options) {
     var orderedOptions, option, key, i, len, id, formatter;
 
-    // When JSON is available in the environment, use it build a cache-id
-    // to reuse formatters for increased performance.
+    // When JSON is available in the environment, use it build a cache-id to
+    // reuse formatters for increased performance.
     if (JSON) {
         // Order the keys in `options` to create a serialized semantic
         // representation which is reproducible.
