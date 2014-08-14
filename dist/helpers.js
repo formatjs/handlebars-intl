@@ -1980,62 +1980,113 @@
     $$core$$default.__addLocaleData({locale:"zu", messageformat:{pluralFunction:intl$messageformat$$funcs[3]}});
     var intl$messageformat$$default = $$core$$default;
 
-    // Cache to hold NumberFormat and DateTimeFormat instances for reuse.
-    var $$formatters$$formatters = {
-        number: {},
-        date  : {}
+    // -----------------------------------------------------------------------------
+
+    // Cache to hold `DateTimeFormat`, `NumberFormat`, and `IntlMessageFormat`
+    // instances for reuse.
+    var intl$format$cache$$cache = {
+        dateTimeFormats: {},
+        numberFormats  : {},
+        messageFormats : {}
     };
 
-    function $$formatters$$getFormatter(type, locales, options) {
-        var orderedOptions, option, key, i, len, id, formatter;
+    function intl$format$cache$$getDateTimeFormat(locales, options) {
+        options || (options = {});
 
-        // When JSON is available in the environment, use it build a cache-id
-        // to reuse formatters for increased performance.
-        if (JSON) {
-            // Order the keys in `options` to create a serialized semantic
-            // representation which is reproducible.
-            if (options) {
-                orderedOptions = [];
+        var cacheId = intl$format$cache$$getCacheId([locales, options]),
+            format  = intl$format$cache$$cache.dateTimeFormats[cacheId];
 
-                for (key in options) {
-                    if (options.hasOwnProperty(key)) {
-                        orderedOptions.push(key);
-                    }
-                }
+        if (!format) {
+            format = new Intl.DateTimeFormat(locales, options);
 
-                orderedOptions.sort();
-
-                for (i = 0, len = orderedOptions.length; i < len; i += 1) {
-                    key    = orderedOptions[i];
-                    option = {};
-
-                    option[key] = options[key];
-                    orderedOptions[i] = option;
-                }
+            if (cacheId) {
+                intl$format$cache$$cache.dateTimeFormats[cacheId] = format;
             }
-
-            id = JSON.stringify([locales, orderedOptions]);
         }
 
-        // Check for a cached formatter instance, and use it.
-        formatter = $$formatters$$formatters[type][id];
-        if (formatter) { return formatter; }
+        return format;
+    }
 
-        switch (type) {
-            case 'number':
-                formatter = new Intl.NumberFormat(locales, options);
-                break;
-            case 'date':
-                formatter = new Intl.DateTimeFormat(locales, options);
-                break;
+    function intl$format$cache$$getNumberFormat(locales, options) {
+        options || (options = {});
+
+        var cacheId = intl$format$cache$$getCacheId([locales, options]),
+            format  = intl$format$cache$$cache.numberFormats[cacheId];
+
+        if (!format) {
+            format = new Intl.NumberFormat(locales, options);
+
+            if (cacheId) {
+                intl$format$cache$$cache.numberFormats[cacheId] = format;
+            }
         }
 
-        // Cache formatter for reuse.
-        if (id) {
-            $$formatters$$formatters[type][id] = formatter;
+        return format;
+    }
+
+    function intl$format$cache$$getMessageFormat(message, locales, options) {
+        options || (options = {});
+
+        var cacheId = intl$format$cache$$getCacheId([message, locales, options]),
+            format  = intl$format$cache$$cache.messageFormats[cacheId];
+
+        if (!format) {
+            format = new intl$messageformat$$default(message, locales, options);
+
+            if (cacheId) {
+                intl$format$cache$$cache.messageFormats[cacheId] = format;
+            }
         }
 
-        return formatter;
+        return format;
+    }
+
+    // -- Utilities ----------------------------------------------------------------
+
+    function intl$format$cache$$getCacheId(inputs) {
+        // When JSON is not available in the runtime, we will not create a cache id.
+        if (!JSON) { return; }
+
+        var cacheId = [];
+
+        var i, len, input;
+
+        for (i = 0, len = inputs.length; i < len; i += 1) {
+            input = inputs[i];
+
+            if (input && typeof input === 'object') {
+                cacheId.push(intl$format$cache$$orderedProps(input));
+            } else {
+                cacheId.push(input);
+            }
+        }
+
+        return JSON.stringify(cacheId);
+    }
+
+    function intl$format$cache$$orderedProps(obj) {
+        var props = [],
+            keys  = [];
+
+        var key, i, len, prop;
+
+        for (key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                keys.push(key);
+            }
+        }
+
+        var orderedKeys = keys.sort();
+
+        for (i = 0, len = orderedKeys.length; i < len; i += 1) {
+            key  = orderedKeys[i];
+            prop = {};
+
+            prop[key] = obj[key];
+            props[i]  = prop;
+        }
+
+        return props;
     }
 
     // -----------------------------------------------------------------------------
@@ -2089,9 +2140,8 @@
                 throw new ReferenceError('{{#intl}} must be invoked as a block helper');
             }
 
-            // Create a new data frame linked the parent and create a new intl
-            // data object and extend it with `options.data.intl` and
-            // `options.hash`.
+            // Create a new data frame linked the parent and create a new intl data
+            // object and extend it with `options.data.intl` and `options.hash`.
             var data     = createFrame(options.data),
                 intlData = $$utils$$extend({}, data.intl, options.hash);
 
@@ -2127,7 +2177,7 @@
                 formatOptions = hash;
             }
 
-            return $$formatters$$getFormatter('date', locales, formatOptions).format(date);
+            return intl$format$cache$$getDateTimeFormat(locales, formatOptions).format(date);
         }
 
         function intlNumber(num, formatOptions, options) {
@@ -2154,16 +2204,17 @@
                 formatOptions = hash;
             }
 
-            return $$formatters$$getFormatter('number', locales, formatOptions).format(num);
+            return intl$format$cache$$getNumberFormat(locales, formatOptions).format(num);
         }
 
         function intlGet(path, options) {
             var intlData  = options.data && options.data.intl,
-                pathParts = path.split('.'),
-                obj, len, i;
+                pathParts = path.split('.');
 
-            // Use the path to walk the Intl data to find the object at the
-            // given path, and throw a descriptive error if it's not found.
+            var obj, len, i;
+
+            // Use the path to walk the Intl data to find the object at the given
+            // path, and throw a descriptive error if it's not found.
             try {
                 for (i = 0, len = pathParts.length; i < len; i++) {
                     obj = intlData = intlData[pathParts[i]];
@@ -2185,12 +2236,8 @@
 
             var hash = options.hash;
 
-            // Support a message being passed as a string argument or pre-prased
-            // array. When there's no `message` argument, ensure a message path
-            // name was provided at `intlName` in the `hash`.
-            //
-            // TODO: remove support form `hash.intlName` once Handlebars bugs
-            // with subexpressions are fixed.
+            // TODO: remove support form `hash.intlName` once Handlebars bugs with
+            // subexpressions are fixed.
             if (!(message || typeof message === 'string' || hash.intlName)) {
                 throw new ReferenceError('{{intlMessage}} must be provided a message or intlName');
             }
@@ -2199,25 +2246,21 @@
                 locales  = intlData.locales,
                 formats  = intlData.formats;
 
-            // Lookup message by path name. User must supply the full path to
-            // the message on `options.data.intl`.
+            // Lookup message by path name. User must supply the full path to the
+            // message on `options.data.intl`.
             if (!message && hash.intlName) {
                 message = intlGet(hash.intlName, options);
             }
 
             // When `message` is a function, assume it's an IntlMessageFormat
-            // instance's `format()` method passed by reference, and call it.
-            // This is possible because its `this` will be pre-bound to the
-            // instance.
+            // instance's `format()` method passed by reference, and call it. This
+            // is possible because its `this` will be pre-bound to the instance.
             if (typeof message === 'function') {
                 return message(hash);
             }
 
-            // Assume that an object with a `format()` method is already an
-            // IntlMessageFormat instance, and use it; otherwise create a new
-            // one.
-            if (typeof message.format !== 'function') {
-                message = new intl$messageformat$$default(message, locales, formats);
+            if (typeof message === 'string') {
+                message = intl$format$cache$$getMessageFormat(message, locales, formats);
             }
 
             return message.format(hash);
@@ -2226,8 +2269,9 @@
         function intlHTMLMessage() {
             /* jshint validthis:true */
             var options = [].slice.call(arguments).pop(),
-                hash    = options.hash,
-                key, value;
+                hash    = options.hash;
+
+            var key, value;
 
             // Replace string properties in `options.hash` with HTML-escaped
             // strings.
@@ -2242,8 +2286,8 @@
                 }
             }
 
-            // Return a Handlebars `SafeString`. This first unwraps the result
-            // to make sure it's not returning a double-wrapped `SafeString`.
+            // Return a Handlebars `SafeString`. This first unwraps the result to
+            // make sure it's not returning a double-wrapped `SafeString`.
             return new SafeString(String(intlMessage.apply(this, arguments)));
         }
     }
@@ -2252,7 +2296,7 @@
         registerWith: $$helpers$$registerWith
     };
 
-    this['HandlebarsHelperIntl'] = src$main$$default;
+    this['HandlebarsIntl'] = src$main$$default;
 }).call(this);
 
 //# sourceMappingURL=helpers.js.map
