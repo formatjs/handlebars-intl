@@ -10,7 +10,7 @@ import {
     getDateTimeFormat,
     getNumberFormat,
     getMessageFormat
-} from './formats';
+} from 'intl-format-cache';
 
 import {extend} from './utils';
 
