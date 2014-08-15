@@ -1,7 +1,7 @@
 {
   "name": "handlebars-helper-intl",
   "main": "dist/helpers.js",
-  "version": "0.2.0",
+  "version": "1.0.0-rc-1",
   "homepage": "https://github.com/yahoo/handlebars-helpers-intl",
   "authors": [
     "Eric Ferraiuolo <eferraiuolo@gmail.com>",
@@ -25,6 +25,7 @@
   ],
   "moduleType": [
     "es6",
-    "globals"
+    "globals",
+    "node"
   ]
 }
