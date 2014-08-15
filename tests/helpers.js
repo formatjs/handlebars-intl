@@ -191,6 +191,38 @@ describe('Helper `intlDate`', function () {
     });
 });
 
+describe('Helper `intlTime`', function () {
+    it('should be added to Handlebars', function () {
+        expect(Handlebars.helpers).to.include.keys('intlTime');
+    });
+
+    it('should be a function', function () {
+        expect(Handlebars.helpers.intlTime).to.be.a('function');
+    });
+
+    it('should throw if called with out a value', function () {
+        expect(Handlebars.compile('{{intlTime}}')).to.throw(TypeError);
+    });
+
+    // Use a fixed known date
+    var dateStr   = 'Thu Jan 23 2014 18:00:44 GMT-0500 (EST)',
+        timeStamp = 1390518044403;
+
+    it('should return a formatted string', function () {
+        var tmpl = intlBlock('{{intlTime "' + dateStr + '"}}', {locales: 'en-US'});
+        expect(tmpl()).to.equal('1/23/2014');
+
+        // note timestamp is passed as a number
+        tmpl = intlBlock('{{intlTime ' + timeStamp + '}}', {locales: 'en-US'});
+        expect(tmpl()).to.equal('1/23/2014');
+    });
+
+    it('should return a formatted string of just the time', function () {
+        var tmpl = intlBlock('{{intlTime ' + timeStamp + ' hour="numeric" minute="numeric" timeZone="UTC"}}', {locales: 'en-US'});
+        expect(tmpl()).to.equal('11:00 PM');
+    });
+});
+
 describe('Helper `intlMessage`', function () {
     it('should be added to Handlebars', function () {
         expect(Handlebars.helpers).to.include.keys('intlMessage');
