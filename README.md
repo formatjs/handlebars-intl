@@ -97,31 +97,13 @@ HandlebarsIntl.registerWith(Handlebars);
 
 ### Supplying i18n Data to Handlebars
 
-Handlebars has a **data channel** feature which is sperate from the context a template is rendered with — it provides a side channel in which the `data` is piped through the template to all helpers and partials. This package uses this data channel to provide the i18n used by the helpers.
+Handlebars has a **data channel** feature which is separate from the context a template is rendered with — it provides a side channel in which the `data` is piped through the template to all helpers and partials. This package uses this data channel to provide the i18n used by the helpers.
 
 #### `data.intl.locales`
 
 A string with a BCP 47 language tag, or an array of such strings; e.g., `"en-US"`. If you do not provide a locale, the default locale will be used, but you should _always_ provide one!
 
 This value is used by the helpers when constructing the underlying formatters.
-
-#### `data.intl.formats`
-
-Object with user defined options for format styles. This is used to supply custom format styles is useful you need supply a set of options to the underlying formatter; e.g., outputting a number in USD:
-
-```js
-{
-    number: {
-        USD: {
-            style   : 'currency',
-            currency: 'USD'
-        }
-    },
-
-    date: {...},
-    time: {...}
-}
-```
 
 #### `data.intl.messages`
 
@@ -132,27 +114,18 @@ Any arbitrary data can be provided on the `data.intl` object; one common use is 
 ```js
 // Static collection of messages, per-locale.
 var MESSAGES = {
-    'en-US': {
-        FOO: '...',
-        BAR: '...'
-    },
-
-    'es-MX': {
-        FOO: '...',
-        BAR: '...'
-    }
+    foo: '{hostName} hosted the party!',
+    bar: 'Pets? We have: {numPets, number, integer}',
+    ...
 }
 ```
 
-Usually only the messages for the locale that the template(s) will be render will are supplied as `data.intl.messages`.
+These statically defined message strings can be provided to handlebars via `data.intl.messages`:
 
 ```js
-// Determined via HTTP content negotiation or from a person's app settings.
-var locale = 'en-US';
-
 var intlData = {
-    locales : locale,
-    messages: MESSAGES[locale]
+    locales : 'en-US',
+    messages: MESSAGES
 }
 
 var context = {...};
@@ -161,6 +134,29 @@ var context = {...};
 var html = template(context, {
     data: {intl: intlData}
 });
+```
+
+#### `data.intl.formats`
+
+Object with user defined options for format styles. This is used to supply custom format styles and is useful you need supply a set of options to the underlying formatter; e.g., outputting a number in USD:
+
+```js
+{
+    number: {
+        USD: {
+            style   : 'currency',
+            currency: 'USD'
+        }
+    },
+
+    date: {...}
+}
+```
+
+These pre-defined formats can then be used by String name/path:
+
+```handlebars
+{{intlNumber 100 "USD"}}
 ```
 
 ### Helpers
@@ -214,6 +210,8 @@ console.log(html); // => "Tuesday, August 12, 2014"
 
 * `date`: `Date` instance or `String` timestamp to format.
 
+* `[format]`: Optional String path to a predefined format on [`data.intl.formats`](#dataintlformats). The format's values are merged with any hash argument values.
+
 **Hash Arguments:**
 
 The hash arguments passed to this helper become the `options` parameter value when the [`Intl.DateTimeFormat`][Intl-DTF] instance is created.
@@ -240,6 +238,8 @@ console.log(html); // => "$100.00"
 
 * `number`: `Number` to format.
 
+* `[format]`: Optional String path to a predefined format on [`data.intl.formats`](#dataintlformats). The format's values are merged with any hash argument values.
+
 **Hash Arguments:**
 
 The hash arguments passed to this helper become the `options` parameter value when the [`Intl.NumberFormat`][Intl-NF] instance is created.
@@ -261,16 +261,13 @@ You have {numPhotos, plural,
 
 ```js
 var MESSAGES = {
-    'en-US': {
-        photos: '...' // String from code block above.
-    }
+    photos: '...', // String from code block above.
+    ...
 };
 
-var locale = 'en-US';
-
 var intlData = {
-    locales : locale,
-    messages: MESSAGE[locale]
+    locales : 'en-US',
+    messages: MESSAGES
 };
 
 var html = template({numPhotos: 1}, {
