@@ -149,11 +149,12 @@ Object with user defined options for format styles. This is used to supply custo
         }
     },
 
-    date: {...}
+    date: {...},
+    time: {...}
 }
 ```
 
-These pre-defined formats can then be used by String name/path:
+These pre-defined formats map to their respective helpers of the same type, and all `data.intl.formats` are used by the `{{intlMessage}}` and `{{intlHTMLMessage}}` helpers. They can then be used by String name/path like this:
 
 ```handlebars
 {{intlNumber 100 "USD"}}
@@ -215,6 +216,10 @@ console.log(html); // => "Tuesday, August 12, 2014"
 **Hash Arguments:**
 
 The hash arguments passed to this helper become the `options` parameter value when the [`Intl.DateTimeFormat`][Intl-DTF] instance is created.
+
+#### `{{intlTime}}`
+
+This delegates to the `{{intlDate}}` helper, but first it will reference any String named `format` from [`data.intl.formats.time`](#dataintlformats).
 
 #### `{{intlNumber}}`
 
