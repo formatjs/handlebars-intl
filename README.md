@@ -3,45 +3,317 @@ handlebars-helper-intl
 
 Handlebars helpers for internationalization.
 
-[![Build Status](https://travis-ci.org/yahoo/handlebars-helper-intl.png)](https://travis-ci.org/yahoo/handlebars-helper-intl)
+[![npm Version](https://img.shields.io/npm/v/handlebars-helper-intl.svg?style=flat)][npm]
+[![Build Status](http://img.shields.io/travis/yahoo/handlebars-helper-intl.svg?style=flat)][Travis]
+[![Dependency Status](https://img.shields.io/david/yahoo/handlebars-helper-intl.svg?style=flat)][David]
 
 
-## Installation
+Overview
+--------
+
+### Goals
+
+* Integrate internationalization features with [Handlebars][] to lower the barrier for localizing Handlebars templates.
+
+* Build on current and emerging JavaScript [`Intl`][Intl] standards — architect in a future-focused way.
+
+* Run in both Node.js and in the browser with a single `<script>` element.
+
+### How It Works
+
+**Template Source:**
+
+```handlebars
+<b>Price:</b> {{intlNumber price style="currency" currency="USD"}}
+```
+
+**Render Template:**
+
+```js
+var intlData = {
+    locales: 'en-US'
+}
+
+var context = {
+    price: 1000
+};
+
+var html = template(context, {
+    data: {intl: intlData}
+});
+```
+
+**Output:**
+
+```html
+<b>Price:</b> $1,000.00
+```
+
+### Features
+
+* Formats **numbers** and **dates/times**, including those in complex messages using the JavaScript built-ins: [`Intl.NumberFormat`][Intl-NF] and [`Intl.DateTimeFormat`][Intl-DTF], respectively.
+
+* Formats complex messages, including **plural** and **select** arguments using the [Intl MessageFormat][Intl-MF] library which follows [ICU Message][ICU] and [CLDR][CLDR] standards.
+
+* Supports formatting message strings that contain HTML via the `{{intlHTMLMessage}}` helper.
 
 
-### Browser
+Usage
+-----
 
-1. Install with [bower](http://bower.io/): `bower install handlebars-helper-intl`
-2. Load the scripts into your page. (It does not matter which order the scripts are loaded in.)
+### `Intl` Dependency
 
-    ```html
-    <script src="handlebars.js"></script>
-    <script src="handlebars-helper-intl.js"></script>
-    ```
+This package assumes that the [`Intl`][Intl] global object exists in the runtime. `Intl` is present in all modern browsers _except_ Safari, and there's work happening to [integrate `Intl` into Node.js][Intl-Node].
 
-3. Register the helpers:
+**Luckly, there's the [Intl.js][] polyfill!** You will need to conditionally load the polyfill if you want to support runtimes which `Intl` is not already built-in.
 
-    ```javascript
-    HandlebarsIntl.register(Handlebars);
-    ```
+### Registering Helpers in a Browser
+
+First, load Handlebars and this package onto the page:
+
+```html
+<script src="handlebars.js"></script>
+<script src="handlebars-helper-intl.js"></script>
+```
+
+Then, register the helpers with Handlebars:
+
+```js
+HandlebarsIntl.registerWith(Handlebars);
+```
+
+This package will create the `HandlebarsIntl` global that has the `registerWith()` function.
+
+### Registering Helpers in Node.js
+
+Import Handlebars and this package, then register the Intl helpers with Handlebars:
+
+```js
+var Handlebars     = require('handlebars'),
+    HandlebarsIntl = require('handlebars-helper-intl');
+
+HandlebarsIntl.registerWith(Handlebars);
+```
+
+### Supplying i18n Data to Handlebars
+
+Handlebars has a **data channel** feature which is sperate from the context a template is rendered with — it provides a side channel in which the `data` is piped through the template to all helpers and partials. This package uses this data channel to provide the i18n used by the helpers.
+
+#### `data.intl.locales`
+
+A string with a BCP 47 language tag, or an array of such strings; e.g., `"en-US"`. If you do not provide a locale, the default locale will be used, but you should _always_ provide one!
+
+This value is used by the helpers when constructing the underlying formatters.
+
+#### `data.intl.formats`
+
+Object with user defined options for format styles. This is used to supply custom format styles is useful you need supply a set of options to the underlying formatter; e.g., outputting a number in USD:
+
+```js
+{
+    number: {
+        USD: {
+            style   : 'currency',
+            currency: 'USD'
+        }
+    },
+
+    date: {...},
+    time: {...}
+}
+```
+
+#### `data.intl.messages`
+
+Any arbitrary data can be provided on the `data.intl` object; one common use is to use it hold complex message strings.
+
+**Note:** These messages _need_ to follow the [ICU Message][ICU] standard. Luckily this is a common standard that professional translators should already be familiar with.
+
+```js
+// Static collection of messages, per-locale.
+var MESSAGES = {
+    'en-US': {
+        FOO: '...',
+        BAR: '...'
+    },
+
+    'es-MX': {
+        FOO: '...',
+        BAR: '...'
+    }
+}
+```
+
+Usually only the messages for the locale that the template(s) will be render will are supplied as `data.intl.messages`.
+
+```js
+// Determined via HTTP content negotiation or from a person's app settings.
+var locale = 'en-US';
+
+var intlData = {
+    locales : locale,
+    messages: MESSAGES[locale]
+}
+
+var context = {...};
+
+// Supply the `intl` `data` object when rendering the template.
+var html = template(context, {
+    data: {intl: intlData}
+});
+```
+
+### Helpers
+
+#### `{{#intl}}`
+
+Block helper used to create a new `intl` data scope by updating the [i18n data supplied to Handlebars](#supplying-i18n-data-to-handlebars) within the block. This is useful when you need to render part of the page in a particular locale, or need to supply the i18n data to Handlebars via the template context — some Handlebars integrations might not support supplying `options.data.intl` when rendering.
+
+The following example uses `{{#intl}}` to set the locale to French and will output `"1 000"`:
+
+```handlebars
+{{#intl locales="fr-FR"}}
+    {{intlNumber 1000}}
+{{/intl}}
+```
+
+#### `{{intlGet}}`
+
+Utility helper for accessing and returning the value the properties from the [i18n data supplied to Handlebars](#supplying-i18n-data-to-handlebars) via a string namespace. This provides descriptive error messages when accessing a property that is undefined, unlike Handlebars built-in data channel access syntax `@`.
+
+The following are equivalent, both lookup the `FOO` message from `data.intl.messages.FOO`:
+
+```handlebars
+{{intlMessage (intlGet "messages.FOO")}}
+{{intlMessage @intl.messages.FOO}}
+```
+
+**Parameters:**
+
+* `namespace`: `String` namespace to lookup a value on the `data.intl` object.
+
+#### `{{intlDate}}`
+
+Formats dates using [`Intl.DateTimeFormat`][Intl-DTF], and returns the formatted string value.
+
+```handlebars
+{{intlDate now weekday="long" timeZone="UTC"}}
+```
+
+```js
+var intlData = {locales: 'en-US'};
+
+var html = template({now: Date.now()}, {
+    data: {intl: intlData}
+});
+
+console.log(html); // => "Tuesday, August 12, 2014"
+```
+
+**Parameters:**
+
+* `date`: `Date` instance or `String` timestamp to format.
+
+**Hash Arguments:**
+
+The hash arguments passed to this helper become the `options` parameter value when the [`Intl.DateTimeFormat`][Intl-DTF] instance is created.
+
+#### `{{intlNumber}}`
+
+Formats numbers using [`Intl.NumberFormat`][Intl-NF], and returns the formatted string value.
+
+```handlebars
+{{intlNumber price style="currency" currency="USD"}}
+```
+
+```js
+var intlData = {locales: 'en-US'};
+
+var html = template({price: 100}, {
+    data: {intl: intlData}
+});
+
+console.log(html); // => "$100.00"
+```
+
+**Parameters:**
+
+* `number`: `Number` to format.
+
+**Hash Arguments:**
+
+The hash arguments passed to this helper become the `options` parameter value when the [`Intl.NumberFormat`][Intl-NF] instance is created.
+
+#### `{{intlMessage}}`
+
+Formats [ICU Message][ICU] strings with the given values supplied as the hash arguments.
+
+```
+You have {numPhotos, plural,
+    0= {no photos.}
+    1= {one photo.}
+    other {# photos.}}
+```
+
+```handlebars
+{{intlMessage (intlGet "messages.photos") numPhotos=numPhotos}}
+```
+
+```js
+var MESSAGES = {
+    'en-US': {
+        photos: '...' // String from code block above.
+    }
+};
+
+var locale = 'en-US';
+
+var intlData = {
+    locales : locale,
+    messages: MESSAGE[locale]
+};
+
+var html = template({numPhotos: 1}, {
+    data: {intl: inltData}
+});
+
+console.log(html); // => "You have one photo."
+```
+
+**Parameters:**
+
+* `message`: `String` message or [`IntlMessageFormat`][Intl-MF] instance to format with the given hash arguments as the values.
+
+  **Note:** It is recommended to access the `message` from the [i18n data supplied to Handlebars](#supplying-i18n-data-to-handlebars) using the `{{intlGet}}` helper or `@intl`-data syntax, instead of including the literal message string in the template.
+
+**Hash Arguments:**
+
+The hash arguments represent the name/value pairs that are used to format the `message` by providing values for its argument placeholders.
+
+#### `{{intlHTMLMessage}}`
+
+This delegates to the `{{intlMessage}}` helper, but will first HTML-escape all of the hash argument values. This allows the `message` string to contain HTML and it will be considered safe since it's part of the template and not user-supplied data.
+
+**Note:** The recommendation is to remove all HTML from message strings, but sometimes it can be impractical, in those cases, this helper can be used.
 
 
-### Node/CommonJS
+License
+-------
 
-1. You can install the helpers with npm: `npm install handlebars-helper-intl`
-2. Load in the module and register it:
-
-    ```javascript
-    var Handlebars = require('handlebars');
-    global.Intl = global.Intl || require('intl');
-    require('handlebars-helper-intl').register(Handlebars);
-    ```
-
-    **NOTE:**  Since node (as of 0.10) doesn't provide the global `Intl` object
-    (ECMA-402) you'll need to provide a polyfill.  The `intl` NPM package can
-    provide this or you can use another.
+This software is free to use under the Yahoo! Inc. BSD license.
+See the [LICENSE file][LICENSE] for license text and copyright information.
 
 
-## Usage
-
-TODO
+[David]: https://david-dm.org/yahoo/handlebars-helper-intl
+[Travis]: https://travis-ci.org/yahoo/handlebars-helper-intl
+[npm]: https://www.npmjs.org/package/handlebars-helper-intl
+[Handlebars]: http://handlebarsjs.com/
+[Intl-MF]: https://github.com/yahoo/intl-messageformat
+[Intl]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl
+[Intl-NF]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NumberFormat
+[Intl-DTF]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DateTimeFormat
+[ICU]: http://userguide.icu-project.org/formatparse/messages
+[CLDR]: http://cldr.unicode.org/
+[Intl.js]: https://github.com/andyearnshaw/Intl.js
+[Intl-Node]: https://github.com/joyent/node/issues/6371
+[LICENSE]: https://github.com/yahoo/handlebars-helper-intl/blob/master/LICENSE
