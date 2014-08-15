@@ -1,6 +1,6 @@
 {
   "name": "handlebars-helper-intl",
-  "version": "0.2.0",
+  "version": "1.0.0-rc-1",
   "description": "Handlebars helpers for internationalization.",
   "keywords": [
     "intl",
