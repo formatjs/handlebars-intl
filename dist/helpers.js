@@ -2119,6 +2119,7 @@
         var helpers = {
             intl           : intl,
             intlDate       : intlDate,
+            intlTime       : intlTime,
             intlNumber     : intlNumber,
             intlGet        : intlGet,
             intlMessage    : intlMessage,
@@ -2178,6 +2179,21 @@
             }
 
             return intl$format$cache$$getDateTimeFormat(locales, formatOptions).format(date);
+        }
+
+        function intlTime(date, formatOptions, options) {
+            if (!options) {
+                options       = formatOptions;
+                formatOptions = null;
+            }
+
+            // Lookup named format on `formats.time`, before delegating to the
+            // `intlDate` helper.
+            if (formatOptions && typeof formatOptions === 'string') {
+                formatOptions = intlGet('formats.time.' + formatOptions, options);
+            }
+
+            return intlDate(date, formatOptions, options);
         }
 
         function intlNumber(num, formatOptions, options) {
