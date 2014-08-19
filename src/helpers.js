@@ -24,19 +24,33 @@ function registerWith(Handlebars) {
         escape      = Handlebars.Utils.escapeExpression;
 
     var helpers = {
-        intl           : intl,
-        intlDate       : intlDate,
-        intlTime       : intlTime,
-        intlNumber     : intlNumber,
-        intlGet        : intlGet,
-        intlMessage    : intlMessage,
-        intlHTMLMessage: intlHTMLMessage
+        intl             : intl,
+        intlGet          : intlGet,
+        formatDate       : formatDate,
+        formatTime       : formatTime,
+        formatNumber     : formatNumber,
+        formatMessage    : formatMessage,
+        formatHTMLMessage: formatHTMLMessage,
+
+        // Deprecated helpers (renamed):
+        intlDate       : deprecate('intlDate', formatDate),
+        intlTime       : deprecate('intlTime', formatTime),
+        intlNumber     : deprecate('intlNumber', formatNumber),
+        intlMessage    : deprecate('intlMessage', formatMessage),
+        intlHTMLMessage: deprecate('intlHTMLMessage', formatHTMLMessage)
     };
 
     for (var name in helpers) {
         if (helpers.hasOwnProperty(name)) {
             Handlebars.registerHelper(name, helpers[name]);
         }
+    }
+
+    function deprecate(name, suggestion) {
+        return function () {
+            console.warn('{{' + name + '}} is deprecated, use: {{' + suggestion.name + '}}');
+            return suggestion.apply(this, arguments);
+        };
     }
 
     // -- Helpers --------------------------------------------------------------
@@ -58,7 +72,28 @@ function registerWith(Handlebars) {
         return options.fn(this, {data: data});
     }
 
-    function intlDate(date, formatOptions, options) {
+    function intlGet(path, options) {
+        var intlData  = options.data && options.data.intl,
+            pathParts = path.split('.');
+
+        var obj, len, i;
+
+        // Use the path to walk the Intl data to find the object at the given
+        // path, and throw a descriptive error if it's not found.
+        try {
+            for (i = 0, len = pathParts.length; i < len; i++) {
+                obj = intlData = intlData[pathParts[i]];
+            }
+        } finally {
+            if (obj === undefined) {
+                throw new ReferenceError('Could not find Intl object: ' + path);
+            }
+        }
+
+        return obj;
+    }
+
+    function formatDate(date, formatOptions, options) {
         date = new Date(date);
 
         // Determine if the `date` is valid.
@@ -88,22 +123,22 @@ function registerWith(Handlebars) {
         return getDateTimeFormat(locales, formatOptions).format(date);
     }
 
-    function intlTime(date, formatOptions, options) {
+    function formatTime(date, formatOptions, options) {
         if (!options) {
             options       = formatOptions;
             formatOptions = null;
         }
 
         // Lookup named format on `formats.time`, before delegating to the
-        // `intlDate` helper.
+        // `formatDate` helper.
         if (formatOptions && typeof formatOptions === 'string') {
             formatOptions = intlGet('formats.time.' + formatOptions, options);
         }
 
-        return intlDate(date, formatOptions, options);
+        return formatDate(date, formatOptions, options);
     }
 
-    function intlNumber(num, formatOptions, options) {
+    function formatNumber(num, formatOptions, options) {
         if (typeof num !== 'number') {
             throw new TypeError('A number must be provided.');
         }
@@ -130,28 +165,7 @@ function registerWith(Handlebars) {
         return getNumberFormat(locales, formatOptions).format(num);
     }
 
-    function intlGet(path, options) {
-        var intlData  = options.data && options.data.intl,
-            pathParts = path.split('.');
-
-        var obj, len, i;
-
-        // Use the path to walk the Intl data to find the object at the given
-        // path, and throw a descriptive error if it's not found.
-        try {
-            for (i = 0, len = pathParts.length; i < len; i++) {
-                obj = intlData = intlData[pathParts[i]];
-            }
-        } finally {
-            if (obj === undefined) {
-                throw new ReferenceError('Could not find Intl object: ' + path);
-            }
-        }
-
-        return obj;
-    }
-
-    function intlMessage(message, options) {
+    function formatMessage(message, options) {
         if (!options) {
             options = message;
             message = null;
@@ -162,7 +176,7 @@ function registerWith(Handlebars) {
         // TODO: remove support form `hash.intlName` once Handlebars bugs with
         // subexpressions are fixed.
         if (!(message || typeof message === 'string' || hash.intlName)) {
-            throw new ReferenceError('{{intlMessage}} must be provided a message or intlName');
+            throw new ReferenceError('{{formatMessage}} must be provided a message or intlName');
         }
 
         var intlData = options.data.intl || {},
@@ -189,7 +203,7 @@ function registerWith(Handlebars) {
         return message.format(hash);
     }
 
-    function intlHTMLMessage() {
+    function formatHTMLMessage() {
         /* jshint validthis:true */
         var options = [].slice.call(arguments).pop(),
             hash    = options.hash;
@@ -211,6 +225,6 @@ function registerWith(Handlebars) {
 
         // Return a Handlebars `SafeString`. This first unwraps the result to
         // make sure it's not returning a double-wrapped `SafeString`.
-        return new SafeString(String(intlMessage.apply(this, arguments)));
+        return new SafeString(String(formatMessage.apply(this, arguments)));
     }
 }

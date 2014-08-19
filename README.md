@@ -3,9 +3,9 @@ handlebars-helper-intl
 
 Handlebars helpers for internationalization.
 
-[![npm Version](https://img.shields.io/npm/v/handlebars-helper-intl.svg?style=flat)][npm]
-[![Build Status](http://img.shields.io/travis/yahoo/handlebars-helper-intl.svg?style=flat)][Travis]
-[![Dependency Status](https://img.shields.io/david/yahoo/handlebars-helper-intl.svg?style=flat)][David]
+[![npm Version][npm-badge]][npm]
+[![Build Status][travis-badge]][travis]
+[![Dependency Status][david-badge]][david]
 
 
 Overview
@@ -24,7 +24,7 @@ Overview
 **Template Source:**
 
 ```handlebars
-<b>Price:</b> {{intlNumber price style="currency" currency="USD"}}
+<b>Price:</b> {{formatNumber price style="currency" currency="USD"}}
 ```
 
 **Render Template:**
@@ -55,7 +55,7 @@ var html = template(context, {
 
 * Formats complex messages, including **plural** and **select** arguments using the [Intl MessageFormat][Intl-MF] library which follows [ICU Message][ICU] and [CLDR][CLDR] standards.
 
-* Supports formatting message strings that contain HTML via the `{{intlHTMLMessage}}` helper.
+* Supports formatting message strings that contain HTML via the `{{formatHTMLMessage}}` helper.
 
 
 Usage
@@ -154,10 +154,10 @@ Object with user defined options for format styles. This is used to supply custo
 }
 ```
 
-These pre-defined formats map to their respective helpers of the same type, and all `data.intl.formats` are used by the `{{intlMessage}}` and `{{intlHTMLMessage}}` helpers. They can then be used by String name/path like this:
+These pre-defined formats map to their respective helpers of the same type, and all `data.intl.formats` are used by the `{{formatMessage}}` and `{{formatHTMLMessage}}` helpers. They can then be used by String name/path like this:
 
 ```handlebars
-{{intlNumber 100 "USD"}}
+{{formatNumber 100 "USD"}}
 ```
 
 ### Helpers
@@ -170,7 +170,7 @@ The following example uses `{{#intl}}` to set the locale to French and will outp
 
 ```handlebars
 {{#intl locales="fr-FR"}}
-    {{intlNumber 1000}}
+    {{formatNumber 1000}}
 {{/intl}}
 ```
 
@@ -181,20 +181,20 @@ Utility helper for accessing and returning the value the properties from the [i1
 The following are equivalent, both lookup the `FOO` message from `data.intl.messages.FOO`:
 
 ```handlebars
-{{intlMessage (intlGet "messages.FOO")}}
-{{intlMessage @intl.messages.FOO}}
+{{formatMessage (intlGet "messages.FOO")}}
+{{formatMessage @intl.messages.FOO}}
 ```
 
 **Parameters:**
 
 * `namespace`: `String` namespace to lookup a value on the `data.intl` object.
 
-#### `{{intlDate}}`
+#### `{{formatDate}}`
 
 Formats dates using [`Intl.DateTimeFormat`][Intl-DTF], and returns the formatted string value.
 
 ```handlebars
-{{intlDate now weekday="long" timeZone="UTC"}}
+{{formatDate now weekday="long" timeZone="UTC"}}
 ```
 
 ```js
@@ -217,16 +217,16 @@ console.log(html); // => "Tuesday, August 12, 2014"
 
 The hash arguments passed to this helper become the `options` parameter value when the [`Intl.DateTimeFormat`][Intl-DTF] instance is created.
 
-#### `{{intlTime}}`
+#### `{{formatTime}}`
 
-This delegates to the `{{intlDate}}` helper, but first it will reference any String named `format` from [`data.intl.formats.time`](#dataintlformats).
+This delegates to the `{{formatDate}}` helper, but first it will reference any String named `format` from [`data.intl.formats.time`](#dataintlformats).
 
-#### `{{intlNumber}}`
+#### `{{formatNumber}}`
 
 Formats numbers using [`Intl.NumberFormat`][Intl-NF], and returns the formatted string value.
 
 ```handlebars
-{{intlNumber price style="currency" currency="USD"}}
+{{formatNumber price style="currency" currency="USD"}}
 ```
 
 ```js
@@ -249,7 +249,7 @@ console.log(html); // => "$100.00"
 
 The hash arguments passed to this helper become the `options` parameter value when the [`Intl.NumberFormat`][Intl-NF] instance is created.
 
-#### `{{intlMessage}}`
+#### `{{formatMessage}}`
 
 Formats [ICU Message][ICU] strings with the given values supplied as the hash arguments.
 
@@ -261,7 +261,7 @@ You have {numPhotos, plural,
 ```
 
 ```handlebars
-{{intlMessage (intlGet "messages.photos") numPhotos=numPhotos}}
+{{formatMessage (intlGet "messages.photos") numPhotos=numPhotos}}
 ```
 
 ```js
@@ -292,9 +292,9 @@ console.log(html); // => "You have one photo."
 
 The hash arguments represent the name/value pairs that are used to format the `message` by providing values for its argument placeholders.
 
-#### `{{intlHTMLMessage}}`
+#### `{{formatHTMLMessage}}`
 
-This delegates to the `{{intlMessage}}` helper, but will first HTML-escape all of the hash argument values. This allows the `message` string to contain HTML and it will be considered safe since it's part of the template and not user-supplied data.
+This delegates to the `{{formatMessage}}` helper, but will first HTML-escape all of the hash argument values. This allows the `message` string to contain HTML and it will be considered safe since it's part of the template and not user-supplied data.
 
 **Note:** The recommendation is to remove all HTML from message strings, but sometimes it can be impractical, in those cases, this helper can be used.
 
@@ -306,9 +306,12 @@ This software is free to use under the Yahoo! Inc. BSD license.
 See the [LICENSE file][LICENSE] for license text and copyright information.
 
 
-[David]: https://david-dm.org/yahoo/handlebars-helper-intl
-[Travis]: https://travis-ci.org/yahoo/handlebars-helper-intl
 [npm]: https://www.npmjs.org/package/handlebars-helper-intl
+[npm-badge]: https://img.shields.io/npm/v/handlebars-helper-intl.svg?style=flat
+[travis]: https://travis-ci.org/yahoo/handlebars-helper-intl
+[travis-badge]: http://img.shields.io/travis/yahoo/handlebars-helper-intl.svg?style=flat
+[david]: https://david-dm.org/yahoo/handlebars-helper-intl
+[david-badge]: https://img.shields.io/david/yahoo/handlebars-helper-intl.svg?style=flat
 [Handlebars]: http://handlebarsjs.com/
 [Intl-MF]: https://github.com/yahoo/intl-messageformat
 [Intl]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl
