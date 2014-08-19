@@ -7,10 +7,10 @@ var Handlebars     = require('handlebars'),
 
 hbsIntlHelpers.registerWith(Handlebars);
 
-var intlNumber = Handlebars.helpers.intlNumber;
+var formatNumber = Handlebars.helpers.formatNumber;
 
 module.exports = function () {
-    intlNumber(4000, {
+    formatNumber(4000, {
         data: {},
         hash: {}
     });
