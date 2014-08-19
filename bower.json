@@ -1,7 +1,7 @@
 {
   "name": "handlebars-helper-intl",
   "main": "dist/helpers.js",
-  "version": "1.0.0-rc-1",
+  "version": "1.0.0-rc-2",
   "homepage": "https://github.com/yahoo/handlebars-helpers-intl",
   "authors": [
     "Eric Ferraiuolo <eferraiuolo@gmail.com>",
