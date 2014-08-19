@@ -72,6 +72,27 @@ function registerWith(Handlebars) {
         return options.fn(this, {data: data});
     }
 
+    function intlGet(path, options) {
+        var intlData  = options.data && options.data.intl,
+            pathParts = path.split('.');
+
+        var obj, len, i;
+
+        // Use the path to walk the Intl data to find the object at the given
+        // path, and throw a descriptive error if it's not found.
+        try {
+            for (i = 0, len = pathParts.length; i < len; i++) {
+                obj = intlData = intlData[pathParts[i]];
+            }
+        } finally {
+            if (obj === undefined) {
+                throw new ReferenceError('Could not find Intl object: ' + path);
+            }
+        }
+
+        return obj;
+    }
+
     function formatDate(date, formatOptions, options) {
         date = new Date(date);
 
@@ -142,27 +163,6 @@ function registerWith(Handlebars) {
         }
 
         return getNumberFormat(locales, formatOptions).format(num);
-    }
-
-    function intlGet(path, options) {
-        var intlData  = options.data && options.data.intl,
-            pathParts = path.split('.');
-
-        var obj, len, i;
-
-        // Use the path to walk the Intl data to find the object at the given
-        // path, and throw a descriptive error if it's not found.
-        try {
-            for (i = 0, len = pathParts.length; i < len; i++) {
-                obj = intlData = intlData[pathParts[i]];
-            }
-        } finally {
-            if (obj === undefined) {
-                throw new ReferenceError('Could not find Intl object: ' + path);
-            }
-        }
-
-        return obj;
     }
 
     function formatMessage(message, options) {
