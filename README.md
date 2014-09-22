@@ -257,8 +257,8 @@ Formats [ICU Message][ICU] strings with the given values supplied as the hash ar
 
 ```
 You have {numPhotos, plural,
-    0= {no photos.}
-    1= {one photo.}
+    =0 {no photos.}
+    =1 {one photo.}
     other {# photos.}}
 ```
 
