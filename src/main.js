@@ -6,9 +6,13 @@ See the accompanying LICENSE file for terms.
 
 /* jshint esnext: true */
 
-import {registerWith} from './helpers';
+import {registerWith, __addLocaleData} from './helpers';
+import defaultLocale from './en';
+
+__addLocaleData(defaultLocale);
 
 // Re-export as default for
 export default {
-    registerWith: registerWith
+    registerWith   : registerWith,
+    __addLocaleData: __addLocaleData
 };

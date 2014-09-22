@@ -17,7 +17,7 @@ Overview
 
 * Integrate internationalization features with [Handlebars][] to lower the barrier for localizing Handlebars templates.
 
-* Build on current and emerging JavaScript [`Intl`][Intl] standards — architect in a future-focused way.
+* Build on current and emerging JavaScript [`Intl`][Intl] standards — architect in a future-focused way. Leverage industry standards used in other programming langages like [CLDR][] locale data, and [ICU Message syntax][ICU].
 
 * Run in both Node.js and in the browser with a single `<script>` element.
 
@@ -55,7 +55,9 @@ var html = template(context, {
 
 * Formats **numbers** and **dates/times**, including those in complex messages using the JavaScript built-ins: [`Intl.NumberFormat`][Intl-NF] and [`Intl.DateTimeFormat`][Intl-DTF], respectively.
 
-* Formats complex messages, including **plural** and **select** arguments using the [Intl MessageFormat][Intl-MF] library which follows [ICU Message][ICU] and [CLDR][CLDR] standards.
+* Formats **relative times** (e.g., "3 hours ago") using the [Intl RelativeFormat][Intl-RF] library which uses [CLDR][] locale data.
+
+* Formats complex messages, including **plural** and **select** arguments using the [Intl MessageFormat][Intl-MF] library which uses [CLDR][] locale data and works with [ICU Message syntax][ICU].
 
 * Supports formatting message strings that contain HTML via the `{{formatHTMLMessage}}` helper.
 
@@ -74,9 +76,17 @@ This package assumes that the [`Intl`][Intl] global object exists in the runtime
 First, load Handlebars and this package onto the page:
 
 ```html
-<script src="handlebars.js"></script>
-<script src="handlebars-intl.js"></script>
+<script src="handlebars/handlebars.min.js"></script>
+<script src="handlebars-intl/handlebars-intl.min.js"></script>
 ```
+
+By default, Handlebars Intl ships with the locale data for English built-in to the runtime library. When you need to format data in another locale, include its data; e.g., for French:
+
+```html
+<script src="handlebars-intl/locale-data/fr.js"></script>
+```
+
+_Note: All 150+ locales supported by this package use their root BCP 47 langage tag; i.e., the part before the first hyphen (if any)._
 
 Then, register the helpers with Handlebars:
 
@@ -96,6 +106,8 @@ var Handlebars     = require('handlebars'),
 
 HandlebarsIntl.registerWith(Handlebars);
 ```
+
+_Note: in Node.js, the data for all 150+ locales is pre-loaded._
 
 ### Supplying i18n Data to Handlebars
 
@@ -151,12 +163,13 @@ Object with user defined options for format styles. This is used to supply custo
         }
     },
 
-    date: {...},
-    time: {...}
+    date    : {...},
+    time    : {...},
+    relative: {...}
 }
 ```
 
-These pre-defined formats map to their respective helpers of the same type, and all `data.intl.formats` are used by the `{{formatMessage}}` and `{{formatHTMLMessage}}` helpers. They can then be used by String name/path like this:
+These pre-defined formats map to their respective helpers of the same type, and any `number`, `date`, and `time` `data.intl.formats` are used by the `{{formatMessage}}` and `{{formatHTMLMessage}}` helpers. They can then be used by String name/path like this:
 
 ```handlebars
 {{formatNumber 100 "USD"}}
@@ -221,7 +234,40 @@ The hash arguments passed to this helper become the `options` parameter value wh
 
 #### `{{formatTime}}`
 
-This delegates to the `{{formatDate}}` helper, but first it will reference any String named `format` from [`data.intl.formats.time`](#dataintlformats).
+This is just like the `{{formatDate}}` helper, except it will reference any string-named `format` from [`data.intl.formats.time`](#dataintlformats).
+
+#### `{{formatRelative}}`
+
+Formats dates relative to "now" using [`IntlRelativeFormat`][Intl-RF], and returns the formatted string value.
+
+```handlebars
+<p>posted {{formatRelative post.date}}</p>
+```
+
+```js
+var intlData: {locales: 'en-US'};
+
+var html = template({
+    post: {
+        date: Date.now() - (24 * 60 * 60 * 1000) // 1 day ago.
+        ...
+    }
+}, {
+    data: {intl: intlData}
+});
+
+console.log(html); // => "<p>posted yesterday</p>"
+```
+
+**Parameters:**
+
+* `date`: `Date` instance or `String` timestamp to format relative to "now".
+
+* `[format]`: Optional String path to a predefined format on [`data.intl.formats`](#dataintlformats). The format's values are merged with any hash argument values.
+
+**Hash Arguments:**
+
+The hash arguments passed to this helper become the `options` parameter value when the [`IntlRelativeFormat`][Intl-RF] instance is created.
 
 #### `{{formatNumber}}`
 
@@ -309,12 +355,13 @@ See the [LICENSE file][LICENSE] for license text and copyright information.
 
 
 [npm]: https://www.npmjs.org/package/handlebars-intl
-[npm-badge]: https://img.shields.io/npm/v/handlebars-intl.svg?style=flat
+[npm-badge]: https://img.shields.io/npm/v/handlebars-intl.svg?style=flat-square
 [travis]: https://travis-ci.org/yahoo/handlebars-intl
-[travis-badge]: http://img.shields.io/travis/yahoo/handlebars-intl.svg?style=flat
+[travis-badge]: http://img.shields.io/travis/yahoo/handlebars-intl.svg?style=flat-square
 [david]: https://david-dm.org/yahoo/handlebars-intl
-[david-badge]: https://img.shields.io/david/yahoo/handlebars-intl.svg?style=flat
+[david-badge]: https://img.shields.io/david/yahoo/handlebars-intl.svg?style=flat-square
 [Handlebars]: http://handlebarsjs.com/
+[Intl-RF]: https://github.com/yahoo/intl-relativeformat
 [Intl-MF]: https://github.com/yahoo/intl-messageformat
 [Intl]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl
 [Intl-NF]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NumberFormat
