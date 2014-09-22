@@ -55,15 +55,6 @@
 
         return obj;
     };
-
-    var $$es5$$fnBind = Function.prototype.bind || function (thisObj) {
-        var fn   = this,
-            args = [].slice.call(arguments, 1);
-
-        return function () {
-            fn.apply(thisObj, args.concat([].slice.call(arguments)));
-        };
-    };
     var $$compiler$$default = $$compiler$$Compiler;
 
     function $$compiler$$Compiler(locales, formats, pluralFn) {
@@ -111,9 +102,9 @@
     };
 
     $$compiler$$Compiler.prototype.compileMessageText = function (element) {
-        // When this `element` is part of plural sub-pattern and its value
-        // contains an unescaped '#', use a `PluralOffsetString` helper to
-        // properly output the number with the correct offset in the string.
+        // When this `element` is part of plural sub-pattern and its value contains
+        // an unescaped '#', use a `PluralOffsetString` helper to properly output
+        // the number with the correct offset in the string.
         if (this.currentPlural && /(^|[^\\])#/g.test(element.value)) {
             // Create a cache a NumberFormat instance that can be reused for any
             // PluralOffsetString instance in this message.
@@ -133,15 +124,16 @@
     };
 
     $$compiler$$Compiler.prototype.compileArgument = function (element) {
-        var format   = element.format,
-            formats  = this.formats,
-            locales  = this.locales,
-            pluralFn = this.pluralFn,
-            options;
+        var format = element.format;
 
         if (!format) {
             return new $$compiler$$StringFormat(element.id);
         }
+
+        var formats  = this.formats,
+            locales  = this.locales,
+            pluralFn = this.pluralFn,
+            options;
 
         switch (format.type) {
             case 'numberFormat':
@@ -183,9 +175,9 @@
             options     = format.options,
             optionsHash = {};
 
-        // Save the current plural element, if any, then set it to a new value
-        // when compiling the options sub-patterns. This conform's the spec's
-        // algorithm for handling `"#"` synax in message text.
+        // Save the current plural element, if any, then set it to a new value when
+        // compiling the options sub-patterns. This conform's the spec's algorithm
+        // for handling `"#"` synax in message text.
         this.pluralStack.push(this.currentPlural);
         this.currentPlural = format.type === 'pluralFormat' ? element : null;
 
@@ -1519,31 +1511,32 @@
             throw new TypeError('A message must be provided as a String or AST.');
         }
 
-        // Creates a new object with the specified `formats` merged with the
-        // default formats.
-        formats = this._mergeFormats($$core$$MessageFormat.FORMATS, formats);
+        // Creates a new object with the specified `formats` merged with the default
+        // formats.
+        formats = this._mergeFormats($$core$$MessageFormat.formats, formats);
 
         // Defined first because it's used to build the format pattern.
         $$es5$$defineProperty(this, '_locale',  {value: this._resolveLocale(locales)});
 
-        var pluralFn = $$core$$MessageFormat.__localeData__[this._locale].pluralFunction;
+        var pluralFn = $$core$$MessageFormat.__localeData__[this._locale].pluralRuleFunction;
 
-        // Define the `pattern` property, a compiled pattern that is highly
-        // optimized for repeated `format()` invocations. **Note:** This passes
-        // the `locales` set provided to the constructor instead of just the
-        // resolved locale.
+        // Compile the `ast` to a pattern that is highly optimized for repeated
+        // `format()` invocations. **Note:** This passes the `locales` set provided
+        // to the constructor instead of just the resolved locale.
         var pattern = this._compilePattern(ast, locales, formats, pluralFn);
-        $$es5$$defineProperty(this, '_pattern', {value: pattern});
 
-        // Bind `format()` method to `this` so it can be passed by reference
-        // like the other `Intl` APIs.
-        this.format = $$es5$$fnBind.call(this.format, this);
+        // "Bind" `format()` method to `this` so it can be passed by reference like
+        // the other `Intl` APIs.
+        var messageFormat = this;
+        this.format = function (values) {
+            return messageFormat._format(pattern, values);
+        };
     }
 
-    // Default format options used as the prototype of the `formats` provided to
-    // the constructor. These are used when constructing the internal
-    // Intl.NumberFormat and Intl.DateTimeFormat instances.
-    $$es5$$defineProperty($$core$$MessageFormat, 'FORMATS', {
+    // Default format options used as the prototype of the `formats` provided to the
+    // constructor. These are used when constructing the internal Intl.NumberFormat
+    // and Intl.DateTimeFormat instances.
+    $$es5$$defineProperty($$core$$MessageFormat, 'formats', {
         enumerable: true,
 
         value: {
@@ -1618,37 +1611,30 @@
     $$es5$$defineProperty($$core$$MessageFormat, '__localeData__', {value: $$es5$$objCreate(null)});
     $$es5$$defineProperty($$core$$MessageFormat, '__addLocaleData', {value: function (data) {
         if (!(data && data.locale)) {
-            throw new Error('Object passed does not identify itself with a valid language tag');
+            throw new Error('Locale data does not contain a `locale` property');
         }
 
-        if (!data.messageformat) {
-            throw new Error('Object passed does not contain locale data for IntlMessageFormat');
+        if (!data.pluralRuleFunction) {
+            throw new Error('Locale data does not contain a `pluralRuleFunction` property');
         }
 
         var availableLocales = $$core$$MessageFormat.__availableLocales__,
             localeData       = $$core$$MessageFormat.__localeData__;
 
-        // Message format locale data only requires the first part of the tag.
-        var locale = data.locale.toLowerCase().split('-')[0];
-
-        availableLocales.push(locale);
-        localeData[locale] = data.messageformat;
+        availableLocales.push(data.locale);
+        localeData[data.locale] = data;
     }});
 
     // Defines `__parse()` static method as an exposed private.
     $$es5$$defineProperty($$core$$MessageFormat, '__parse', {value: intl$messageformat$parser$$default.parse});
 
-    // Define public `defaultLocale` property which is set when the first bundle
-    // of locale data is added.
+    // Define public `defaultLocale` property which defaults to English, but can be
+    // set by the developer.
     $$es5$$defineProperty($$core$$MessageFormat, 'defaultLocale', {
         enumerable: true,
         writable  : true,
-        value     : 'en'
+        value     : undefined
     });
-
-    $$core$$MessageFormat.prototype.format = function (values) {
-        return this._format(this._pattern, values);
-    };
 
     $$core$$MessageFormat.prototype.resolvedOptions = function () {
         // TODO: Provide anything else?
@@ -1684,8 +1670,8 @@
 
             value = values[id];
 
-            // Recursively format plural and select parts' option — which can be
-            // a nested pattern structure. The choosing of the option to use is
+            // Recursively format plural and select parts' option — which can be a
+            // nested pattern structure. The choosing of the option to use is
             // abstracted-by and delegated-to the part helper object.
             if (part.options) {
                 result += this._format(part.getOption(value), values);
@@ -1742,242 +1728,13 @@
             }
         }
 
-        return locale || $$core$$MessageFormat.defaultLocale;
+        return locale || $$core$$MessageFormat.defaultLocale.split('-')[0];
     };
-    var intl$messageformat$$funcs = [
-    function (n) {  },
-    function (n) { n=Math.floor(n);if(n===1)return"one";return"other"; },
-    function (n) { n=Math.floor(n);if(n>=0&&n<=1)return"one";return"other"; },
-    function (n) { var i=Math.floor(Math.abs(n));n=Math.floor(n);if(i===0||n===1)return"one";return"other"; },
-    function (n) { n=Math.floor(n);if(n===0)return"zero";if(n===1)return"one";if(n===2)return"two";if(n%100>=3&&n%100<=10)return"few";if(n%100>=11&&n%100<=99)return"many";return"other"; },
-    function (n) { var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(i===1&&v===0)return"one";return"other"; },
-    function (n) { n=Math.floor(n);if(n%10===1&&(n%100!==11))return"one";if(n%10>=2&&n%10<=4&&!(n%100>=12&&n%100<=14))return"few";if(n%10===0||n%10>=5&&n%10<=9||n%100>=11&&n%100<=14)return"many";return"other"; },
-    function (n) { return"other"; },
-    function (n) { n=Math.floor(n);if(n%10===1&&!(n%100===11||n%100===71||n%100===91))return"one";if(n%10===2&&!(n%100===12||n%100===72||n%100===92))return"two";if((n%10>=3&&n%10<=4||n%10===9)&&!(n%100>=10&&n%100<=19||n%100>=70&&n%100<=79||n%100>=90&&n%100<=99))return"few";if((n!==0)&&n%1e6===0)return"many";return"other"; },
-    function (n) { var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length,f=parseInt(n.toString().replace(/^[^.]*\.?/,""),10);n=Math.floor(n);if(v===0&&i%10===1&&((i%100!==11)||f%10===1&&(f%100!==11)))return"one";if(v===0&&i%10>=2&&i%10<=4&&(!(i%100>=12&&i%100<=14)||f%10>=2&&f%10<=4&&!(f%100>=12&&f%100<=14)))return"few";return"other"; },
-    function (n) { var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(i===1&&v===0)return"one";if(i>=2&&i<=4&&v===0)return"few";if((v!==0))return"many";return"other"; },
-    function (n) { n=Math.floor(n);if(n===0)return"zero";if(n===1)return"one";if(n===2)return"two";if(n===3)return"few";if(n===6)return"many";return"other"; },
-    function (n) { var i=Math.floor(Math.abs(n)),t=parseInt(n.toString().replace(/^[^.]*\.?|0+$/g,""),10);n=Math.floor(n);if(n===1||(t!==0)&&(i===0||i===1))return"one";return"other"; },
-    function (n) { var i=Math.floor(Math.abs(n));n=Math.floor(n);if(i===0||i===1)return"one";return"other"; },
-    function (n) { var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length,f=parseInt(n.toString().replace(/^[^.]*\.?/,""),10);n=Math.floor(n);if(v===0&&(i===1||i===2||i===3||v===0&&(!(i%10===4||i%10===6||i%10===9)||(v!==0)&&!(f%10===4||f%10===6||f%10===9))))return"one";return"other"; },
-    function (n) { n=Math.floor(n);if(n===1)return"one";if(n===2)return"two";if(n>=3&&n<=6)return"few";if(n>=7&&n<=10)return"many";return"other"; },
-    function (n) { n=Math.floor(n);if(n===1||n===11)return"one";if(n===2||n===12)return"two";if(n>=3&&n<=10||n>=13&&n<=19)return"few";return"other"; },
-    function (n) { var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(v===0&&i%10===1)return"one";if(v===0&&i%10===2)return"two";if(v===0&&(i%100===0||i%100===20||i%100===40||i%100===60||i%100===80))return"few";if((v!==0))return"many";return"other"; },
-    function (n) { var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(i===1&&v===0)return"one";if(i===2&&v===0)return"two";if(v===0&&!(n>=0&&n<=10)&&n%10===0)return"many";return"other"; },
-    function (n) { var i=Math.floor(Math.abs(n)),t=parseInt(n.toString().replace(/^[^.]*\.?|0+$/g,""),10);n=Math.floor(n);if(t===0&&i%10===1&&((i%100!==11)||(t!==0)))return"one";return"other"; },
-    function (n) { n=Math.floor(n);if(n===0)return"zero";if(n===1)return"one";return"other"; },
-    function (n) { n=Math.floor(n);if(n===1)return"one";if(n===2)return"two";return"other"; },
-    function (n) { var i=Math.floor(Math.abs(n));n=Math.floor(n);if(n===0)return"zero";if((i===0||i===1)&&(n!==0))return"one";return"other"; },
-    function (n) { var f=parseInt(n.toString().replace(/^[^.]*\.?/,""),10);n=Math.floor(n);if(n%10===1&&!(n%100>=11&&n%100<=19))return"one";if(n%10>=2&&n%10<=9&&!(n%100>=11&&n%100<=19))return"few";if((f!==0))return"many";return"other"; },
-    function (n) { var v=n.toString().replace(/^[^.]*\.?/,"").length,f=parseInt(n.toString().replace(/^[^.]*\.?/,""),10);n=Math.floor(n);if(n%10===0||n%100>=11&&n%100<=19||v===2&&f%100>=11&&f%100<=19)return"zero";if(n%10===1&&((n%100!==11)||v===2&&f%10===1&&((f%100!==11)||(v!==2)&&f%10===1)))return"one";return"other"; },
-    function (n) { var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length,f=parseInt(n.toString().replace(/^[^.]*\.?/,""),10);n=Math.floor(n);if(v===0&&(i%10===1||f%10===1))return"one";return"other"; },
-    function (n) { n=Math.floor(n);if(n===1)return"one";if(n===0||n%100>=2&&n%100<=10)return"few";if(n%100>=11&&n%100<=19)return"many";return"other"; },
-    function (n) { var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(i===1&&v===0)return"one";if(v===0&&i%10>=2&&i%10<=4&&!(i%100>=12&&i%100<=14))return"few";if(v===0&&(i!==1)&&(i%10>=0&&i%10<=1||v===0&&(i%10>=5&&i%10<=9||v===0&&i%100>=12&&i%100<=14)))return"many";return"other"; },
-    function (n) { var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length,t=parseInt(n.toString().replace(/^[^.]*\.?|0+$/g,""),10);n=Math.floor(n);if(i===1&&(v===0||i===0&&t===1))return"one";return"other"; },
-    function (n) { var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(i===1&&v===0)return"one";if((v!==0)||n===0||(n!==1)&&n%100>=1&&n%100<=19)return"few";return"other"; },
-    function (n) { var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(v===0&&i%10===1&&(i%100!==11))return"one";if(v===0&&i%10>=2&&i%10<=4&&!(i%100>=12&&i%100<=14))return"few";if(v===0&&(i%10===0||v===0&&(i%10>=5&&i%10<=9||v===0&&i%100>=11&&i%100<=14)))return"many";return"other"; },
-    function (n) { var i=Math.floor(Math.abs(n));n=Math.floor(n);if(i===0||n===1)return"one";if(n>=2&&n<=10)return"few";return"other"; },
-    function (n) { var i=Math.floor(Math.abs(n)),f=parseInt(n.toString().replace(/^[^.]*\.?/,""),10);n=Math.floor(n);if(n===0||n===1||i===0&&f===1)return"one";return"other"; },
-    function (n) { var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(v===0&&i%100===1)return"one";if(v===0&&i%100===2)return"two";if(v===0&&(i%100>=3&&i%100<=4||(v!==0)))return"few";return"other"; },
-    function (n) { n=Math.floor(n);if(n>=0&&n<=1||n>=11&&n<=99)return"one";return"other"; }
-    ];
-    $$core$$default.__addLocaleData({locale:"aa", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"af", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"agq", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"ak", messageformat:{pluralFunction:intl$messageformat$$funcs[2]}});
-    $$core$$default.__addLocaleData({locale:"am", messageformat:{pluralFunction:intl$messageformat$$funcs[3]}});
-    $$core$$default.__addLocaleData({locale:"ar", messageformat:{pluralFunction:intl$messageformat$$funcs[4]}});
-    $$core$$default.__addLocaleData({locale:"as", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
-    $$core$$default.__addLocaleData({locale:"asa", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"ast", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
-    $$core$$default.__addLocaleData({locale:"az", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"bas", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"be", messageformat:{pluralFunction:intl$messageformat$$funcs[6]}});
-    $$core$$default.__addLocaleData({locale:"bem", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"bez", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"bg", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"bm", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
-    $$core$$default.__addLocaleData({locale:"bn", messageformat:{pluralFunction:intl$messageformat$$funcs[3]}});
-    $$core$$default.__addLocaleData({locale:"bo", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
-    $$core$$default.__addLocaleData({locale:"br", messageformat:{pluralFunction:intl$messageformat$$funcs[8]}});
-    $$core$$default.__addLocaleData({locale:"brx", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"bs", messageformat:{pluralFunction:intl$messageformat$$funcs[9]}});
-    $$core$$default.__addLocaleData({locale:"byn", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"ca", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
-    $$core$$default.__addLocaleData({locale:"cgg", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"chr", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"cs", messageformat:{pluralFunction:intl$messageformat$$funcs[10]}});
-    $$core$$default.__addLocaleData({locale:"cy", messageformat:{pluralFunction:intl$messageformat$$funcs[11]}});
-    $$core$$default.__addLocaleData({locale:"da", messageformat:{pluralFunction:intl$messageformat$$funcs[12]}});
-    $$core$$default.__addLocaleData({locale:"dav", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"de", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
-    $$core$$default.__addLocaleData({locale:"dje", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"dua", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"dyo", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"dz", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
-    $$core$$default.__addLocaleData({locale:"ebu", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"ee", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"el", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"en", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
-    $$core$$default.__addLocaleData({locale:"eo", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"es", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"et", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
-    $$core$$default.__addLocaleData({locale:"eu", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"ewo", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"fa", messageformat:{pluralFunction:intl$messageformat$$funcs[3]}});
-    $$core$$default.__addLocaleData({locale:"ff", messageformat:{pluralFunction:intl$messageformat$$funcs[13]}});
-    $$core$$default.__addLocaleData({locale:"fi", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
-    $$core$$default.__addLocaleData({locale:"fil", messageformat:{pluralFunction:intl$messageformat$$funcs[14]}});
-    $$core$$default.__addLocaleData({locale:"fo", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"fr", messageformat:{pluralFunction:intl$messageformat$$funcs[13]}});
-    $$core$$default.__addLocaleData({locale:"fur", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"fy", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
-    $$core$$default.__addLocaleData({locale:"ga", messageformat:{pluralFunction:intl$messageformat$$funcs[15]}});
-    $$core$$default.__addLocaleData({locale:"gd", messageformat:{pluralFunction:intl$messageformat$$funcs[16]}});
-    $$core$$default.__addLocaleData({locale:"gl", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
-    $$core$$default.__addLocaleData({locale:"gsw", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"gu", messageformat:{pluralFunction:intl$messageformat$$funcs[3]}});
-    $$core$$default.__addLocaleData({locale:"guz", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"gv", messageformat:{pluralFunction:intl$messageformat$$funcs[17]}});
-    $$core$$default.__addLocaleData({locale:"ha", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"haw", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"he", messageformat:{pluralFunction:intl$messageformat$$funcs[18]}});
-    $$core$$default.__addLocaleData({locale:"hi", messageformat:{pluralFunction:intl$messageformat$$funcs[3]}});
-    $$core$$default.__addLocaleData({locale:"hr", messageformat:{pluralFunction:intl$messageformat$$funcs[9]}});
-    $$core$$default.__addLocaleData({locale:"hu", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"hy", messageformat:{pluralFunction:intl$messageformat$$funcs[13]}});
-    $$core$$default.__addLocaleData({locale:"ia", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"id", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
-    $$core$$default.__addLocaleData({locale:"ig", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
-    $$core$$default.__addLocaleData({locale:"ii", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
-    $$core$$default.__addLocaleData({locale:"is", messageformat:{pluralFunction:intl$messageformat$$funcs[19]}});
-    $$core$$default.__addLocaleData({locale:"it", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
-    $$core$$default.__addLocaleData({locale:"ja", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
-    $$core$$default.__addLocaleData({locale:"jgo", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"jmc", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"ka", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"kab", messageformat:{pluralFunction:intl$messageformat$$funcs[13]}});
-    $$core$$default.__addLocaleData({locale:"kam", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"kde", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
-    $$core$$default.__addLocaleData({locale:"kea", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
-    $$core$$default.__addLocaleData({locale:"khq", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"ki", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"kk", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"kkj", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"kl", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"kln", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"km", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
-    $$core$$default.__addLocaleData({locale:"kn", messageformat:{pluralFunction:intl$messageformat$$funcs[3]}});
-    $$core$$default.__addLocaleData({locale:"ko", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
-    $$core$$default.__addLocaleData({locale:"kok", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"ks", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"ksb", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"ksf", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"ksh", messageformat:{pluralFunction:intl$messageformat$$funcs[20]}});
-    $$core$$default.__addLocaleData({locale:"kw", messageformat:{pluralFunction:intl$messageformat$$funcs[21]}});
-    $$core$$default.__addLocaleData({locale:"ky", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"lag", messageformat:{pluralFunction:intl$messageformat$$funcs[22]}});
-    $$core$$default.__addLocaleData({locale:"lg", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"lkt", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
-    $$core$$default.__addLocaleData({locale:"ln", messageformat:{pluralFunction:intl$messageformat$$funcs[2]}});
-    $$core$$default.__addLocaleData({locale:"lo", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
-    $$core$$default.__addLocaleData({locale:"lt", messageformat:{pluralFunction:intl$messageformat$$funcs[23]}});
-    $$core$$default.__addLocaleData({locale:"lu", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"luo", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"luy", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"lv", messageformat:{pluralFunction:intl$messageformat$$funcs[24]}});
-    $$core$$default.__addLocaleData({locale:"mas", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"mer", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"mfe", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"mg", messageformat:{pluralFunction:intl$messageformat$$funcs[2]}});
-    $$core$$default.__addLocaleData({locale:"mgh", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"mgo", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"mk", messageformat:{pluralFunction:intl$messageformat$$funcs[25]}});
-    $$core$$default.__addLocaleData({locale:"ml", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"mn", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"mr", messageformat:{pluralFunction:intl$messageformat$$funcs[3]}});
-    $$core$$default.__addLocaleData({locale:"ms", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
-    $$core$$default.__addLocaleData({locale:"mt", messageformat:{pluralFunction:intl$messageformat$$funcs[26]}});
-    $$core$$default.__addLocaleData({locale:"mua", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"my", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
-    $$core$$default.__addLocaleData({locale:"naq", messageformat:{pluralFunction:intl$messageformat$$funcs[21]}});
-    $$core$$default.__addLocaleData({locale:"nb", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"nd", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"ne", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"nl", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
-    $$core$$default.__addLocaleData({locale:"nmg", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"nn", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"nnh", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"nr", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"nso", messageformat:{pluralFunction:intl$messageformat$$funcs[2]}});
-    $$core$$default.__addLocaleData({locale:"nus", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"nyn", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"om", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"or", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"os", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"pa", messageformat:{pluralFunction:intl$messageformat$$funcs[2]}});
-    $$core$$default.__addLocaleData({locale:"pl", messageformat:{pluralFunction:intl$messageformat$$funcs[27]}});
-    $$core$$default.__addLocaleData({locale:"ps", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"pt", messageformat:{pluralFunction:intl$messageformat$$funcs[28]}});
-    $$core$$default.__addLocaleData({locale:"rm", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"rn", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"ro", messageformat:{pluralFunction:intl$messageformat$$funcs[29]}});
-    $$core$$default.__addLocaleData({locale:"rof", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"ru", messageformat:{pluralFunction:intl$messageformat$$funcs[30]}});
-    $$core$$default.__addLocaleData({locale:"rw", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"rwk", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"sah", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
-    $$core$$default.__addLocaleData({locale:"saq", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"sbp", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"se", messageformat:{pluralFunction:intl$messageformat$$funcs[21]}});
-    $$core$$default.__addLocaleData({locale:"seh", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"ses", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
-    $$core$$default.__addLocaleData({locale:"sg", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
-    $$core$$default.__addLocaleData({locale:"shi", messageformat:{pluralFunction:intl$messageformat$$funcs[31]}});
-    $$core$$default.__addLocaleData({locale:"si", messageformat:{pluralFunction:intl$messageformat$$funcs[32]}});
-    $$core$$default.__addLocaleData({locale:"sk", messageformat:{pluralFunction:intl$messageformat$$funcs[10]}});
-    $$core$$default.__addLocaleData({locale:"sl", messageformat:{pluralFunction:intl$messageformat$$funcs[33]}});
-    $$core$$default.__addLocaleData({locale:"sn", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"so", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"sq", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"sr", messageformat:{pluralFunction:intl$messageformat$$funcs[9]}});
-    $$core$$default.__addLocaleData({locale:"ss", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"ssy", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"st", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"sv", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
-    $$core$$default.__addLocaleData({locale:"sw", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
-    $$core$$default.__addLocaleData({locale:"swc", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"ta", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"te", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"teo", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"tg", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"th", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
-    $$core$$default.__addLocaleData({locale:"ti", messageformat:{pluralFunction:intl$messageformat$$funcs[2]}});
-    $$core$$default.__addLocaleData({locale:"tig", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"tn", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"to", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
-    $$core$$default.__addLocaleData({locale:"tr", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"ts", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"twq", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"tzm", messageformat:{pluralFunction:intl$messageformat$$funcs[34]}});
-    $$core$$default.__addLocaleData({locale:"ug", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"uk", messageformat:{pluralFunction:intl$messageformat$$funcs[30]}});
-    $$core$$default.__addLocaleData({locale:"ur", messageformat:{pluralFunction:intl$messageformat$$funcs[5]}});
-    $$core$$default.__addLocaleData({locale:"uz", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"vai", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"ve", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"vi", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
-    $$core$$default.__addLocaleData({locale:"vo", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"vun", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"wae", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"wal", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"xh", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"xog", messageformat:{pluralFunction:intl$messageformat$$funcs[1]}});
-    $$core$$default.__addLocaleData({locale:"yav", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"yo", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
-    $$core$$default.__addLocaleData({locale:"zgh", messageformat:{pluralFunction:intl$messageformat$$funcs[0]}});
-    $$core$$default.__addLocaleData({locale:"zh", messageformat:{pluralFunction:intl$messageformat$$funcs[7]}});
-    $$core$$default.__addLocaleData({locale:"zu", messageformat:{pluralFunction:intl$messageformat$$funcs[3]}});
+    var $$en$$default = {"locale":"en","pluralRuleFunction":function (n) {var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(i===1&&v===0)return"one";return"other";}};
+
+    $$core$$default.__addLocaleData($$en$$default);
+    $$core$$default.defaultLocale = 'en';
+
     var intl$messageformat$$default = $$core$$default;
 
     // -----------------------------------------------------------------------------
@@ -2329,4 +2086,4 @@
     this['HandlebarsIntl'] = src$main$$default;
 }).call(this);
 
-//# sourceMappingURL=helpers.js.map
+//# sourceMappingURL=handlebars-intl.js.map

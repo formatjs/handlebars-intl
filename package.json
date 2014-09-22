@@ -1,5 +1,5 @@
 {
-  "name": "handlebars-helper-intl",
+  "name": "handlebars-intl",
   "version": "1.0.0-rc-2",
   "description": "Handlebars helpers for internationalization.",
   "keywords": [
@@ -14,11 +14,11 @@
     "Anthony Pipkin <a.pipkin@yahoo.com>"
   ],
   "bugs": {
-    "url": "https://github.com/yahoo/handlebars-helper-intl/issues"
+    "url": "https://github.com/yahoo/handlebars-intl/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:yahoo/handlebars-helper-intl.git"
+    "url": "git@github.com:yahoo/handlebars-intl.git"
   },
   "main": "index.js",
   "jsnext:main": "src/main.js",
@@ -47,7 +47,7 @@
     "pretest": "grunt",
     "test": "istanbul cover -- _mocha tests/ --reporter spec"
   },
-  "homepage": "https://github.com/yahoo/handlebars-helper-intl",
+  "homepage": "https://github.com/yahoo/handlebars-intl",
   "directories": {
     "test": "tests"
   },

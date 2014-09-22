@@ -1,11 +1,13 @@
-handlebars-helper-intl
-======================
+Handlebars Intl
+===============
 
 Handlebars helpers for internationalization.
 
 [![npm Version][npm-badge]][npm]
 [![Build Status][travis-badge]][travis]
 [![Dependency Status][david-badge]][david]
+
+**This package used to be named `handlebars-helper-intl`.**
 
 
 Overview
@@ -73,7 +75,7 @@ First, load Handlebars and this package onto the page:
 
 ```html
 <script src="handlebars.js"></script>
-<script src="handlebars-helper-intl.js"></script>
+<script src="handlebars-intl.js"></script>
 ```
 
 Then, register the helpers with Handlebars:
@@ -90,7 +92,7 @@ Import Handlebars and this package, then register the Intl helpers with Handleba
 
 ```js
 var Handlebars     = require('handlebars'),
-    HandlebarsIntl = require('handlebars-helper-intl');
+    HandlebarsIntl = require('handlebars-intl');
 
 HandlebarsIntl.registerWith(Handlebars);
 ```
@@ -306,12 +308,12 @@ This software is free to use under the Yahoo! Inc. BSD license.
 See the [LICENSE file][LICENSE] for license text and copyright information.
 
 
-[npm]: https://www.npmjs.org/package/handlebars-helper-intl
-[npm-badge]: https://img.shields.io/npm/v/handlebars-helper-intl.svg?style=flat
-[travis]: https://travis-ci.org/yahoo/handlebars-helper-intl
-[travis-badge]: http://img.shields.io/travis/yahoo/handlebars-helper-intl.svg?style=flat
-[david]: https://david-dm.org/yahoo/handlebars-helper-intl
-[david-badge]: https://img.shields.io/david/yahoo/handlebars-helper-intl.svg?style=flat
+[npm]: https://www.npmjs.org/package/handlebars-intl
+[npm-badge]: https://img.shields.io/npm/v/handlebars-intl.svg?style=flat
+[travis]: https://travis-ci.org/yahoo/handlebars-intl
+[travis-badge]: http://img.shields.io/travis/yahoo/handlebars-intl.svg?style=flat
+[david]: https://david-dm.org/yahoo/handlebars-intl
+[david-badge]: https://img.shields.io/david/yahoo/handlebars-intl.svg?style=flat
 [Handlebars]: http://handlebarsjs.com/
 [Intl-MF]: https://github.com/yahoo/intl-messageformat
 [Intl]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl
@@ -321,4 +323,4 @@ See the [LICENSE file][LICENSE] for license text and copyright information.
 [CLDR]: http://cldr.unicode.org/
 [Intl.js]: https://github.com/andyearnshaw/Intl.js
 [Intl-Node]: https://github.com/joyent/node/issues/6371
-[LICENSE]: https://github.com/yahoo/handlebars-helper-intl/blob/master/LICENSE
+[LICENSE]: https://github.com/yahoo/handlebars-intl/blob/master/LICENSE

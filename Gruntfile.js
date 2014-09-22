@@ -2,8 +2,6 @@
 
 module.exports = function (grunt) {
     grunt.initConfig({
-        pkg: grunt.file.readJSON('package.json'),
-
         clean: {
             dist: 'dist/',
             lib : 'lib/',
@@ -30,7 +28,7 @@ module.exports = function (grunt) {
         },
 
         bundle_jsnext: {
-            dest: 'dist/helpers.js',
+            dest: 'dist/handlebars-intl.js',
 
             options: {
                 namespace: 'HandlebarsIntl'
@@ -43,8 +41,8 @@ module.exports = function (grunt) {
 
         uglify: {
             all: {
-                src: 'dist/helpers.js',
-                dest: 'dist/helpers.min.js',
+                src: 'dist/handlebars-intl.js',
+                dest: 'dist/handlebars-intl.min.js',
 
                 options: {
                     preserveComments: 'some'
