@@ -7,3 +7,9 @@ notifications:
             - mojito-next@yahoo-inc.com
         on_success: change
         on_failure: always
+env:
+  global:
+    - secure: dbisNSzYg7xHKjwpS41u6K4DQxXb6C89mSby4yFbjQGZcJeqA6OrxYNZ93xZ4JSzwA/Z6w6OsNy3oFwB5E19X3p3NldzIaK/FjaH1bZAllku+wNkSXuU3Z0+Ph3yuFYFYRWCzgHutx204LKk//lqONzsWolcVhPGhADFTiAR/qs=
+    - secure: ajl+g+6joXLhO+3cRb5rS+w6A1wsDaJeSrEG+npSMGviIdcAD8jZ8CeDdiZqjU9eFbI+JP4CMa+ywPuj68lqqYuoBks8QTb+5ZpPcXn8HlEW1uDguq6DmSb7koQ6XodYB9pILJDJMAfrxguO1WEQ86biC32wZHYC8Rt423OD9no=
+addons:
+  sauce_connect: true

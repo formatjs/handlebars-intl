@@ -30,6 +30,7 @@
   "devDependencies": {
     "benchmark": "^1.0.0",
     "chai": "^1.9.1",
+    "expect.js": "^0.3.1",
     "grunt": "^0.4.5",
     "grunt-benchmark": "^0.3.0",
     "grunt-bundle-jsnext-lib": "^0.2.1",
@@ -44,11 +45,13 @@
     "intl": "^0.1.4",
     "istanbul": "^0.3.2",
     "mocha": "^1.21.4",
-    "xunit-file": "0.0.5"
+    "xunit-file": "0.0.5",
+    "yeti": "^0.2.29"
   },
   "scripts": {
     "prepublish": "grunt",
-    "test": "istanbul cover -- _mocha tests/ --reporter spec"
+    "pretest": "grunt",
+    "test": "istanbul cover -- _mocha tests/ --reporter spec && tests/smoke/saucelabs.sh"
   },
   "homepage": "https://github.com/yahoo/handlebars-intl",
   "directories": {
