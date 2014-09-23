@@ -23,14 +23,14 @@
     // Purposely using the same implementation as the Intl.js `Intl` polyfill.
     // Copyright 2013 Andy Earnshaw, MIT License
 
-    var $$es5$$realDefineProp = (function () {
+    var $$es51$$realDefineProp = (function () {
         try { return !!Object.defineProperty({}, 'a', {}); }
         catch (e) { return false; }
     })();
 
-    var $$es5$$es3 = !$$es5$$realDefineProp && !Object.prototype.__defineGetter__;
+    var $$es51$$es3 = !$$es51$$realDefineProp && !Object.prototype.__defineGetter__;
 
-    var $$es5$$defineProperty = $$es5$$realDefineProp ? Object.defineProperty :
+    var $$es51$$defineProperty = $$es51$$realDefineProp ? Object.defineProperty :
             function (obj, name, desc) {
 
         if ('get' in desc && obj.__defineGetter__) {
@@ -40,7 +40,7 @@
         }
     };
 
-    var $$es5$$objCreate = Object.create || function (proto, props) {
+    var $$es51$$objCreate = Object.create || function (proto, props) {
         var obj, k;
 
         function F() {}
@@ -49,7 +49,7 @@
 
         for (k in props) {
             if ($$utils1$$hop.call(props, k)) {
-                $$es5$$defineProperty(obj, k, props[k]);
+                $$es51$$defineProperty(obj, k, props[k]);
             }
         }
 
@@ -1516,7 +1516,7 @@
         formats = this._mergeFormats($$core$$MessageFormat.formats, formats);
 
         // Defined first because it's used to build the format pattern.
-        $$es5$$defineProperty(this, '_locale',  {value: this._resolveLocale(locales)});
+        $$es51$$defineProperty(this, '_locale',  {value: this._resolveLocale(locales)});
 
         var pluralFn = $$core$$MessageFormat.__localeData__[this._locale].pluralRuleFunction;
 
@@ -1536,7 +1536,7 @@
     // Default format options used as the prototype of the `formats` provided to the
     // constructor. These are used when constructing the internal Intl.NumberFormat
     // and Intl.DateTimeFormat instances.
-    $$es5$$defineProperty($$core$$MessageFormat, 'formats', {
+    $$es51$$defineProperty($$core$$MessageFormat, 'formats', {
         enumerable: true,
 
         value: {
@@ -1607,9 +1607,9 @@
     });
 
     // Define internal private properties for dealing with locale data.
-    $$es5$$defineProperty($$core$$MessageFormat, '__availableLocales__', {value: []});
-    $$es5$$defineProperty($$core$$MessageFormat, '__localeData__', {value: $$es5$$objCreate(null)});
-    $$es5$$defineProperty($$core$$MessageFormat, '__addLocaleData', {value: function (data) {
+    $$es51$$defineProperty($$core$$MessageFormat, '__availableLocales__', {value: []});
+    $$es51$$defineProperty($$core$$MessageFormat, '__localeData__', {value: $$es51$$objCreate(null)});
+    $$es51$$defineProperty($$core$$MessageFormat, '__addLocaleData', {value: function (data) {
         if (!(data && data.locale)) {
             throw new Error('Locale data does not contain a `locale` property');
         }
@@ -1626,11 +1626,11 @@
     }});
 
     // Defines `__parse()` static method as an exposed private.
-    $$es5$$defineProperty($$core$$MessageFormat, '__parse', {value: intl$messageformat$parser$$default.parse});
+    $$es51$$defineProperty($$core$$MessageFormat, '__parse', {value: intl$messageformat$parser$$default.parse});
 
     // Define public `defaultLocale` property which defaults to English, but can be
     // set by the developer.
-    $$es5$$defineProperty($$core$$MessageFormat, 'defaultLocale', {
+    $$es51$$defineProperty($$core$$MessageFormat, 'defaultLocale', {
         enumerable: true,
         writable  : true,
         value     : undefined
@@ -1690,7 +1690,7 @@
         for (type in defaults) {
             if (!$$utils1$$hop.call(defaults, type)) { continue; }
 
-            mergedFormats[type] = mergedType = $$es5$$objCreate(defaults[type]);
+            mergedFormats[type] = mergedType = $$es51$$objCreate(defaults[type]);
 
             if (formats && $$utils1$$hop.call(formats, type)) {
                 $$utils1$$extend(mergedType, formats[type]);
@@ -1730,79 +1730,400 @@
 
         return locale || $$core$$MessageFormat.defaultLocale.split('-')[0];
     };
-    var $$en$$default = {"locale":"en","pluralRuleFunction":function (n) {var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(i===1&&v===0)return"one";return"other";}};
+    var $$en1$$default = {"locale":"en","pluralRuleFunction":function (n) {var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(i===1&&v===0)return"one";return"other";}};
 
-    $$core$$default.__addLocaleData($$en$$default);
+    $$core$$default.__addLocaleData($$en1$$default);
     $$core$$default.defaultLocale = 'en';
 
     var intl$messageformat$$default = $$core$$default;
 
-    // -----------------------------------------------------------------------------
+    // Purposely using the same implementation as the Intl.js `Intl` polyfill.
+    // Copyright 2013 Andy Earnshaw, MIT License
 
-    // Cache to hold `DateTimeFormat`, `NumberFormat`, and `IntlMessageFormat`
-    // instances for reuse.
-    var intl$format$cache$$cache = {
-        dateTimeFormats: {},
-        numberFormats  : {},
-        messageFormats : {}
+    var $$es52$$hop = Object.prototype.hasOwnProperty;
+
+    var $$es52$$realDefineProp = (function () {
+        try { return !!Object.defineProperty({}, 'a', {}); }
+        catch (e) { return false; }
+    })();
+
+    var $$es52$$es3 = !$$es52$$realDefineProp && !Object.prototype.__defineGetter__;
+
+    var $$es52$$defineProperty = $$es52$$realDefineProp ? Object.defineProperty :
+            function (obj, name, desc) {
+
+        if ('get' in desc && obj.__defineGetter__) {
+            obj.__defineGetter__(name, desc.get);
+        } else if (!$$es52$$hop.call(obj, name) || 'value' in desc) {
+            obj[name] = desc.value;
+        }
     };
 
-    function intl$format$cache$$getDateTimeFormat(locales, options) {
-        options || (options = {});
+    var $$es52$$objCreate = Object.create || function (proto, props) {
+        var obj, k;
 
-        var cacheId = intl$format$cache$$getCacheId([locales, options]),
-            format  = intl$format$cache$$cache.dateTimeFormats[cacheId];
+        function F() {}
+        F.prototype = proto;
+        obj = new F();
 
-        if (!format) {
-            format = new Intl.DateTimeFormat(locales, options);
-
-            if (cacheId) {
-                intl$format$cache$$cache.dateTimeFormats[cacheId] = format;
+        for (k in props) {
+            if ($$es52$$hop.call(props, k)) {
+                $$es52$$defineProperty(obj, k, props[k]);
             }
         }
 
-        return format;
+        return obj;
+    };
+
+    var $$diff$$round = Math.round;
+
+    function $$diff$$daysToYears (days) {
+        // 400 years have 146097 days (taking into account leap year rules)
+        return days * 400 / 146097;
     }
 
-    function intl$format$cache$$getNumberFormat(locales, options) {
-        options || (options = {});
+    var $$diff$$default = function (dfrom, dto) {
+        var millisecond = $$diff$$round(dto.getTime() - dfrom.getTime()),
+            second      = $$diff$$round(millisecond / 1000),
+            minute      = $$diff$$round(second / 60),
+            hour        = $$diff$$round(minute / 60),
+            day         = $$diff$$round(hour / 24),
+            week        = $$diff$$round(day / 7);
 
-        var cacheId = intl$format$cache$$getCacheId([locales, options]),
-            format  = intl$format$cache$$cache.numberFormats[cacheId];
+        var rawYears = $$diff$$daysToYears(day),
+            month    = $$diff$$round(rawYears * 12),
+            year     = $$diff$$round(rawYears);
 
-        if (!format) {
-            format = new Intl.NumberFormat(locales, options);
+        return {
+            millisecond: millisecond,
+            second     : second,
+            minute     : minute,
+            hour       : hour,
+            day        : day,
+            week       : week,
+            month      : month,
+            year       : year
+        };
+    };
 
-            if (cacheId) {
-                intl$format$cache$$cache.numberFormats[cacheId] = format;
-            }
-        }
+    var $$core1$$default = $$core1$$RelativeFormat;
 
-        return format;
+    var $$core1$$FIELDS = ['second', 'minute', 'hour', 'day', 'month', 'year'];
+    var $$core1$$STYLES = ['best fit', 'numeric'];
+
+    // -- RelativeFormat --------------------------------------------------------
+
+    function $$core1$$RelativeFormat(locales, options) {
+        options = options || {};
+
+        $$es52$$defineProperty(this, '_locale', {value: this._resolveLocale(locales)});
+        $$es52$$defineProperty(this, '_options', {value: {
+            style: this._resolveStyle(options.style),
+            units: this._isValidUnits(options.units) && options.units
+        }});
+
+        $$es52$$defineProperty(this, '_messages', {value: $$es52$$objCreate(null)});
+
+        // "Bind" `format()` method to `this` so it can be passed by reference like
+        // the other `Intl` APIs.
+        var relativeFormat = this;
+        this.format = function format(date) {
+            return relativeFormat._format(date);
+        };
     }
 
-    function intl$format$cache$$getMessageFormat(message, locales, options) {
-        options || (options = {});
+    // Define internal private properties for dealing with locale data.
+    $$es52$$defineProperty($$core1$$RelativeFormat, '__availableLocales__', {value: []});
+    $$es52$$defineProperty($$core1$$RelativeFormat, '__localeData__', {value: $$es52$$objCreate(null)});
+    $$es52$$defineProperty($$core1$$RelativeFormat, '__addLocaleData', {value: function (data) {
+        if (!(data && data.locale)) {
+            throw new Error(
+                'Locale data provided to IntlRelativeFormat does not contain a ' +
+                '`locale` property'
+            );
+        }
 
-        var cacheId = intl$format$cache$$getCacheId([message, locales, options]),
-            format  = intl$format$cache$$cache.messageFormats[cacheId];
+        if (!data.fields) {
+            throw new Error(
+                'Locale data provided to IntlRelativeFormat does not contain a ' +
+                '`fields` property'
+            );
+        }
 
-        if (!format) {
-            format = new intl$messageformat$$default(message, locales, options);
+        // Add data to IntlMessageFormat.
+        intl$messageformat$$default.__addLocaleData(data);
 
-            if (cacheId) {
-                intl$format$cache$$cache.messageFormats[cacheId] = format;
+        var availableLocales = $$core1$$RelativeFormat.__availableLocales__,
+            localeData       = $$core1$$RelativeFormat.__localeData__;
+
+        // Message format locale data only requires the first part of the tag.
+        var locale = data.locale.toLowerCase().split('-')[0];
+
+        availableLocales.push(locale);
+        localeData[locale] = data;
+    }});
+
+    // Define public `defaultLocale` property which can be set by the developer, or
+    // it will be set when the first RelativeFormat instance is created by leveraging
+    // the resolved locale from `Intl`.
+    $$es52$$defineProperty($$core1$$RelativeFormat, 'defaultLocale', {
+        enumerable: true,
+        writable  : true,
+        value     : undefined
+    });
+
+    // Define public `thresholds` property which can be set by the developer, and
+    // defaults to relative time thresholds from moment.js.
+    $$es52$$defineProperty($$core1$$RelativeFormat, 'thresholds', {
+        enumerable: true,
+
+        value: {
+            second: 45,  // seconds to minute
+            minute: 45,  // minutes to hour
+            hour  : 22,  // hours to day
+            day   : 26,  // days to month
+            month : 11   // months to year
+        }
+    });
+
+    $$core1$$RelativeFormat.prototype.resolvedOptions = function () {
+        return {
+            locale: this._locale,
+            style : this._options.style,
+            units : this._options.units
+        };
+    };
+
+    $$core1$$RelativeFormat.prototype._format = function (date) {
+        date = new Date(date);
+
+        // Determine if the `date` is valid.
+        if (!(date && date.getTime())) {
+            throw new TypeError(
+                'A Date must be provided to a IntlRelativeFormat instance\'s ' +
+                '`format()` function'
+            );
+        }
+
+        var diffReport  = $$diff$$default(new Date(), date);
+        var units       = this._options.units || this._selectUnits(diffReport);
+        var diffInUnits = diffReport[units];
+
+        if (this._options.style !== 'numeric') {
+            var relativeUnits = this._resolveRelativeUnits(diffInUnits, units);
+            if (relativeUnits) {
+                return relativeUnits;
             }
         }
 
-        return format;
+        return this._resolveMessage(units).format({
+            '0' : Math.abs(diffInUnits),
+            when: diffInUnits < 0 ? 'past' : 'future'
+        });
+    };
+
+    $$core1$$RelativeFormat.prototype._isValidUnits = function (units) {
+        if (!units || $$core1$$FIELDS.indexOf(units) >= 0) {
+            return true;
+        }
+
+        if (typeof units === 'string') {
+            var suggestion = /s$/.test(units) && units.substr(0, units.length - 1);
+            if (suggestion && $$core1$$FIELDS.indexOf(suggestion) >= 0) {
+                throw new Error(
+                    '"' + units + '" is not a valid IntlRelativeFormat `units` ' +
+                    'value, did you mean: ' + suggestion
+                );
+            }
+        }
+
+        throw new Error(
+            '"' + units + '" is not a valid IntlRelativeFormat `units` value, it ' +
+            'must be one of: "' + $$core1$$FIELDS.join('", "') + '"'
+        );
+    };
+
+    $$core1$$RelativeFormat.prototype._resolveLocale = function (locales) {
+        if (!locales) {
+            locales = $$core1$$RelativeFormat.defaultLocale;
+        }
+
+        if (typeof locales === 'string') {
+            locales = [locales];
+        }
+
+        var availableLocales = $$core1$$RelativeFormat.__availableLocales__;
+        var i, len, locale;
+
+        for (i = 0, len = locales.length; i < len; i += 1) {
+            // We just need the root part of the langage tag.
+            locale = locales[i].split('-')[0].toLowerCase();
+
+            // Validate that the langage tag is structurally valid.
+            if (!/[a-z]{2,3}/.test(locale)) {
+                throw new Error(
+                    'Language tag provided to IntlRelativeFormat is not ' +
+                    'structrually valid: ' + locale
+                );
+            }
+
+            // Return the first locale for which we have CLDR data registered.
+            if (availableLocales.indexOf(locale) >= 0) {
+                return locale;
+            }
+        }
+
+        throw new Error(
+            'No locale data has been added to IntlRelativeFormat for: ' +
+            locales.join(', ')
+        );
+    };
+
+    $$core1$$RelativeFormat.prototype._resolveMessage = function (units) {
+        var messages = this._messages;
+        var field, relativeTime, i, future, past, message;
+
+        // Create a new synthetic message based on the locale data from CLDR.
+        if (!messages[units]) {
+            field        = $$core1$$RelativeFormat.__localeData__[this._locale].fields[units];
+            relativeTime = field.relativeTime;
+            future       = '';
+            past         = '';
+
+            for (i in relativeTime.future) {
+                if (relativeTime.future.hasOwnProperty(i)) {
+                    future += ' ' + i + ' {' +
+                        relativeTime.future[i].replace('{0}', '#') + '}';
+                }
+            }
+
+            for (i in relativeTime.past) {
+                if (relativeTime.past.hasOwnProperty(i)) {
+                    past += ' ' + i + ' {' +
+                        relativeTime.past[i].replace('{0}', '#') + '}';
+                }
+            }
+
+            message = '{when, select, future {{0, plural, ' + future + '}}' +
+                    'past {{0, plural, ' + past + '}}}';
+
+            messages[units] = new intl$messageformat$$default(message, this._locale);
+        }
+
+        return messages[units];
+    };
+
+    $$core1$$RelativeFormat.prototype._resolveRelativeUnits = function (diff, units) {
+        var field = $$core1$$RelativeFormat.__localeData__[this._locale].fields[units];
+
+        if (field.relative) {
+            return field.relative[diff];
+        }
+    };
+
+    $$core1$$RelativeFormat.prototype._resolveStyle = function (style) {
+        // Default to "best fit" style.
+        if (!style) {
+            return $$core1$$STYLES[0];
+        }
+
+        if ($$core1$$STYLES.indexOf(style) >= 0) {
+            return style;
+        }
+
+        throw new Error(
+            '"' + style + '" is not a valid IntlRelativeFormat `style` value, it ' +
+            'must be one of: "' + $$core1$$STYLES.join('", "') + '"'
+        );
+    };
+
+    $$core1$$RelativeFormat.prototype._selectUnits = function (diffReport) {
+        var i, l, units;
+
+        for (i = 0, l = $$core1$$FIELDS.length; i < l; i += 1) {
+            units = $$core1$$FIELDS[i];
+
+            if (Math.abs(diffReport[units]) < $$core1$$RelativeFormat.thresholds[units]) {
+                break;
+            }
+        }
+
+        return units;
+    };
+    var $$en2$$default = {"locale":"en","pluralRuleFunction":function (n) {var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(i===1&&v===0)return"one";return"other";},"fields":{"second":{"displayName":"Second","relative":{"0":"now"},"relativeTime":{"future":{"one":"in {0} second","other":"in {0} seconds"},"past":{"one":"{0} second ago","other":"{0} seconds ago"}}},"minute":{"displayName":"Minute","relativeTime":{"future":{"one":"in {0} minute","other":"in {0} minutes"},"past":{"one":"{0} minute ago","other":"{0} minutes ago"}}},"hour":{"displayName":"Hour","relativeTime":{"future":{"one":"in {0} hour","other":"in {0} hours"},"past":{"one":"{0} hour ago","other":"{0} hours ago"}}},"day":{"displayName":"Day","relative":{"0":"today","1":"tomorrow","-1":"yesterday"},"relativeTime":{"future":{"one":"in {0} day","other":"in {0} days"},"past":{"one":"{0} day ago","other":"{0} days ago"}}},"month":{"displayName":"Month","relative":{"0":"this month","1":"next month","-1":"last month"},"relativeTime":{"future":{"one":"in {0} month","other":"in {0} months"},"past":{"one":"{0} month ago","other":"{0} months ago"}}},"year":{"displayName":"Year","relative":{"0":"this year","1":"next year","-1":"last year"},"relativeTime":{"future":{"one":"in {0} year","other":"in {0} years"},"past":{"one":"{0} year ago","other":"{0} years ago"}}}}};
+
+    $$core1$$default.__addLocaleData($$en2$$default);
+    $$core1$$default.defaultLocale = 'en';
+
+    var intl$relativeformat$$default = $$core1$$default;
+
+    // Purposely using the same implementation as the Intl.js `Intl` polyfill.
+    // Copyright 2013 Andy Earnshaw, MIT License
+
+    var $$es5$$hop = Object.prototype.hasOwnProperty;
+
+    var $$es5$$realDefineProp = (function () {
+        try { return !!Object.defineProperty({}, 'a', {}); }
+        catch (e) { return false; }
+    })();
+
+    var $$es5$$es3 = !$$es5$$realDefineProp && !Object.prototype.__defineGetter__;
+
+    var $$es5$$defineProperty = $$es5$$realDefineProp ? Object.defineProperty :
+            function (obj, name, desc) {
+
+        if ('get' in desc && obj.__defineGetter__) {
+            obj.__defineGetter__(name, desc.get);
+        } else if (!$$es5$$hop.call(obj, name) || 'value' in desc) {
+            obj[name] = desc.value;
+        }
+    };
+
+    var $$es5$$objCreate = Object.create || function (proto, props) {
+        var obj, k;
+
+        function F() {}
+        F.prototype = proto;
+        obj = new F();
+
+        for (k in props) {
+            if ($$es5$$hop.call(props, k)) {
+                $$es5$$defineProperty(obj, k, props[k]);
+            }
+        }
+
+        return obj;
+    };
+    var intl$format$cache$$default = intl$format$cache$$createFormatCache;
+
+    // -----------------------------------------------------------------------------
+
+    function intl$format$cache$$createFormatCache(FormatConstructor) {
+        var cache = $$es5$$objCreate(null);
+
+        return function () {
+            var args    = Array.prototype.slice.call(arguments);
+            var cacheId = intl$format$cache$$getCacheId(args);
+            var format  = cacheId && cache[cacheId];
+
+            if (!format) {
+                format = $$es5$$objCreate(FormatConstructor.prototype);
+                FormatConstructor.apply(format, args);
+
+                if (cacheId) {
+                    cache[cacheId] = format;
+                }
+            }
+
+            return format;
+        };
     }
 
     // -- Utilities ----------------------------------------------------------------
 
     function intl$format$cache$$getCacheId(inputs) {
         // When JSON is not available in the runtime, we will not create a cache id.
-        if (!JSON) { return; }
+        if (typeof JSON === 'undefined') { return; }
 
         var cacheId = [];
 
@@ -1868,6 +2189,11 @@
 
     // -----------------------------------------------------------------------------
 
+    var $$helpers$$getNumberFormat   = intl$format$cache$$default(Intl.NumberFormat);
+    var $$helpers$$getDateTimeFormat = intl$format$cache$$default(Intl.DateTimeFormat);
+    var $$helpers$$getMessageFormat  = intl$format$cache$$default(intl$messageformat$$default);
+    var $$helpers$$getRelativeFormat = intl$format$cache$$default(intl$relativeformat$$default);
+
     function $$helpers$$registerWith(Handlebars) {
         var SafeString  = Handlebars.SafeString,
             createFrame = Handlebars.createFrame,
@@ -1878,6 +2204,7 @@
             intlGet          : intlGet,
             formatDate       : formatDate,
             formatTime       : formatTime,
+            formatRelative   : formatRelative,
             formatNumber     : formatNumber,
             formatMessage    : formatMessage,
             formatHTMLMessage: formatHTMLMessage,
@@ -1898,7 +2225,15 @@
 
         function deprecate(name, suggestion) {
             return function () {
-                console.warn('{{' + name + '}} is deprecated, use: {{' + suggestion.name + '}}');
+                if (typeof console !== 'undefined' &&
+                    typeof console.warn === 'function') {
+
+                    console.warn(
+                        '{{' + name + '}} is deprecated, use: ' +
+                        '{{' + suggestion.name + '}}'
+                    );
+                }
+
                 return suggestion.apply(this, arguments);
             };
         }
@@ -1909,7 +2244,7 @@
             /* jshint validthis:true */
 
             if (!options.fn) {
-                throw new ReferenceError('{{#intl}} must be invoked as a block helper');
+                throw new Error('{{#intl}} must be invoked as a block helper');
             }
 
             // Create a new data frame linked the parent and create a new intl data
@@ -1944,75 +2279,26 @@
         }
 
         function formatDate(date, formatOptions, options) {
-            date = new Date(date);
-
-            // Determine if the `date` is valid.
-            if (!(date && date.getTime())) {
-                throw new TypeError('A date must be provided.');
-            }
-
-            if (!options) {
-                options       = formatOptions;
-                formatOptions = null;
-            }
-
-            var hash    = options.hash,
-                data    = options.data,
-                locales = data.intl && data.intl.locales;
-
-            if (formatOptions) {
-                if (typeof formatOptions === 'string') {
-                    formatOptions = intlGet('formats.date.' + formatOptions, options);
-                }
-
-                formatOptions = $$utils$$extend({}, formatOptions, hash);
-            } else {
-                formatOptions = hash;
-            }
-
-            return intl$format$cache$$getDateTimeFormat(locales, formatOptions).format(date);
+            date = resolveDate(date, 'A date must be provided to {{formatDate}}');
+            return simpleFormat('date', date, formatOptions, options);
         }
 
         function formatTime(date, formatOptions, options) {
-            if (!options) {
-                options       = formatOptions;
-                formatOptions = null;
-            }
+            date = resolveDate(date, 'A date must be provided to {{formatTime}}');
+            return simpleFormat('time', date, formatOptions, options);
+        }
 
-            // Lookup named format on `formats.time`, before delegating to the
-            // `formatDate` helper.
-            if (formatOptions && typeof formatOptions === 'string') {
-                formatOptions = intlGet('formats.time.' + formatOptions, options);
-            }
-
-            return formatDate(date, formatOptions, options);
+        function formatRelative(date, formatOptions, options) {
+            date = resolveDate(date, 'A date must be provided to {{formatRelative}}');
+            return simpleFormat('relative', date, formatOptions, options);
         }
 
         function formatNumber(num, formatOptions, options) {
             if (typeof num !== 'number') {
-                throw new TypeError('A number must be provided.');
+                throw new TypeError('A number must be provided to {{formatNumber}}');
             }
 
-            if (!options) {
-                options       = formatOptions;
-                formatOptions = null;
-            }
-
-            var hash    = options.hash,
-                data    = options.data,
-                locales = data.intl && data.intl.locales;
-
-            if (formatOptions) {
-                if (typeof formatOptions === 'string') {
-                    formatOptions = intlGet('formats.number.' + formatOptions, options);
-                }
-
-                formatOptions = $$utils$$extend({}, formatOptions, hash);
-            } else {
-                formatOptions = hash;
-            }
-
-            return intl$format$cache$$getNumberFormat(locales, formatOptions).format(num);
+            return simpleFormat('number', num, formatOptions, options);
         }
 
         function formatMessage(message, options) {
@@ -2047,7 +2333,7 @@
             }
 
             if (typeof message === 'string') {
-                message = intl$format$cache$$getMessageFormat(message, locales, formats);
+                message = $$helpers$$getMessageFormat(message, locales, formats);
             }
 
             return message.format(hash);
@@ -2077,10 +2363,66 @@
             // make sure it's not returning a double-wrapped `SafeString`.
             return new SafeString(String(formatMessage.apply(this, arguments)));
         }
+
+        // -- Utilities ------------------------------------------------------------
+
+        function resolveDate(date, errMsg) {
+            date = new Date(date);
+
+            // Determine if the `date` is valid.
+            if (!(date && date.getTime())) {
+                throw new TypeError(errMsg);
+            }
+
+            return date;
+        }
+
+        function simpleFormat(type, value, formatOptions, helperOptions) {
+            if (!helperOptions) {
+                helperOptions = formatOptions;
+                formatOptions = null;
+            }
+
+            var hash    = helperOptions.hash;
+            var data    = helperOptions.data;
+            var locales = data.intl && data.intl.locales;
+
+            if (formatOptions) {
+                if (typeof formatOptions === 'string') {
+                    formatOptions = intlGet('formats.' + type + '.' + formatOptions,
+                            helperOptions);
+                }
+
+                formatOptions = $$utils$$extend({}, formatOptions, hash);
+            } else {
+                formatOptions = hash;
+            }
+
+            switch(type) {
+                case 'date':
+                case 'time':
+                    return $$helpers$$getDateTimeFormat(locales, formatOptions).format(value);
+                case 'number':
+                    return $$helpers$$getNumberFormat(locales, formatOptions).format(value);
+                case 'relative':
+                    return $$helpers$$getRelativeFormat(locales, formatOptions).format(value);
+                default:
+                    throw new Error('Unrecognized simple format type: ' + type);
+            }
+        }
     }
 
+    function $$helpers$$__addLocaleData(data) {
+        intl$messageformat$$default.__addLocaleData(data);
+        intl$relativeformat$$default.__addLocaleData(data);
+    }
+    var $$en$$default = {"locale":"en","pluralRuleFunction":function (n) {var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(i===1&&v===0)return"one";return"other";},"fields":{"second":{"displayName":"Second","relative":{"0":"now"},"relativeTime":{"future":{"one":"in {0} second","other":"in {0} seconds"},"past":{"one":"{0} second ago","other":"{0} seconds ago"}}},"minute":{"displayName":"Minute","relativeTime":{"future":{"one":"in {0} minute","other":"in {0} minutes"},"past":{"one":"{0} minute ago","other":"{0} minutes ago"}}},"hour":{"displayName":"Hour","relativeTime":{"future":{"one":"in {0} hour","other":"in {0} hours"},"past":{"one":"{0} hour ago","other":"{0} hours ago"}}},"day":{"displayName":"Day","relative":{"0":"today","1":"tomorrow","-1":"yesterday"},"relativeTime":{"future":{"one":"in {0} day","other":"in {0} days"},"past":{"one":"{0} day ago","other":"{0} days ago"}}},"month":{"displayName":"Month","relative":{"0":"this month","1":"next month","-1":"last month"},"relativeTime":{"future":{"one":"in {0} month","other":"in {0} months"},"past":{"one":"{0} month ago","other":"{0} months ago"}}},"year":{"displayName":"Year","relative":{"0":"this year","1":"next year","-1":"last year"},"relativeTime":{"future":{"one":"in {0} year","other":"in {0} years"},"past":{"one":"{0} year ago","other":"{0} years ago"}}}}};
+
+    $$helpers$$__addLocaleData($$en$$default);
+
     var src$main$$default = {
-        registerWith: $$helpers$$registerWith
+        registerWith   : $$helpers$$registerWith,
+        __addLocaleData: $$helpers$$__addLocaleData
     };
 
     this['HandlebarsIntl'] = src$main$$default;
