@@ -6,17 +6,20 @@ See the accompanying LICENSE file for terms.
 
 /* jshint esnext: true */
 
-import {
-    getDateTimeFormat,
-    getNumberFormat,
-    getMessageFormat
-} from 'intl-format-cache';
+import IntlMessageFormat from 'intl-messageformat';
+import IntlRelativeFormat from 'intl-relativeformat';
+import createFormatCache from 'intl-format-cache';
 
 import {extend} from './utils';
 
-export {registerWith};
+export {registerWith, __addLocaleData};
 
 // -----------------------------------------------------------------------------
+
+var getNumberFormat   = createFormatCache(Intl.NumberFormat);
+var getDateTimeFormat = createFormatCache(Intl.DateTimeFormat);
+var getMessageFormat  = createFormatCache(IntlMessageFormat);
+var getRelativeFormat = createFormatCache(IntlRelativeFormat);
 
 function registerWith(Handlebars) {
     var SafeString  = Handlebars.SafeString,
@@ -28,6 +31,7 @@ function registerWith(Handlebars) {
         intlGet          : intlGet,
         formatDate       : formatDate,
         formatTime       : formatTime,
+        formatRelative   : formatRelative,
         formatNumber     : formatNumber,
         formatMessage    : formatMessage,
         formatHTMLMessage: formatHTMLMessage,
@@ -48,7 +52,15 @@ function registerWith(Handlebars) {
 
     function deprecate(name, suggestion) {
         return function () {
-            console.warn('{{' + name + '}} is deprecated, use: {{' + suggestion.name + '}}');
+            if (typeof console !== 'undefined' &&
+                typeof console.warn === 'function') {
+
+                console.warn(
+                    '{{' + name + '}} is deprecated, use: ' +
+                    '{{' + suggestion.name + '}}'
+                );
+            }
+
             return suggestion.apply(this, arguments);
         };
     }
@@ -59,7 +71,7 @@ function registerWith(Handlebars) {
         /* jshint validthis:true */
 
         if (!options.fn) {
-            throw new ReferenceError('{{#intl}} must be invoked as a block helper');
+            throw new Error('{{#intl}} must be invoked as a block helper');
         }
 
         // Create a new data frame linked the parent and create a new intl data
@@ -94,75 +106,26 @@ function registerWith(Handlebars) {
     }
 
     function formatDate(date, formatOptions, options) {
-        date = new Date(date);
-
-        // Determine if the `date` is valid.
-        if (!(date && date.getTime())) {
-            throw new TypeError('A date must be provided.');
-        }
-
-        if (!options) {
-            options       = formatOptions;
-            formatOptions = null;
-        }
-
-        var hash    = options.hash,
-            data    = options.data,
-            locales = data.intl && data.intl.locales;
-
-        if (formatOptions) {
-            if (typeof formatOptions === 'string') {
-                formatOptions = intlGet('formats.date.' + formatOptions, options);
-            }
-
-            formatOptions = extend({}, formatOptions, hash);
-        } else {
-            formatOptions = hash;
-        }
-
-        return getDateTimeFormat(locales, formatOptions).format(date);
+        date = resolveDate(date, 'A date must be provided to {{formatDate}}');
+        return simpleFormat('date', date, formatOptions, options);
     }
 
     function formatTime(date, formatOptions, options) {
-        if (!options) {
-            options       = formatOptions;
-            formatOptions = null;
-        }
+        date = resolveDate(date, 'A date must be provided to {{formatTime}}');
+        return simpleFormat('time', date, formatOptions, options);
+    }
 
-        // Lookup named format on `formats.time`, before delegating to the
-        // `formatDate` helper.
-        if (formatOptions && typeof formatOptions === 'string') {
-            formatOptions = intlGet('formats.time.' + formatOptions, options);
-        }
-
-        return formatDate(date, formatOptions, options);
+    function formatRelative(date, formatOptions, options) {
+        date = resolveDate(date, 'A date must be provided to {{formatRelative}}');
+        return simpleFormat('relative', date, formatOptions, options);
     }
 
     function formatNumber(num, formatOptions, options) {
         if (typeof num !== 'number') {
-            throw new TypeError('A number must be provided.');
+            throw new TypeError('A number must be provided to {{formatNumber}}');
         }
 
-        if (!options) {
-            options       = formatOptions;
-            formatOptions = null;
-        }
-
-        var hash    = options.hash,
-            data    = options.data,
-            locales = data.intl && data.intl.locales;
-
-        if (formatOptions) {
-            if (typeof formatOptions === 'string') {
-                formatOptions = intlGet('formats.number.' + formatOptions, options);
-            }
-
-            formatOptions = extend({}, formatOptions, hash);
-        } else {
-            formatOptions = hash;
-        }
-
-        return getNumberFormat(locales, formatOptions).format(num);
+        return simpleFormat('number', num, formatOptions, options);
     }
 
     function formatMessage(message, options) {
@@ -227,4 +190,56 @@ function registerWith(Handlebars) {
         // make sure it's not returning a double-wrapped `SafeString`.
         return new SafeString(String(formatMessage.apply(this, arguments)));
     }
+
+    // -- Utilities ------------------------------------------------------------
+
+    function resolveDate(date, errMsg) {
+        date = new Date(date);
+
+        // Determine if the `date` is valid.
+        if (!(date && date.getTime())) {
+            throw new TypeError(errMsg);
+        }
+
+        return date;
+    }
+
+    function simpleFormat(type, value, formatOptions, helperOptions) {
+        if (!helperOptions) {
+            helperOptions = formatOptions;
+            formatOptions = null;
+        }
+
+        var hash    = helperOptions.hash;
+        var data    = helperOptions.data;
+        var locales = data.intl && data.intl.locales;
+
+        if (formatOptions) {
+            if (typeof formatOptions === 'string') {
+                formatOptions = intlGet('formats.' + type + '.' + formatOptions,
+                        helperOptions);
+            }
+
+            formatOptions = extend({}, formatOptions, hash);
+        } else {
+            formatOptions = hash;
+        }
+
+        switch(type) {
+            case 'date':
+            case 'time':
+                return getDateTimeFormat(locales, formatOptions).format(value);
+            case 'number':
+                return getNumberFormat(locales, formatOptions).format(value);
+            case 'relative':
+                return getRelativeFormat(locales, formatOptions).format(value);
+            default:
+                throw new Error('Unrecognized simple format type: ' + type);
+        }
+    }
+}
+
+function __addLocaleData(data) {
+    IntlMessageFormat.__addLocaleData(data);
+    IntlRelativeFormat.__addLocaleData(data);
 }
