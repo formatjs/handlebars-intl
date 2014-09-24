@@ -71,6 +71,29 @@ This package assumes that the [`Intl`][Intl] global object exists in the runtime
 
 **Luckly, there's the [Intl.js][] polyfill!** You will need to conditionally load the polyfill if you want to support runtimes which `Intl` is not already built-in.
 
+#### Loading Intl.js Polyfill in a browser
+
+If the browser does not already have the `Intl` APIs built-in, the Intl.js Polyfill will need to be loaded on the page along with the locale data for any locales that need to be supported:
+
+```html
+<script src="intl/Intl.min.js"></script>
+<script src="intl/locale-data/jsonp/en-US.js"></script>
+```
+
+_Note: Modern browsers already have the `Intl` APIs built-in, so you can load the Intl.js Polyfill conditionally, by for checking for `window.Intl`._
+
+#### Loading Intl.js Polyfill in Node.js
+
+Conditionally require the Intl.js Polyfill if it doesn't already exist in the runtime. As of Node <= 0.10, this polyfill will be required.
+
+```js
+if (!global.Intl) {
+    require('intl');
+}
+```
+
+_Note: When using the Intl.js Polyfill in Node.js, it will automatically load the locale data for all supported locales._
+
 ### Registering Helpers in a Browser
 
 First, load Handlebars and this package onto the page:
