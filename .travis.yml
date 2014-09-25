@@ -10,7 +10,7 @@ notifications:
     on_failure: always
 env:
   global:
-    - secure: pKfInMlawxC/TL71GQdSan/7JsSYjORlNawLOopxJgDig6vPGor06oLJ1nZMo29Wg8dJYEhZj6EjenXJEZHpfKNe11ObZtRSJuoBD3/S4oH01PoB76AMDeLz0s2Ue8B3xQoclHM9YzgHTeJ2dnBMwyVNaFca8ivZCapxVlNX1kI=
-    - secure: O5Sv3HUmCb9Ajt8S/+iqwPRnBenSrupF6J9Wq4LNya4KJLap4Xv8hyOQ2+6jkVPApaj2zLLJQciiglzCurKcr0ysdPa3eS3Z3aCzyaDnDceePWVwtc4CWs4rrYSc+/u2LXAhAdE1+TYuzUtojWZGPWqipetDjAp9gQV0jwD9dr0=
+    - secure: 1r3HJvCAiLtqo4neotDQC8pPM0uB/45RUBmrjkELfGg02Eo2HYP0d8jBqDSR48e4O5/6Zw4lQPLLgDV7Ix3wNCo9yqIH1NDXnkBWcEShRzzJD1dJpCS+zCJXmuh9IqXOr+Sd93jNXADc6xVk8vUWaAOfaIK0vBiQmrq4GxLyYc4=
+    - secure: qtUKktaUsfHgDK4ncpEVRTYV4T7pEZPOASB26EkCyyG8MgIfp827O9VmM3NtE6rPT4ymMuGvaRyCrt6cea5duhOnu0XyaoHR+IxRH+r67/qHKXzQ9dRMNbGD+UME6ozhMLgGAh1ZsWZ/QL9ei7WvtZID0IBbwxWZ/sYQZwa8Jho=
 addons:
   sauce_connect: true
