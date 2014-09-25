@@ -50,7 +50,8 @@
   },
   "scripts": {
     "prepublish": "grunt",
-    "test": "istanbul cover -- _mocha tests/ --reporter spec && tests/smoke/saucelabs.sh"
+    "test": "istanbul cover -- _mocha tests/ --reporter spec",
+    "travis": "istanbul cover -- _mocha tests/ --reporter spec && tests/smoke/saucelabs.sh"
   },
   "homepage": "https://github.com/yahoo/handlebars-intl",
   "directories": {
