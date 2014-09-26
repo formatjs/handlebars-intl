@@ -1,7 +1,7 @@
 {
   "name": "handlebars-intl",
   "main": "dist/handlebars-intl.js",
-  "version": "1.0.0-rc-4",
+  "version": "1.0.0-rc-5",
   "homepage": "https://github.com/yahoo/handlebars-intl",
   "authors": [
     "Eric Ferraiuolo <eferraiuolo@gmail.com>",
