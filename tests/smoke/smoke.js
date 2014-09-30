@@ -8,11 +8,11 @@ describe('Handlebars Intl Helper', function () {
 
     it('Formats dates correctly', function () {
         var template = Handlebars.compile(
-'{{#intl locales="es-AR"}}{{formatDate now weekday="long" timeZone="UTC"}}{{/intl}}'
+'{{#intl locales="en-US"}}{{formatDate now month="numeric" year="numeric" timeZone="UTC"}}{{/intl}}'
         );
 
-        var date = new Date(2014, 8, 22, 0, 0, 0, 0);
-        expect(template({now: date})).to.equal('lunes');
+        var date = new Date(Date.UTC(2014, 8, 22, 0, 0, 0, 0));
+        expect(template({now: date})).to.equal('9/2014');
     });
 
     it('Formats messages correctly', function () {
