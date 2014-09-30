@@ -46,6 +46,7 @@ echo
     --caps "name=ie11;browserName=internet explorer;version=11;platform=Windows 8.1$SAUCE_CAPS" \
     --caps "name=ie10;browserName=internet explorer;version=10;platform=Windows 8$SAUCE_CAPS" \
     --caps "name=ie9;browserName=internet explorer;version=9;platform=Windows 7$SAUCE_CAPS" \
+    --caps "name=ie8;browserName=internet explorer;version=8;platform=Windows 7$SAUCE_CAPS" \
     --wd-url "http://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@ondemand.saucelabs.com/" \
     --hub "http://test.yuicode.com/" \
     tests/smoke/*.html
