@@ -8,12 +8,12 @@ describe('Handlebars Intl Helper', function () {
 
     it('Formats dates correctly', function () {
         var template = Handlebars.compile(
-'{{#intl locales="es-AR"}}{{formatDate now weekday="long" month="long" year="numeric" timeZone="UTC"}}{{/intl}}'
+'{{#intl locales="es-AR"}}{{formatDate now month="long" year="numeric" timeZone="UTC"}}{{/intl}}'
         );
 
         var date = new Date(Date.UTC(2014, 9, 20, 0, 0, 0, 0));
-        expect(template({now: date})).to.contain('lunes')
-            .and.to.contain('octubre')
+        expect(template({now: date}))
+            .to.contain('octubre')
             .and.to.contain('2014');
     });
 
