@@ -7,6 +7,8 @@ Handlebars helpers for internationalization.
 [![Build Status][travis-badge]][travis]
 [![Dependency Status][david-badge]][david]
 
+[![Sauce Test Status](https://saucelabs.com/browser-matrix/handlebars-intl.svg)](https://saucelabs.com/u/handlebars-intl)
+
 **This package used to be named `handlebars-helper-intl`.**
 
 
