@@ -47,8 +47,7 @@
     "intl": "^0.1.4",
     "istanbul": "^0.3.2",
     "mocha": "^1.21.4",
-    "xunit-file": "0.0.5",
-    "yeti": "^0.2.29"
+    "xunit-file": "0.0.5"
   },
   "scripts": {
     "prepublish": "grunt",
