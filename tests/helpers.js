@@ -1,31 +1,18 @@
-/* global describe, it, locale */
+/* global describe, it, expect, locale, Handlebars */
 /* jshint node:true, expr:true */
 
 'use strict';
 
-var chai,
-    expect,
-    Handlebars,
-    timeStamp = 1390518044403;
-
-if (typeof require === 'function') {
-    chai = require('chai');
-    Handlebars = require('handlebars');
-
-    // Intl
-    global.Intl || (global.Intl = require('intl'));
-
-    require('../').registerWith(Handlebars);
-}
-
-expect = chai.expect;
+var timeStamp = 1390518044403;
 
 function intlBlock(content, options) {
     var hash = [],
         option, open, close;
 
     for (option in options) {
-        hash.push(option + '=' + '"' + options[option] + '"');
+        if (options.hasOwnProperty(option)) {
+            hash.push(option + '=' + '"' + options[option] + '"');
+        }
     }
 
     open  = '{{#intl ' + hash.join(' ') + '}}';
@@ -36,7 +23,7 @@ function intlBlock(content, options) {
 
 describe('Helper `formatNumber`', function () {
     it('should be added to Handlebars', function () {
-        expect(Handlebars.helpers).to.include.keys('formatNumber');
+        expect(Handlebars.helpers).to.have.keys('formatNumber');
     });
 
     it('should be a function', function () {
@@ -44,7 +31,9 @@ describe('Helper `formatNumber`', function () {
     });
 
     it('should throw if called with out a value', function () {
-        expect(Handlebars.compile('{{formatNumber}}')).to.throw(TypeError);
+        expect(Handlebars.compile('{{formatNumber}}')).to.throwException(function (e) {
+            expect(e).to.be.a(TypeError);
+        });
     });
 
     describe('used to format numbers', function () {
@@ -161,7 +150,7 @@ describe('Helper `formatNumber`', function () {
 
 describe('Helper `formatDate`', function () {
     it('should be added to Handlebars', function () {
-        expect(Handlebars.helpers).to.include.keys('formatDate');
+        expect(Handlebars.helpers).to.have.keys('formatDate');
     });
 
     it('should be a function', function () {
@@ -169,7 +158,9 @@ describe('Helper `formatDate`', function () {
     });
 
     it('should throw if called with out a value', function () {
-        expect(Handlebars.compile('{{formatDate}}')).to.throw(TypeError);
+        expect(Handlebars.compile('{{formatDate}}')).to.throwException(function (e) {
+            expect(e).to.be.a(TypeError);
+        });
     });
 
     // Use a fixed known date
@@ -193,7 +184,7 @@ describe('Helper `formatDate`', function () {
 
 describe('Helper `formatTime`', function () {
     it('should be added to Handlebars', function () {
-        expect(Handlebars.helpers).to.include.keys('formatTime');
+        expect(Handlebars.helpers).to.have.keys('formatTime');
     });
 
     it('should be a function', function () {
@@ -201,7 +192,9 @@ describe('Helper `formatTime`', function () {
     });
 
     it('should throw if called with out a value', function () {
-        expect(Handlebars.compile('{{formatTime}}')).to.throw(TypeError);
+        expect(Handlebars.compile('{{formatTime}}')).to.throwException(function (e) {
+            expect(e).to.be.a(TypeError);
+        });
     });
 
     // Use a fixed known date
@@ -225,7 +218,7 @@ describe('Helper `formatTime`', function () {
 
 describe('Helper `formatMessage`', function () {
     it('should be added to Handlebars', function () {
-        expect(Handlebars.helpers).to.include.keys('formatMessage');
+        expect(Handlebars.helpers).to.have.keys('formatMessage');
     });
 
     it('should be a function', function () {
@@ -233,7 +226,9 @@ describe('Helper `formatMessage`', function () {
     });
 
     it('should throw if called with out a value', function () {
-        expect(Handlebars.compile('{{formatMessage}}')).to.throw(ReferenceError);
+        expect(Handlebars.compile('{{formatMessage}}')).to.throwException(function (e) {
+            expect(e).to.be.a(ReferenceError);
+        });
     });
 
     it('should return a formatted string', function () {
@@ -289,7 +284,7 @@ describe('Helper `formatMessage`', function () {
 
 describe('Helper `intl`', function () {
     it('should be added to Handlebars', function () {
-        expect(Handlebars.helpers).to.include.keys('intl');
+        expect(Handlebars.helpers).to.have.keys('intl');
     });
 
     it('should be a function', function () {
