@@ -1,5 +1,5 @@
-/*global Handlebars*/
-
+/* global Handlebars */
+/* jshint node:true */
 'use strict';
 
 if (typeof Intl === 'undefined') {
