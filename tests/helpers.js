@@ -84,31 +84,31 @@ describe('Helper `formatNumber`', function () {
         it('should return a string formatted to currency', function () {
             var tmpl;
 
-            tmpl = intlBlock('{{formatNumber 40000 style="currency" currency="USD"}}', {locales: 'en-US'});
-            expect(tmpl()).to.equal('$40,000.00');
+            tmpl = intlBlock('{{formatNumber 40000 style="currency" currency="USD" minimumFractionDigits=0}}', {locales: 'en-US'});
+            expect(tmpl()).to.equal('$40,000');
 
-            tmpl = intlBlock('{{formatNumber 40000 style="currency" currency="EUR"}}', {locales: 'en-US'});
-            expect(tmpl()).to.equal('€40,000.00');
+            tmpl = intlBlock('{{formatNumber 40000 style="currency" currency="EUR" minimumFractionDigits=0}}', {locales: 'en-US'});
+            expect(tmpl()).to.equal('€40,000');
 
-            tmpl = intlBlock('{{formatNumber 40000 style="currency" currency="JPY"}}', {locales: 'en-US'});
+            tmpl = intlBlock('{{formatNumber 40000 style="currency" currency="JPY" minimumFractionDigits=0}}', {locales: 'en-US'});
             expect(tmpl()).to.equal('¥40,000');
         });
 
         it('should return a string formatted to currency with code', function () {
             var tmpl;
 
-            tmpl = intlBlock('{{formatNumber 40000 style="currency" currency="USD" currencyDisplay="code"}}', {locales: 'en-US'});
+            tmpl = intlBlock('{{formatNumber 40000 style="currency" currency="USD" currencyDisplay="code" minimumFractionDigits=2}}', {locales: 'en-US'});
             expect(tmpl()).to.equal('USD40,000.00');
 
-            tmpl = intlBlock('{{formatNumber 40000 style="currency" currency="EUR" currencyDisplay="code"}}', {locales: 'en-US'});
+            tmpl = intlBlock('{{formatNumber 40000 style="currency" currency="EUR" currencyDisplay="code" minimumFractionDigits=2}}', {locales: 'en-US'});
             expect(tmpl()).to.equal('EUR40,000.00');
 
-            tmpl = intlBlock('{{formatNumber 40000 style="currency" currency="JPY" currencyDisplay="code"}}', {locales: 'en-US'});
+            tmpl = intlBlock('{{formatNumber 40000 style="currency" currency="JPY" currencyDisplay="code" minimumFractionDigits=0}}', {locales: 'en-US'});
             expect(tmpl()).to.equal('JPY40,000');
         });
 
         it('should function within an `each` block helper', function () {
-            var tmpl = intlBlock('{{#each currencies}} {{formatNumber AMOUNT style="currency" currency=CURRENCY}}{{/each}}', {locales: 'en-US'}),
+            var tmpl = intlBlock('{{#each currencies}} {{formatNumber AMOUNT style="currency" currency=CURRENCY minimumFractionDigits=0}}{{/each}}', {locales: 'en-US'}),
                 out  = tmpl({ currencies: [
                         { AMOUNT: 3, CURRENCY: 'USD'},
                         { AMOUNT: 8, CURRENCY: 'EUR'},
@@ -116,20 +116,20 @@ describe('Helper `formatNumber`', function () {
                     ]});
 
             // note the output must contain the correct spaces to match the template
-            expect(out).to.equal(' $3.00 €8.00 ¥10');
+            expect(out).to.equal(' $3 €8 ¥10');
         });
 
         it('should return a currency even when using a different locale', function (){
-            var tmpl = intlBlock('{{formatNumber 40000 style="currency" currency=CURRENCY}}', {locales: 'de-DE'}),
+            var tmpl = intlBlock('{{formatNumber 40000 style="currency" currency=CURRENCY minimumFractionDigits=2}}', {locales: 'de-DE'}),
                 out  = tmpl({ CURRENCY: 'USD' });
 
             expect(out, 'USD->de-DE').to.equal('40.000,00 $');
 
-            tmpl = intlBlock('{{formatNumber 40000 style="currency" currency=CURRENCY}}', {locales: 'de-DE'});
+            tmpl = intlBlock('{{formatNumber 40000 style="currency" currency=CURRENCY minimumFractionDigits=2}}', {locales: 'de-DE'});
             out  = tmpl({ CURRENCY: 'EUR'});
             expect(out, 'EUR->de-DE').to.equal('40.000,00 €');
 
-            tmpl = intlBlock('{{formatNumber 40000 style="currency" currency=CURRENCY}}', {locales: 'de-DE'});
+            tmpl = intlBlock('{{formatNumber 40000 style="currency" currency=CURRENCY minimumFractionDigits=0}}', {locales: 'de-DE'});
             out  = tmpl({ CURRENCY: 'JPY'});
             expect(out, 'JPY->de-DE').to.equal('40.000 ¥');
         });
@@ -293,17 +293,17 @@ describe('Helper `intl`', function () {
 
     describe('should provide formats', function () {
         it('for formatNumber', function () {
-            var tmpl = '{{#intl formats=intl.formats locales="en-US"}}{{formatNumber NUM "usd"}} {{formatNumber NUM "eur"}} {{formatNumber NUM style="currency" currency="USD"}}{{/intl}}',
+            var tmpl = '{{#intl formats=intl.formats locales="en-US"}}{{formatNumber NUM "usd"}} {{formatNumber NUM "eur"}} {{formatNumber NUM style="currency" currency="USD" minimumFractionDigits=2}}{{/intl}}',
                 ctx = {
                     intl: {
                         formats: {
                             number: {
-                                eur: { style: 'currency', currency: 'EUR' },
-                                usd: { style: 'currency', currency: 'USD' }
+                                eur: { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 },
+                                usd: { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }
                             }
                         }
                     },
-                    NUM: 40000.004
+                    NUM: 40000.00
                 };
             expect(Handlebars.compile(tmpl)(ctx)).to.equal('$40,000.00 €40,000.00 $40,000.00');
         });
@@ -330,13 +330,13 @@ describe('Helper `intl`', function () {
                     intl: {
                         formats: {
                             number: {
-                                eur: { style: 'currency', currency: 'EUR' },
-                                usd: { style: 'currency', currency: 'USD' }
+                                eur: { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 },
+                                usd: { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }
                             }
                         }
                     },
                     PRODUCT: 'oranges',
-                    PRICE: 40000.004,
+                    PRICE: 40000.00,
                     DEADLINE: timeStamp,
                     TZ: 'UTC'
                 };
