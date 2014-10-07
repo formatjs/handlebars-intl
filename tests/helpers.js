@@ -1,4 +1,4 @@
-/* global describe, it, expect, locale, Handlebars */
+/* global describe, it, expect, locale, Intl, IntlPolyfill, Handlebars */
 /* jshint node:true, expr:true */
 
 'use strict';
