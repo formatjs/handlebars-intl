@@ -2,9 +2,8 @@
 /* jshint node:true */
 'use strict';
 
-if (typeof Intl === 'undefined') {
-    global.Intl = require('intl');
-}
+// Force use of Intl.js Polyfill to serve as a mock.
+require('intl');
 
 global.Handlebars = require('handlebars');
 global.expect = require('expect.js');
