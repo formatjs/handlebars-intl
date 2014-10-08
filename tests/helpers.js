@@ -180,6 +180,11 @@ describe('Helper `formatDate`', function () {
         var tmpl = intlBlock('{{formatDate ' + timeStamp + ' hour="numeric" minute="numeric" timeZone="UTC"}}', {locales: 'en-US'});
         expect(tmpl()).to.equal('11:00 PM');
     });
+
+    it('should format the epoch timestamp', function () {
+        var tmpl = intlBlock('{{formatDate 0}}', {locales: 'en-US'});
+        expect(tmpl()).to.equal('12/31/1969');
+    });
 });
 
 describe('Helper `formatTime`', function () {
