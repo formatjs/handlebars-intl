@@ -2315,25 +2315,25 @@
         }
 
         function formatDate(date, formatOptions, options) {
-            date = resolveDate(date, 'A date must be provided to {{formatDate}}');
+            date = new Date(date);
+            assertIsDate(date, 'A date or timestamp must be provided to {{formatDate}}');
             return simpleFormat('date', date, formatOptions, options);
         }
 
         function formatTime(date, formatOptions, options) {
-            date = resolveDate(date, 'A date must be provided to {{formatTime}}');
+            date = new Date(date);
+            assertIsDate(date, 'A date or timestamp must be provided to {{formatTime}}');
             return simpleFormat('time', date, formatOptions, options);
         }
 
         function formatRelative(date, formatOptions, options) {
-            date = resolveDate(date, 'A date must be provided to {{formatRelative}}');
+            date = new Date(date);
+            assertIsDate(date, 'A date or timestamp must be provided to {{formatRelative}}');
             return simpleFormat('relative', date, formatOptions, options);
         }
 
         function formatNumber(num, formatOptions, options) {
-            if (typeof num !== 'number') {
-                throw new TypeError('A number must be provided to {{formatNumber}}');
-            }
-
+            assertIsNumber(num, 'A number must be provided to {{formatNumber}}');
             return simpleFormat('number', num, formatOptions, options);
         }
 
@@ -2348,7 +2348,9 @@
             // TODO: remove support form `hash.intlName` once Handlebars bugs with
             // subexpressions are fixed.
             if (!(message || typeof message === 'string' || hash.intlName)) {
-                throw new ReferenceError('{{formatMessage}} must be provided a message or intlName');
+                throw new ReferenceError(
+                    '{{formatMessage}} must be provided a message or intlName'
+                );
             }
 
             var intlData = options.data.intl || {},
@@ -2402,15 +2404,18 @@
 
         // -- Utilities ------------------------------------------------------------
 
-        function resolveDate(date, errMsg) {
-            date = new Date(date);
-
-            // Determine if the `date` is valid.
-            if (!(date && date.getTime())) {
+        function assertIsDate(date, errMsg) {
+            // Determine if the `date` is valid by checking if it is finite, which
+            // is the same way that `Intl.DateTimeFormat#format()` checks.
+            if (!isFinite(date)) {
                 throw new TypeError(errMsg);
             }
+        }
 
-            return date;
+        function assertIsNumber(num, errMsg) {
+            if (typeof num !== 'number') {
+                throw new TypeError(errMsg);
+            }
         }
 
         function simpleFormat(type, value, formatOptions, helperOptions) {
