@@ -6,10 +6,7 @@ See the accompanying LICENSE file for terms.
 
 /* jshint esnext: true */
 
-import {registerWith, __addLocaleData} from './helpers';
-import defaultLocale from './en';
-
-__addLocaleData(defaultLocale);
+import {registerWith, __addLocaleData} from './handlebars-intl.js';
 
 // Re-export as default for
 export default {

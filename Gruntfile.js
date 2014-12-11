@@ -59,7 +59,7 @@ module.exports = function (grunt) {
                 options: {
                     prelude: [
                         '// GENERATED FILE',
-                        'var HandlebarsIntl = require("./helpers");\n\n'
+                        'var HandlebarsIntl = require("./handlebars-intl");\n\n'
                     ].join('\n'),
 
                     wrapEntry: function (entry) {

@@ -10,9 +10,9 @@ import IntlMessageFormat from 'intl-messageformat';
 import IntlRelativeFormat from 'intl-relativeformat';
 import createFormatCache from 'intl-format-cache';
 
-import {extend} from './utils';
+import {extend} from './utils.js';
 
-export {registerWith, __addLocaleData};
+export {registerWith};
 
 // -----------------------------------------------------------------------------
 
@@ -242,9 +242,4 @@ function registerWith(Handlebars) {
                 throw new Error('Unrecognized simple format type: ' + type);
         }
     }
-}
-
-function __addLocaleData(data) {
-    IntlMessageFormat.__addLocaleData(data);
-    IntlRelativeFormat.__addLocaleData(data);
 }
