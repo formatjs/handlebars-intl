@@ -23,14 +23,14 @@
     // Purposely using the same implementation as the Intl.js `Intl` polyfill.
     // Copyright 2013 Andy Earnshaw, MIT License
 
-    var $$es51$$realDefineProp = (function () {
+    var $$es5$$realDefineProp = (function () {
         try { return !!Object.defineProperty({}, 'a', {}); }
         catch (e) { return false; }
     })();
 
-    var $$es51$$es3 = !$$es51$$realDefineProp && !Object.prototype.__defineGetter__;
+    var $$es5$$es3 = !$$es5$$realDefineProp && !Object.prototype.__defineGetter__;
 
-    var $$es51$$defineProperty = $$es51$$realDefineProp ? Object.defineProperty :
+    var $$es5$$defineProperty = $$es5$$realDefineProp ? Object.defineProperty :
             function (obj, name, desc) {
 
         if ('get' in desc && obj.__defineGetter__) {
@@ -40,7 +40,7 @@
         }
     };
 
-    var $$es51$$objCreate = Object.create || function (proto, props) {
+    var $$es5$$objCreate = Object.create || function (proto, props) {
         var obj, k;
 
         function F() {}
@@ -49,7 +49,7 @@
 
         for (k in props) {
             if ($$utils1$$hop.call(props, k)) {
-                $$es51$$defineProperty(obj, k, props[k]);
+                $$es5$$defineProperty(obj, k, props[k]);
             }
         }
 
@@ -1516,7 +1516,7 @@
         formats = this._mergeFormats($$core$$MessageFormat.formats, formats);
 
         // Defined first because it's used to build the format pattern.
-        $$es51$$defineProperty(this, '_locale',  {value: this._resolveLocale(locales)});
+        $$es5$$defineProperty(this, '_locale',  {value: this._resolveLocale(locales)});
 
         var pluralFn = $$core$$MessageFormat.__localeData__[this._locale].pluralRuleFunction;
 
@@ -1536,7 +1536,7 @@
     // Default format options used as the prototype of the `formats` provided to the
     // constructor. These are used when constructing the internal Intl.NumberFormat
     // and Intl.DateTimeFormat instances.
-    $$es51$$defineProperty($$core$$MessageFormat, 'formats', {
+    $$es5$$defineProperty($$core$$MessageFormat, 'formats', {
         enumerable: true,
 
         value: {
@@ -1607,8 +1607,8 @@
     });
 
     // Define internal private properties for dealing with locale data.
-    $$es51$$defineProperty($$core$$MessageFormat, '__localeData__', {value: $$es51$$objCreate(null)});
-    $$es51$$defineProperty($$core$$MessageFormat, '__addLocaleData', {value: function (data) {
+    $$es5$$defineProperty($$core$$MessageFormat, '__localeData__', {value: $$es5$$objCreate(null)});
+    $$es5$$defineProperty($$core$$MessageFormat, '__addLocaleData', {value: function (data) {
         if (!(data && data.locale)) {
             throw new Error(
                 'Locale data provided to IntlMessageFormat is missing a ' +
@@ -1630,11 +1630,11 @@
     }});
 
     // Defines `__parse()` static method as an exposed private.
-    $$es51$$defineProperty($$core$$MessageFormat, '__parse', {value: intl$messageformat$parser$$default.parse});
+    $$es5$$defineProperty($$core$$MessageFormat, '__parse', {value: intl$messageformat$parser$$default.parse});
 
     // Define public `defaultLocale` property which defaults to English, but can be
     // set by the developer.
-    $$es51$$defineProperty($$core$$MessageFormat, 'defaultLocale', {
+    $$es5$$defineProperty($$core$$MessageFormat, 'defaultLocale', {
         enumerable: true,
         writable  : true,
         value     : undefined
@@ -1694,7 +1694,7 @@
         for (type in defaults) {
             if (!$$utils1$$hop.call(defaults, type)) { continue; }
 
-            mergedFormats[type] = mergedType = $$es51$$objCreate(defaults[type]);
+            mergedFormats[type] = mergedType = $$es5$$objCreate(defaults[type]);
 
             if (formats && $$utils1$$hop.call(formats, type)) {
                 $$utils1$$extend(mergedType, formats[type]);
@@ -1749,26 +1749,26 @@
     // Purposely using the same implementation as the Intl.js `Intl` polyfill.
     // Copyright 2013 Andy Earnshaw, MIT License
 
-    var $$es52$$hop = Object.prototype.hasOwnProperty;
+    var $$es51$$hop = Object.prototype.hasOwnProperty;
 
-    var $$es52$$realDefineProp = (function () {
+    var $$es51$$realDefineProp = (function () {
         try { return !!Object.defineProperty({}, 'a', {}); }
         catch (e) { return false; }
     })();
 
-    var $$es52$$es3 = !$$es52$$realDefineProp && !Object.prototype.__defineGetter__;
+    var $$es51$$es3 = !$$es51$$realDefineProp && !Object.prototype.__defineGetter__;
 
-    var $$es52$$defineProperty = $$es52$$realDefineProp ? Object.defineProperty :
+    var $$es51$$defineProperty = $$es51$$realDefineProp ? Object.defineProperty :
             function (obj, name, desc) {
 
         if ('get' in desc && obj.__defineGetter__) {
             obj.__defineGetter__(name, desc.get);
-        } else if (!$$es52$$hop.call(obj, name) || 'value' in desc) {
+        } else if (!$$es51$$hop.call(obj, name) || 'value' in desc) {
             obj[name] = desc.value;
         }
     };
 
-    var $$es52$$objCreate = Object.create || function (proto, props) {
+    var $$es51$$objCreate = Object.create || function (proto, props) {
         var obj, k;
 
         function F() {}
@@ -1776,15 +1776,15 @@
         obj = new F();
 
         for (k in props) {
-            if ($$es52$$hop.call(props, k)) {
-                $$es52$$defineProperty(obj, k, props[k]);
+            if ($$es51$$hop.call(props, k)) {
+                $$es51$$defineProperty(obj, k, props[k]);
             }
         }
 
         return obj;
     };
 
-    var $$es52$$arrIndexOf = Array.prototype.indexOf || function (search, fromIndex) {
+    var $$es51$$arrIndexOf = Array.prototype.indexOf || function (search, fromIndex) {
         /*jshint validthis:true */
         var arr = this;
         if (!arr.length) {
@@ -1858,13 +1858,20 @@
     function $$core1$$RelativeFormat(locales, options) {
         options = options || {};
 
-        $$es52$$defineProperty(this, '_locale', {value: this._resolveLocale(locales)});
-        $$es52$$defineProperty(this, '_options', {value: {
+        // Make a copy of `locales` if it's an array, so that it doesn't change
+        // since it's used lazily.
+        if (Object.prototype.toString.call(locales) === '[object Array]') {
+            locales = locales.concat();
+        }
+
+        $$es51$$defineProperty(this, '_locale', {value: this._resolveLocale(locales)});
+        $$es51$$defineProperty(this, '_locales', {value: locales});
+        $$es51$$defineProperty(this, '_options', {value: {
             style: this._resolveStyle(options.style),
             units: this._isValidUnits(options.units) && options.units
         }});
 
-        $$es52$$defineProperty(this, '_messages', {value: $$es52$$objCreate(null)});
+        $$es51$$defineProperty(this, '_messages', {value: $$es51$$objCreate(null)});
 
         // "Bind" `format()` method to `this` so it can be passed by reference like
         // the other `Intl` APIs.
@@ -1875,8 +1882,8 @@
     }
 
     // Define internal private properties for dealing with locale data.
-    $$es52$$defineProperty($$core1$$RelativeFormat, '__localeData__', {value: $$es52$$objCreate(null)});
-    $$es52$$defineProperty($$core1$$RelativeFormat, '__addLocaleData', {value: function (data) {
+    $$es51$$defineProperty($$core1$$RelativeFormat, '__localeData__', {value: $$es51$$objCreate(null)});
+    $$es51$$defineProperty($$core1$$RelativeFormat, '__addLocaleData', {value: function (data) {
         if (!(data && data.locale)) {
             throw new Error(
                 'Locale data provided to IntlRelativeFormat is missing a ' +
@@ -1903,7 +1910,7 @@
     // Define public `defaultLocale` property which can be set by the developer, or
     // it will be set when the first RelativeFormat instance is created by leveraging
     // the resolved locale from `Intl`.
-    $$es52$$defineProperty($$core1$$RelativeFormat, 'defaultLocale', {
+    $$es51$$defineProperty($$core1$$RelativeFormat, 'defaultLocale', {
         enumerable: true,
         writable  : true,
         value     : undefined
@@ -1911,7 +1918,7 @@
 
     // Define public `thresholds` property which can be set by the developer, and
     // defaults to relative time thresholds from moment.js.
-    $$es52$$defineProperty($$core1$$RelativeFormat, 'thresholds', {
+    $$es51$$defineProperty($$core1$$RelativeFormat, 'thresholds', {
         enumerable: true,
 
         value: {
@@ -1929,6 +1936,42 @@
             style : this._options.style,
             units : this._options.units
         };
+    };
+
+    $$core1$$RelativeFormat.prototype._compileMessage = function (units) {
+        // `this._locales` is the original set of locales the user specificed to the
+        // constructor, while `this._locale` is the resolved root locale.
+        var locales        = this._locales;
+        var resolvedLocale = this._locale;
+
+        var localeData   = $$core1$$RelativeFormat.__localeData__;
+        var field        = localeData[resolvedLocale].fields[units];
+        var relativeTime = field.relativeTime;
+        var future       = '';
+        var past         = '';
+        var i;
+
+        for (i in relativeTime.future) {
+            if (relativeTime.future.hasOwnProperty(i)) {
+                future += ' ' + i + ' {' +
+                    relativeTime.future[i].replace('{0}', '#') + '}';
+            }
+        }
+
+        for (i in relativeTime.past) {
+            if (relativeTime.past.hasOwnProperty(i)) {
+                past += ' ' + i + ' {' +
+                    relativeTime.past[i].replace('{0}', '#') + '}';
+            }
+        }
+
+        var message = '{when, select, future {{0, plural, ' + future + '}}' +
+                                     'past {{0, plural, ' + past + '}}}';
+
+        // Create the synthetic IntlMessageFormat instance using the original
+        // locales value specified by the user when constructing the the parent
+        // IntlRelativeFormat instance.
+        return new intl$messageformat$$default(message, locales);
     };
 
     $$core1$$RelativeFormat.prototype._format = function (date) {
@@ -1965,13 +2008,13 @@
     };
 
     $$core1$$RelativeFormat.prototype._isValidUnits = function (units) {
-        if (!units || $$es52$$arrIndexOf.call($$core1$$FIELDS, units) >= 0) {
+        if (!units || $$es51$$arrIndexOf.call($$core1$$FIELDS, units) >= 0) {
             return true;
         }
 
         if (typeof units === 'string') {
             var suggestion = /s$/.test(units) && units.substr(0, units.length - 1);
-            if (suggestion && $$es52$$arrIndexOf.call($$core1$$FIELDS, suggestion) >= 0) {
+            if (suggestion && $$es51$$arrIndexOf.call($$core1$$FIELDS, suggestion) >= 0) {
                 throw new Error(
                     '"' + units + '" is not a valid IntlRelativeFormat `units` ' +
                     'value, did you mean: ' + suggestion
@@ -2024,33 +2067,10 @@
 
     $$core1$$RelativeFormat.prototype._resolveMessage = function (units) {
         var messages = this._messages;
-        var field, relativeTime, i, future, past, message;
 
         // Create a new synthetic message based on the locale data from CLDR.
         if (!messages[units]) {
-            field        = $$core1$$RelativeFormat.__localeData__[this._locale].fields[units];
-            relativeTime = field.relativeTime;
-            future       = '';
-            past         = '';
-
-            for (i in relativeTime.future) {
-                if (relativeTime.future.hasOwnProperty(i)) {
-                    future += ' ' + i + ' {' +
-                        relativeTime.future[i].replace('{0}', '#') + '}';
-                }
-            }
-
-            for (i in relativeTime.past) {
-                if (relativeTime.past.hasOwnProperty(i)) {
-                    past += ' ' + i + ' {' +
-                        relativeTime.past[i].replace('{0}', '#') + '}';
-                }
-            }
-
-            message = '{when, select, future {{0, plural, ' + future + '}}' +
-                    'past {{0, plural, ' + past + '}}}';
-
-            messages[units] = new intl$messageformat$$default(message, this._locale);
+            messages[units] = this._compileMessage(units);
         }
 
         return messages[units];
@@ -2070,7 +2090,7 @@
             return $$core1$$STYLES[0];
         }
 
-        if ($$es52$$arrIndexOf.call($$core1$$STYLES, style) >= 0) {
+        if ($$es51$$arrIndexOf.call($$core1$$STYLES, style) >= 0) {
             return style;
         }
 
@@ -2103,26 +2123,26 @@
     // Purposely using the same implementation as the Intl.js `Intl` polyfill.
     // Copyright 2013 Andy Earnshaw, MIT License
 
-    var $$es5$$hop = Object.prototype.hasOwnProperty;
+    var $$es52$$hop = Object.prototype.hasOwnProperty;
 
-    var $$es5$$realDefineProp = (function () {
+    var $$es52$$realDefineProp = (function () {
         try { return !!Object.defineProperty({}, 'a', {}); }
         catch (e) { return false; }
     })();
 
-    var $$es5$$es3 = !$$es5$$realDefineProp && !Object.prototype.__defineGetter__;
+    var $$es52$$es3 = !$$es52$$realDefineProp && !Object.prototype.__defineGetter__;
 
-    var $$es5$$defineProperty = $$es5$$realDefineProp ? Object.defineProperty :
+    var $$es52$$defineProperty = $$es52$$realDefineProp ? Object.defineProperty :
             function (obj, name, desc) {
 
         if ('get' in desc && obj.__defineGetter__) {
             obj.__defineGetter__(name, desc.get);
-        } else if (!$$es5$$hop.call(obj, name) || 'value' in desc) {
+        } else if (!$$es52$$hop.call(obj, name) || 'value' in desc) {
             obj[name] = desc.value;
         }
     };
 
-    var $$es5$$objCreate = Object.create || function (proto, props) {
+    var $$es52$$objCreate = Object.create || function (proto, props) {
         var obj, k;
 
         function F() {}
@@ -2130,8 +2150,8 @@
         obj = new F();
 
         for (k in props) {
-            if ($$es5$$hop.call(props, k)) {
-                $$es5$$defineProperty(obj, k, props[k]);
+            if ($$es52$$hop.call(props, k)) {
+                $$es52$$defineProperty(obj, k, props[k]);
             }
         }
 
@@ -2142,7 +2162,7 @@
     // -----------------------------------------------------------------------------
 
     function intl$format$cache$$createFormatCache(FormatConstructor) {
-        var cache = $$es5$$objCreate(null);
+        var cache = $$es52$$objCreate(null);
 
         return function () {
             var args    = Array.prototype.slice.call(arguments);
@@ -2150,7 +2170,7 @@
             var format  = cacheId && cache[cacheId];
 
             if (!format) {
-                format = $$es5$$objCreate(FormatConstructor.prototype);
+                format = $$es52$$objCreate(FormatConstructor.prototype);
                 FormatConstructor.apply(format, args);
 
                 if (cacheId) {
@@ -2459,18 +2479,17 @@
             }
         }
     }
-
-    function $$helpers$$__addLocaleData(data) {
+    var $$en$$default = {"locale":"en","pluralRuleFunction":function (n) {var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(i===1&&v===0)return"one";return"other";},"fields":{"second":{"displayName":"Second","relative":{"0":"now"},"relativeTime":{"future":{"one":"in {0} second","other":"in {0} seconds"},"past":{"one":"{0} second ago","other":"{0} seconds ago"}}},"minute":{"displayName":"Minute","relativeTime":{"future":{"one":"in {0} minute","other":"in {0} minutes"},"past":{"one":"{0} minute ago","other":"{0} minutes ago"}}},"hour":{"displayName":"Hour","relativeTime":{"future":{"one":"in {0} hour","other":"in {0} hours"},"past":{"one":"{0} hour ago","other":"{0} hours ago"}}},"day":{"displayName":"Day","relative":{"0":"today","1":"tomorrow","-1":"yesterday"},"relativeTime":{"future":{"one":"in {0} day","other":"in {0} days"},"past":{"one":"{0} day ago","other":"{0} days ago"}}},"month":{"displayName":"Month","relative":{"0":"this month","1":"next month","-1":"last month"},"relativeTime":{"future":{"one":"in {0} month","other":"in {0} months"},"past":{"one":"{0} month ago","other":"{0} months ago"}}},"year":{"displayName":"Year","relative":{"0":"this year","1":"next year","-1":"last year"},"relativeTime":{"future":{"one":"in {0} year","other":"in {0} years"},"past":{"one":"{0} year ago","other":"{0} years ago"}}}}};
+    function $$handlebars$intl$$__addLocaleData(data) {
         intl$messageformat$$default.__addLocaleData(data);
         intl$relativeformat$$default.__addLocaleData(data);
     }
-    var $$en$$default = {"locale":"en","pluralRuleFunction":function (n) {var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(i===1&&v===0)return"one";return"other";},"fields":{"second":{"displayName":"Second","relative":{"0":"now"},"relativeTime":{"future":{"one":"in {0} second","other":"in {0} seconds"},"past":{"one":"{0} second ago","other":"{0} seconds ago"}}},"minute":{"displayName":"Minute","relativeTime":{"future":{"one":"in {0} minute","other":"in {0} minutes"},"past":{"one":"{0} minute ago","other":"{0} minutes ago"}}},"hour":{"displayName":"Hour","relativeTime":{"future":{"one":"in {0} hour","other":"in {0} hours"},"past":{"one":"{0} hour ago","other":"{0} hours ago"}}},"day":{"displayName":"Day","relative":{"0":"today","1":"tomorrow","-1":"yesterday"},"relativeTime":{"future":{"one":"in {0} day","other":"in {0} days"},"past":{"one":"{0} day ago","other":"{0} days ago"}}},"month":{"displayName":"Month","relative":{"0":"this month","1":"next month","-1":"last month"},"relativeTime":{"future":{"one":"in {0} month","other":"in {0} months"},"past":{"one":"{0} month ago","other":"{0} months ago"}}},"year":{"displayName":"Year","relative":{"0":"this year","1":"next year","-1":"last year"},"relativeTime":{"future":{"one":"in {0} year","other":"in {0} years"},"past":{"one":"{0} year ago","other":"{0} years ago"}}}}};
 
-    $$helpers$$__addLocaleData($$en$$default);
+    $$handlebars$intl$$__addLocaleData($$en$$default);
 
     var src$main$$default = {
         registerWith   : $$helpers$$registerWith,
-        __addLocaleData: $$helpers$$__addLocaleData
+        __addLocaleData: $$handlebars$intl$$__addLocaleData
     };
 
     this['HandlebarsIntl'] = src$main$$default;
