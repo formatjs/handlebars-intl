@@ -367,10 +367,33 @@ The hash arguments represent the name/value pairs that are used to format the `m
 
 #### `{{formatHTMLMessage}}`
 
-This delegates to the `{{formatMessage}}` helper, but will first HTML-escape all of the hash argument values. This allows the `message` string to contain HTML and it will be considered safe since it's part of the template and not user-supplied data.
+This delegates to the `{{formatMessage}}` helper, but will first HTML-escape all of the hash argument values which do not return a Handlebars.SafeString. This allows the `message` string to contain HTML and it will be considered safe since it's part of the template and not user-supplied data.
 
 **Note:** The recommendation is to remove all HTML from message strings, but sometimes it can be impractical, in those cases, this helper can be used.
 
+```javascript
+Handlebars.registerHelper('strong', function (input) {
+    return new Handlebars.SafeString('<strong>' + Handlebars.Utils.escapeExpression(input) + '</strong>');
+});
+
+var html = template({visitorCount: 100}, {
+  data: {intl: inltData}
+});
+```
+
+```handlebars
+{{formatMessage "Hello visitor #{vis}!" vis=(strong (relativeNumber visitorCount))}}
+```
+
+Output:
+Hello visitor #**100**!
+
+```handlebars
+{{formatMessage "Hello visitor #<strong>{vis}</strong>!" vis=(relativeNumber visitorCount)}}
+```
+
+Output:
+Hello visitor #<strong>100</strong>!
 
 License
 -------

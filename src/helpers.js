@@ -134,7 +134,13 @@ function registerWith(Handlebars) {
             message = null;
         }
 
-        var hash = options.hash;
+        var hash          = options.hash,
+            isMessageSafe = message instanceof SafeString;
+
+        if (isMessageSafe) {
+            // `IntlMessageFormat` requires `message` to be a string
+            message = String(message);
+        }
 
         // TODO: remove support form `hash.intlName` once Handlebars bugs with
         // subexpressions are fixed.
@@ -144,9 +150,27 @@ function registerWith(Handlebars) {
             );
         }
 
-        var intlData = options.data.intl || {},
-            locales  = intlData.locales,
-            formats  = intlData.formats;
+        var intlData          = options.data.intl || {},
+            locales           = intlData.locales,
+            formats           = intlData.formats,
+            hashHasSafeString = false;
+
+        var key, value;
+
+        for (key in hash) {
+            if (hash.hasOwnProperty(key)) {
+                value = hash[key];
+
+                if (!hashHasSafeString && value instanceof SafeString) {
+                    hashHasSafeString = true;
+                }
+
+                // Escape string value.
+                else if (typeof value === 'string') {
+                    hash[key] = escape(value);
+                }
+            }
+        }
 
         // Lookup message by path name. User must supply the full path to the
         // message on `options.data.intl`.
@@ -162,35 +186,29 @@ function registerWith(Handlebars) {
         }
 
         if (typeof message === 'string') {
+            // When `message` is not a SafeString but at least one of
+            // the hash values is a SafeString, escape the message
+            if (!isMessageSafe && hashHasSafeString) {
+                message = escape(message);
+            }
+
             message = getMessageFormat(message, locales, formats);
+        }
+
+        // If any of the hash values are a SafeString we need to treat
+        // the output of message.format as a SafeString to render
+        // the SafeString hash values as allowed HTML.
+        if (hashHasSafeString) {
+          return new SafeString(message.format(hash));
         }
 
         return message.format(hash);
     }
 
-    function formatHTMLMessage() {
-        /* jshint validthis:true */
-        var options = [].slice.call(arguments).pop(),
-            hash    = options.hash;
-
-        var key, value;
-
-        // Replace string properties in `options.hash` with HTML-escaped
-        // strings.
-        for (key in hash) {
-            if (hash.hasOwnProperty(key)) {
-                value = hash[key];
-
-                // Escape string value.
-                if (typeof value === 'string') {
-                    hash[key] = escape(value);
-                }
-            }
-        }
-
+    function formatHTMLMessage(message, options) {
         // Return a Handlebars `SafeString`. This first unwraps the result to
         // make sure it's not returning a double-wrapped `SafeString`.
-        return new SafeString(String(formatMessage.apply(this, arguments)));
+        return new SafeString(String(formatMessage.call(this, new SafeString(message), options)));
     }
 
     // -- Utilities ------------------------------------------------------------
