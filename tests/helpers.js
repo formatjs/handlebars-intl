@@ -141,7 +141,7 @@ describe('Helper `formatNumber`', function () {
             expect(tmpl()).to.equal('40,000%');
         });
 
-        it('should return a perctage when using a different locale', function () {
+        it('should return a percentage when using a different locale', function () {
             var tmpl = intlBlock('{{formatNumber 400 style="percent"}}', {locales: 'de-DE'});
             expect(tmpl()).to.equal('40.000 %');
         });
