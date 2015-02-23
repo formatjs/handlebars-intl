@@ -42,6 +42,8 @@ var context = {
     price: 1000
 };
 
+var template = Handlebars.compile(/* Template Source */);
+
 var html = template(context, {
     data: {intl: intlData}
 });
@@ -169,6 +171,8 @@ var intlData = {
 
 var context = {...};
 
+var template = Handlebars.compile(/* Template Source */);
+
 // Supply the `intl` `data` object when rendering the template.
 var html = template(context, {
     data: {intl: intlData}
@@ -240,6 +244,8 @@ Formats dates using [`Intl.DateTimeFormat`][Intl-DTF], and returns the formatted
 ```js
 var intlData = {locales: 'en-US'};
 
+var template = Handlebars.compile(/* Template Source */);
+
 var html = template({now: Date.now()}, {
     data: {intl: intlData}
 });
@@ -271,6 +277,8 @@ Formats dates relative to "now" using [`IntlRelativeFormat`][Intl-RF], and retur
 
 ```js
 var intlData: {locales: 'en-US'};
+
+var template = Handlebars.compile(/* Template Source */);
 
 var html = template({
     post: {
@@ -304,6 +312,8 @@ Formats numbers using [`Intl.NumberFormat`][Intl-NF], and returns the formatted 
 
 ```js
 var intlData = {locales: 'en-US'};
+
+var template = Handlebars.compile(/* Template Source */);
 
 var html = template({price: 100}, {
     data: {intl: intlData}
@@ -347,6 +357,8 @@ var intlData = {
     locales : 'en-US',
     messages: MESSAGES
 };
+
+var template = Handlebars.compile(/* Template Source */);
 
 var html = template({numPhotos: 1}, {
     data: {intl: inltData}
