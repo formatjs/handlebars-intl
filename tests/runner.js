@@ -10,4 +10,8 @@ global.expect = require('expect.js');
 
 require('../').registerWith(Handlebars);
 
+Handlebars.registerHelper('strong', function (input) {
+	return new Handlebars.SafeString('<strong>' + Handlebars.Utils.escapeExpression(input) + '</strong>');
+});
+
 require('./helpers');

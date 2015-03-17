@@ -221,6 +221,45 @@ describe('Helper `formatTime`', function () {
     });
 });
 
+describe('Helper `formatHTMLMessage`', function () {
+  it('should be added to Handlebars', function () {
+    expect(Handlebars.helpers).to.have.keys('formatHTMLMessage');
+  });
+
+  it('should return html, escaping all arguments', function () {
+    var tmpl = intlBlock('{{formatHTMLMessage MSG firstName=firstName lastName=lastName}}', {locales: 'en-US'}),
+    out  = tmpl({
+      MSG      : '<strong>Hi, my name is {firstName} {lastName}.</strong>',
+      firstName: '<em>Anthony</em>',
+      lastName : 'Pipkin'
+    });
+
+    expect(out).to.equal('<strong>Hi, my name is &lt;em&gt;Anthony&lt;/em&gt; Pipkin.</strong>');
+  });
+
+  it('should return html, if an argument is a SafeString', function () {
+    var tmpl = intlBlock('{{formatHTMLMessage MSG firstName=(strong firstName) lastName=lastName}}', {locales: 'en-US'}),
+    out  = tmpl({
+      MSG      : 'Hi, my name is {firstName} {lastName}.',
+      firstName: 'Anthony',
+      lastName : 'Pipkin'
+    });
+
+    expect(out).to.equal('Hi, my name is <strong>Anthony</strong> Pipkin.');
+  });
+
+  it('should return a string, escaping all arguments', function () {
+    var tmpl = intlBlock('{{formatHTMLMessage MSG firstName=firstName lastName=lastName}}', {locales: 'en-US'}),
+    out  = tmpl({
+      MSG      : 'Hi, my name is {firstName} {lastName}.',
+      firstName: '<em>Anthony</em>',
+      lastName : '<strong>Pipkin</strong>'
+    });
+
+    expect(out).to.equal('Hi, my name is &lt;em&gt;Anthony&lt;/em&gt; &lt;strong&gt;Pipkin&lt;/strong&gt;.');
+  });
+});
+
 describe('Helper `formatMessage`', function () {
     it('should be added to Handlebars', function () {
         expect(Handlebars.helpers).to.have.keys('formatMessage');
@@ -245,6 +284,37 @@ describe('Helper `formatMessage`', function () {
             });
 
         expect(out).to.equal('Hi, my name is Anthony Pipkin.');
+    });
+
+    it('should return html for SafeString arguments and escape the rest of the options', function () {
+      var tmpl = intlBlock('{{formatMessage MSG firstName=(strong firstName) lastName=lastName}}', {locales: 'en-US'}),
+      out  = tmpl({
+        MSG      : 'Hi, my name is {firstName} {lastName}.',
+        firstName: 'Anthony',
+        lastName : '<strong>Pipkin</strong>'
+      });
+
+      expect(out).to.equal('Hi, my name is <strong>Anthony</strong> &lt;strong&gt;Pipkin&lt;/strong&gt;.');
+    });
+
+    it('should return a formatted html string when an argument is a SafeString', function () {
+      var tmpl = intlBlock('{{formatMessage MSG photos=(strong (formatNumber photos))}}', {locales: 'en-US'}),
+      out  = tmpl({
+        MSG      : '<em>Number</em> of photos: {photos}.',
+        photos   : 100
+      });
+
+      expect(out).to.equal('&lt;em&gt;Number&lt;/em&gt; of photos: <strong>100</strong>.');
+    });
+
+    it('should return a string and escape all arguments', function () {
+      var tmpl = intlBlock('{{formatMessage MSG photos=photos}}', {locales: 'en-US'}),
+      out  = tmpl({
+        MSG      : 'Number of photos: {photos}.',
+        photos   : '<strong>100</strong>'
+      });
+
+      expect(out).to.equal('Number of photos: &amp;lt;strong&amp;gt;100&amp;lt;/strong&amp;gt;.');
     });
 
     it('should return a formatted string with formatted numbers and dates', function () {
