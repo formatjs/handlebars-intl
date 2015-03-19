@@ -105,27 +105,70 @@ function registerWith(Handlebars) {
         return obj;
     }
 
-    function formatDate(date, formatOptions, options) {
+    function formatDate(date, format, options) {
         date = new Date(date);
         assertIsDate(date, 'A date or timestamp must be provided to {{formatDate}}');
-        return simpleFormat('date', date, formatOptions, options);
+
+        if (!options) {
+            options = format;
+            format  = null;
+        }
+
+        var locales       = options.data.intl && options.data.intl.locales;
+        var formatOptions = getFormatOptions('date', format, options);
+
+        return getDateTimeFormat(locales, formatOptions).format(date);
     }
 
-    function formatTime(date, formatOptions, options) {
+    function formatTime(date, format, options) {
         date = new Date(date);
         assertIsDate(date, 'A date or timestamp must be provided to {{formatTime}}');
-        return simpleFormat('time', date, formatOptions, options);
+
+        if (!options) {
+            options = format;
+            format  = null;
+        }
+
+        var locales       = options.data.intl && options.data.intl.locales;
+        var formatOptions = getFormatOptions('time', format, options);
+
+        return getDateTimeFormat(locales, formatOptions).format(date);
     }
 
-    function formatRelative(date, formatOptions, options) {
+    function formatRelative(date, format, options) {
         date = new Date(date);
         assertIsDate(date, 'A date or timestamp must be provided to {{formatRelative}}');
-        return simpleFormat('relative', date, formatOptions, options);
+
+        if (!options) {
+            options = format;
+            format  = null;
+        }
+
+        var locales       = options.data.intl && options.data.intl.locales;
+        var formatOptions = getFormatOptions('relative', format, options);
+        var now           = options.hash.now;
+
+        // Remove `now` from the options passed to the `IntlRelativeFormat`
+        // constructor, because it's only used when calling `format()`.
+        delete formatOptions.now;
+
+        return getRelativeFormat(locales, formatOptions).format(date, {
+            now: now
+        });
     }
 
-    function formatNumber(num, formatOptions, options) {
+    function formatNumber(num, format, options) {
         assertIsNumber(num, 'A number must be provided to {{formatNumber}}');
-        return simpleFormat('number', num, formatOptions, options);
+
+        if (!options) {
+            options = format;
+            format  = null;
+        }
+
+        var locales       = options.data.intl && options.data.intl.locales;
+        var formatOptions = getFormatOptions('number', format, options);
+
+        return getNumberFormat(locales, formatOptions).format(num);
     }
 
     function formatMessage(message, options) {
@@ -209,20 +252,13 @@ function registerWith(Handlebars) {
         }
     }
 
-    function simpleFormat(type, value, formatOptions, helperOptions) {
-        if (!helperOptions) {
-            helperOptions = formatOptions;
-            formatOptions = null;
-        }
+    function getFormatOptions(type, format, options) {
+        var hash = options.hash;
+        var formatOptions;
 
-        var hash    = helperOptions.hash;
-        var data    = helperOptions.data;
-        var locales = data.intl && data.intl.locales;
-
-        if (formatOptions) {
-            if (typeof formatOptions === 'string') {
-                formatOptions = intlGet('formats.' + type + '.' + formatOptions,
-                        helperOptions);
+        if (format) {
+            if (typeof format === 'string') {
+                formatOptions = intlGet('formats.' + type + '.' + format, options);
             }
 
             formatOptions = extend({}, formatOptions, hash);
@@ -230,16 +266,6 @@ function registerWith(Handlebars) {
             formatOptions = hash;
         }
 
-        switch(type) {
-            case 'date':
-            case 'time':
-                return getDateTimeFormat(locales, formatOptions).format(value);
-            case 'number':
-                return getNumberFormat(locales, formatOptions).format(value);
-            case 'relative':
-                return getRelativeFormat(locales, formatOptions).format(value);
-            default:
-                throw new Error('Unrecognized simple format type: ' + type);
-        }
+        return formatOptions;
     }
 }

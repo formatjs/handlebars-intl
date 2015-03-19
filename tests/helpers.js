@@ -221,6 +221,48 @@ describe('Helper `formatTime`', function () {
     });
 });
 
+describe('Helper `formatRelative`', function () {
+    it('should be added to Handlebars', function () {
+        expect(Handlebars.helpers).to.have.keys('formatRelative');
+    });
+
+    it('should be a function', function () {
+        expect(Handlebars.helpers.formatRelative).to.be.a('function');
+    });
+
+    it('should throw if called with out a value', function () {
+        expect(Handlebars.compile('{{formatRelative}}')).to.throwException(function (e) {
+            expect(e).to.be.a(TypeError);
+        });
+    });
+
+    it('should return a formatted string', function () {
+        var tmpl = intlBlock('{{formatRelative date}}', {locales: 'en-US'});
+        expect(tmpl({date: new Date()})).to.equal('now');
+
+        // Note timestamp is passed as a number
+        tmpl = intlBlock('{{formatRelative timestamp}}', {locales: 'en-US'});
+        expect(tmpl({timestamp: new Date().getTime() - 1000})).to.equal('1 second ago');
+    });
+
+    it('should accept formatting options', function () {
+        var tmpl = intlBlock('{{formatRelative date style="numeric"}}', {locales: 'en-US'});
+        var tomorrow = new Date().getTime() + (24 * 60 * 60 * 1000);
+        expect(tmpl({date: tomorrow})).to.equal('in 1 day');
+    });
+
+    it('should accept a `now` option', function () {
+        var tmpl = intlBlock('{{formatRelative 2000 now=1000}}', {locales: 'en-US'});
+        expect(tmpl()).to.equal('in 1 second');
+    });
+
+    it('should format the epoch timestamp', function () {
+        var tmpl = intlBlock('{{formatRelative 0 now=1000}}', {locales: 'en-US'});
+        expect(tmpl()).to.equal('1 second ago');
+    });
+});
+
+
 describe('Helper `formatMessage`', function () {
     it('should be added to Handlebars', function () {
         expect(Handlebars.helpers).to.have.keys('formatMessage');
@@ -284,6 +326,16 @@ describe('Helper `formatMessage`', function () {
             });
 
         expect(out).to.equal(' Allison harvested 10 apples. Jeremy harvested 60 apples.');
+    });
+
+    it('should return a formatted `selectedordinal` message', function () {
+        var tmpl = intlBlock('{{formatMessage BDAY_MSG year=year}}', {locales: 'en-US'});
+        var out  = tmpl({
+            BDAY_MSG: 'This is my {year, selectordinal, one{#st} two{#nd} few{#rd} other{#th}} birthday.',
+            year    : 3
+        });
+
+        expect(out).to.equal('This is my 3rd birthday.');
     });
 });
 
