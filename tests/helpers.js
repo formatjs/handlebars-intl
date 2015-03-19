@@ -236,18 +236,15 @@ describe('Helper `formatRelative`', function () {
         });
     });
 
+    var tomorrow = new Date().getTime() + (24 * 60 * 60 * 1000);
+
     it('should return a formatted string', function () {
         var tmpl = intlBlock('{{formatRelative date}}', {locales: 'en-US'});
-        expect(tmpl({date: new Date()})).to.equal('now');
-
-        // Note timestamp is passed as a number
-        tmpl = intlBlock('{{formatRelative timestamp}}', {locales: 'en-US'});
-        expect(tmpl({timestamp: new Date().getTime() - 1000})).to.equal('1 second ago');
+        expect(tmpl({date: tomorrow})).to.equal('tomorrow');
     });
 
     it('should accept formatting options', function () {
         var tmpl = intlBlock('{{formatRelative date style="numeric"}}', {locales: 'en-US'});
-        var tomorrow = new Date().getTime() + (24 * 60 * 60 * 1000);
         expect(tmpl({date: tomorrow})).to.equal('in 1 day');
     });
 
