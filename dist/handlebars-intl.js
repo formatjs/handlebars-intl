@@ -159,7 +159,9 @@
 
             case 'pluralFormat':
                 options = this.compileOptions(element);
-                return new $$compiler$$PluralFormat(element.id, format.offset, options, pluralFn);
+                return new $$compiler$$PluralFormat(
+                    element.id, format.ordinal, format.offset, options, pluralFn
+                );
 
             case 'selectFormat':
                 options = this.compileOptions(element);
@@ -176,8 +178,8 @@
             optionsHash = {};
 
         // Save the current plural element, if any, then set it to a new value when
-        // compiling the options sub-patterns. This conform's the spec's algorithm
-        // for handling `"#"` synax in message text.
+        // compiling the options sub-patterns. This conforms the spec's algorithm
+        // for handling `"#"` syntax in message text.
         this.pluralStack.push(this.currentPlural);
         this.currentPlural = format.type === 'pluralFormat' ? element : null;
 
@@ -190,7 +192,7 @@
             optionsHash[option.selector] = this.compileMessage(option.value);
         }
 
-        // Pop the plural stack to put back the original currnet plural value.
+        // Pop the plural stack to put back the original current plural value.
         this.currentPlural = this.pluralStack.pop();
 
         return optionsHash;
@@ -210,18 +212,19 @@
         return typeof value === 'string' ? value : String(value);
     };
 
-    function $$compiler$$PluralFormat(id, offset, options, pluralFn) {
-        this.id       = id;
-        this.offset   = offset;
-        this.options  = options;
-        this.pluralFn = pluralFn;
+    function $$compiler$$PluralFormat(id, useOrdinal, offset, options, pluralFn) {
+        this.id         = id;
+        this.useOrdinal = useOrdinal;
+        this.offset     = offset;
+        this.options    = options;
+        this.pluralFn   = pluralFn;
     }
 
     $$compiler$$PluralFormat.prototype.getOption = function (value) {
         var options = this.options;
 
         var option = options['=' + value] ||
-                options[this.pluralFn(value - this.offset)];
+                options[this.pluralFn(value - this.offset, this.useOrdinal)];
 
         return option || options.other;
     };
@@ -343,67 +346,85 @@
                 },
             peg$c22 = "plural",
             peg$c23 = { type: "literal", value: "plural", description: "\"plural\"" },
-            peg$c24 = function(offset, options) {
+            peg$c24 = function(pluralStyle) {
                     return {
-                        type   : 'pluralFormat',
-                        offset : offset || 0,
-                        options: options
+                        type   : pluralStyle.type,
+                        ordinal: false,
+                        offset : pluralStyle.offset || 0,
+                        options: pluralStyle.options
+                    };
+                },
+            peg$c25 = "selectordinal",
+            peg$c26 = { type: "literal", value: "selectordinal", description: "\"selectordinal\"" },
+            peg$c27 = function(pluralStyle) {
+                    return {
+                        type   : pluralStyle.type,
+                        ordinal: true,
+                        offset : pluralStyle.offset || 0,
+                        options: pluralStyle.options
                     }
                 },
-            peg$c25 = "select",
-            peg$c26 = { type: "literal", value: "select", description: "\"select\"" },
-            peg$c27 = function(options) {
+            peg$c28 = "select",
+            peg$c29 = { type: "literal", value: "select", description: "\"select\"" },
+            peg$c30 = function(options) {
                     return {
                         type   : 'selectFormat',
                         options: options
-                    }
+                    };
                 },
-            peg$c28 = "=",
-            peg$c29 = { type: "literal", value: "=", description: "\"=\"" },
-            peg$c30 = function(selector, pattern) {
+            peg$c31 = "=",
+            peg$c32 = { type: "literal", value: "=", description: "\"=\"" },
+            peg$c33 = function(selector, pattern) {
                     return {
                         type    : 'optionalFormatPattern',
                         selector: selector,
                         value   : pattern
                     };
                 },
-            peg$c31 = "offset:",
-            peg$c32 = { type: "literal", value: "offset:", description: "\"offset:\"" },
-            peg$c33 = function(number) {
+            peg$c34 = "offset:",
+            peg$c35 = { type: "literal", value: "offset:", description: "\"offset:\"" },
+            peg$c36 = function(number) {
                     return number;
                 },
-            peg$c34 = { type: "other", description: "whitespace" },
-            peg$c35 = /^[ \t\n\r]/,
-            peg$c36 = { type: "class", value: "[ \\t\\n\\r]", description: "[ \\t\\n\\r]" },
-            peg$c37 = { type: "other", description: "optionalWhitespace" },
-            peg$c38 = /^[0-9]/,
-            peg$c39 = { type: "class", value: "[0-9]", description: "[0-9]" },
-            peg$c40 = /^[0-9a-f]/i,
-            peg$c41 = { type: "class", value: "[0-9a-f]i", description: "[0-9a-f]i" },
-            peg$c42 = "0",
-            peg$c43 = { type: "literal", value: "0", description: "\"0\"" },
-            peg$c44 = /^[1-9]/,
-            peg$c45 = { type: "class", value: "[1-9]", description: "[1-9]" },
-            peg$c46 = function(digits) {
+            peg$c37 = function(offset, options) {
+                    return {
+                        type   : 'pluralFormat',
+                        offset : offset,
+                        options: options
+                    };
+                },
+            peg$c38 = { type: "other", description: "whitespace" },
+            peg$c39 = /^[ \t\n\r]/,
+            peg$c40 = { type: "class", value: "[ \\t\\n\\r]", description: "[ \\t\\n\\r]" },
+            peg$c41 = { type: "other", description: "optionalWhitespace" },
+            peg$c42 = /^[0-9]/,
+            peg$c43 = { type: "class", value: "[0-9]", description: "[0-9]" },
+            peg$c44 = /^[0-9a-f]/i,
+            peg$c45 = { type: "class", value: "[0-9a-f]i", description: "[0-9a-f]i" },
+            peg$c46 = "0",
+            peg$c47 = { type: "literal", value: "0", description: "\"0\"" },
+            peg$c48 = /^[1-9]/,
+            peg$c49 = { type: "class", value: "[1-9]", description: "[1-9]" },
+            peg$c50 = function(digits) {
                 return parseInt(digits, 10);
             },
-            peg$c47 = /^[^{}\\\0-\x1F \t\n\r]/,
-            peg$c48 = { type: "class", value: "[^{}\\\\\\0-\\x1F \\t\\n\\r]", description: "[^{}\\\\\\0-\\x1F \\t\\n\\r]" },
-            peg$c49 = "\\#",
-            peg$c50 = { type: "literal", value: "\\#", description: "\"\\\\#\"" },
-            peg$c51 = function() { return '\\#'; },
-            peg$c52 = "\\{",
-            peg$c53 = { type: "literal", value: "\\{", description: "\"\\\\{\"" },
-            peg$c54 = function() { return '\u007B'; },
-            peg$c55 = "\\}",
-            peg$c56 = { type: "literal", value: "\\}", description: "\"\\\\}\"" },
-            peg$c57 = function() { return '\u007D'; },
-            peg$c58 = "\\u",
-            peg$c59 = { type: "literal", value: "\\u", description: "\"\\\\u\"" },
-            peg$c60 = function(digits) {
+            peg$c51 = /^[^{}\\\0-\x1F \t\n\r]/,
+            peg$c52 = { type: "class", value: "[^{}\\\\\\0-\\x1F \\t\\n\\r]", description: "[^{}\\\\\\0-\\x1F \\t\\n\\r]" },
+            peg$c53 = "\\#",
+            peg$c54 = { type: "literal", value: "\\#", description: "\"\\\\#\"" },
+            peg$c55 = function() { return '\\#'; },
+            peg$c56 = "\\{",
+            peg$c57 = { type: "literal", value: "\\{", description: "\"\\\\{\"" },
+            peg$c58 = function() { return '\u007B'; },
+            peg$c59 = "\\}",
+            peg$c60 = { type: "literal", value: "\\}", description: "\"\\\\}\"" },
+            peg$c61 = function() { return '\u007D'; },
+            peg$c62 = "\\u",
+            peg$c63 = { type: "literal", value: "\\u", description: "\"\\\\u\"" },
+            peg$c64 = function(digits) {
                     return String.fromCharCode(parseInt(digits, 16));
                 },
-            peg$c61 = function(chars) { return chars.join(''); },
+            peg$c65 = function(chars) { return chars.join(''); },
 
             peg$currPos          = 0,
             peg$reportedPos      = 0,
@@ -832,7 +853,10 @@
           if (s0 === peg$FAILED) {
             s0 = peg$parsepluralFormat();
             if (s0 === peg$FAILED) {
-              s0 = peg$parseselectFormat();
+              s0 = peg$parseselectOrdinalFormat();
+              if (s0 === peg$FAILED) {
+                s0 = peg$parseselectFormat();
+              }
             }
           }
 
@@ -922,7 +946,7 @@
         }
 
         function peg$parsepluralFormat() {
-          var s0, s1, s2, s3, s4, s5, s6, s7, s8;
+          var s0, s1, s2, s3, s4, s5;
 
           s0 = peg$currPos;
           if (input.substr(peg$currPos, 6) === peg$c22) {
@@ -945,35 +969,64 @@
               if (s3 !== peg$FAILED) {
                 s4 = peg$parse_();
                 if (s4 !== peg$FAILED) {
-                  s5 = peg$parseoffset();
-                  if (s5 === peg$FAILED) {
-                    s5 = peg$c9;
-                  }
+                  s5 = peg$parsepluralStyle();
                   if (s5 !== peg$FAILED) {
-                    s6 = peg$parse_();
-                    if (s6 !== peg$FAILED) {
-                      s7 = [];
-                      s8 = peg$parseoptionalFormatPattern();
-                      if (s8 !== peg$FAILED) {
-                        while (s8 !== peg$FAILED) {
-                          s7.push(s8);
-                          s8 = peg$parseoptionalFormatPattern();
-                        }
-                      } else {
-                        s7 = peg$c2;
-                      }
-                      if (s7 !== peg$FAILED) {
-                        peg$reportedPos = s0;
-                        s1 = peg$c24(s5, s7);
-                        s0 = s1;
-                      } else {
-                        peg$currPos = s0;
-                        s0 = peg$c2;
-                      }
-                    } else {
-                      peg$currPos = s0;
-                      s0 = peg$c2;
-                    }
+                    peg$reportedPos = s0;
+                    s1 = peg$c24(s5);
+                    s0 = s1;
+                  } else {
+                    peg$currPos = s0;
+                    s0 = peg$c2;
+                  }
+                } else {
+                  peg$currPos = s0;
+                  s0 = peg$c2;
+                }
+              } else {
+                peg$currPos = s0;
+                s0 = peg$c2;
+              }
+            } else {
+              peg$currPos = s0;
+              s0 = peg$c2;
+            }
+          } else {
+            peg$currPos = s0;
+            s0 = peg$c2;
+          }
+
+          return s0;
+        }
+
+        function peg$parseselectOrdinalFormat() {
+          var s0, s1, s2, s3, s4, s5;
+
+          s0 = peg$currPos;
+          if (input.substr(peg$currPos, 13) === peg$c25) {
+            s1 = peg$c25;
+            peg$currPos += 13;
+          } else {
+            s1 = peg$FAILED;
+            if (peg$silentFails === 0) { peg$fail(peg$c26); }
+          }
+          if (s1 !== peg$FAILED) {
+            s2 = peg$parse_();
+            if (s2 !== peg$FAILED) {
+              if (input.charCodeAt(peg$currPos) === 44) {
+                s3 = peg$c10;
+                peg$currPos++;
+              } else {
+                s3 = peg$FAILED;
+                if (peg$silentFails === 0) { peg$fail(peg$c11); }
+              }
+              if (s3 !== peg$FAILED) {
+                s4 = peg$parse_();
+                if (s4 !== peg$FAILED) {
+                  s5 = peg$parsepluralStyle();
+                  if (s5 !== peg$FAILED) {
+                    peg$reportedPos = s0;
+                    s1 = peg$c27(s5);
+                    s0 = s1;
                   } else {
                     peg$currPos = s0;
                     s0 = peg$c2;
@@ -1002,12 +1055,12 @@
           var s0, s1, s2, s3, s4, s5, s6;
 
           s0 = peg$currPos;
-          if (input.substr(peg$currPos, 6) === peg$c25) {
-            s1 = peg$c25;
+          if (input.substr(peg$currPos, 6) === peg$c28) {
+            s1 = peg$c28;
             peg$currPos += 6;
           } else {
             s1 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c26); }
+            if (peg$silentFails === 0) { peg$fail(peg$c29); }
           }
           if (s1 !== peg$FAILED) {
             s2 = peg$parse_();
@@ -1034,7 +1087,7 @@
                   }
                   if (s5 !== peg$FAILED) {
                     peg$reportedPos = s0;
-                    s1 = peg$c27(s5);
+                    s1 = peg$c30(s5);
                     s0 = s1;
                   } else {
                     peg$currPos = s0;
@@ -1066,11 +1119,11 @@
           s0 = peg$currPos;
           s1 = peg$currPos;
           if (input.charCodeAt(peg$currPos) === 61) {
-            s2 = peg$c28;
+            s2 = peg$c31;
             peg$currPos++;
           } else {
             s2 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c29); }
+            if (peg$silentFails === 0) { peg$fail(peg$c32); }
           }
           if (s2 !== peg$FAILED) {
             s3 = peg$parsenumber();
@@ -1129,7 +1182,7 @@
                         }
                         if (s8 !== peg$FAILED) {
                           peg$reportedPos = s0;
-                          s1 = peg$c30(s2, s6);
+                          s1 = peg$c33(s2, s6);
                           s0 = s1;
                         } else {
                           peg$currPos = s0;
@@ -1171,12 +1224,12 @@
           var s0, s1, s2, s3;
 
           s0 = peg$currPos;
-          if (input.substr(peg$currPos, 7) === peg$c31) {
-            s1 = peg$c31;
+          if (input.substr(peg$currPos, 7) === peg$c34) {
+            s1 = peg$c34;
             peg$currPos += 7;
           } else {
             s1 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c32); }
+            if (peg$silentFails === 0) { peg$fail(peg$c35); }
           }
           if (s1 !== peg$FAILED) {
             s2 = peg$parse_();
@@ -1184,7 +1237,48 @@
               s3 = peg$parsenumber();
               if (s3 !== peg$FAILED) {
                 peg$reportedPos = s0;
-                s1 = peg$c33(s3);
+                s1 = peg$c36(s3);
+                s0 = s1;
+              } else {
+                peg$currPos = s0;
+                s0 = peg$c2;
+              }
+            } else {
+              peg$currPos = s0;
+              s0 = peg$c2;
+            }
+          } else {
+            peg$currPos = s0;
+            s0 = peg$c2;
+          }
+
+          return s0;
+        }
+
+        function peg$parsepluralStyle() {
+          var s0, s1, s2, s3, s4;
+
+          s0 = peg$currPos;
+          s1 = peg$parseoffset();
+          if (s1 === peg$FAILED) {
+            s1 = peg$c9;
+          }
+          if (s1 !== peg$FAILED) {
+            s2 = peg$parse_();
+            if (s2 !== peg$FAILED) {
+              s3 = [];
+              s4 = peg$parseoptionalFormatPattern();
+              if (s4 !== peg$FAILED) {
+                while (s4 !== peg$FAILED) {
+                  s3.push(s4);
+                  s4 = peg$parseoptionalFormatPattern();
+                }
+              } else {
+                s3 = peg$c2;
+              }
+              if (s3 !== peg$FAILED) {
+                peg$reportedPos = s0;
+                s1 = peg$c37(s1, s3);
                 s0 = s1;
               } else {
                 peg$currPos = s0;
@@ -1207,22 +1301,22 @@
 
           peg$silentFails++;
           s0 = [];
-          if (peg$c35.test(input.charAt(peg$currPos))) {
+          if (peg$c39.test(input.charAt(peg$currPos))) {
             s1 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s1 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c36); }
+            if (peg$silentFails === 0) { peg$fail(peg$c40); }
           }
           if (s1 !== peg$FAILED) {
             while (s1 !== peg$FAILED) {
               s0.push(s1);
-              if (peg$c35.test(input.charAt(peg$currPos))) {
+              if (peg$c39.test(input.charAt(peg$currPos))) {
                 s1 = input.charAt(peg$currPos);
                 peg$currPos++;
               } else {
                 s1 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c36); }
+                if (peg$silentFails === 0) { peg$fail(peg$c40); }
               }
             }
           } else {
@@ -1231,7 +1325,7 @@
           peg$silentFails--;
           if (s0 === peg$FAILED) {
             s1 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c34); }
+            if (peg$silentFails === 0) { peg$fail(peg$c38); }
           }
 
           return s0;
@@ -1255,7 +1349,7 @@
           peg$silentFails--;
           if (s0 === peg$FAILED) {
             s1 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c37); }
+            if (peg$silentFails === 0) { peg$fail(peg$c41); }
           }
 
           return s0;
@@ -1264,12 +1358,12 @@
         function peg$parsedigit() {
           var s0;
 
-          if (peg$c38.test(input.charAt(peg$currPos))) {
+          if (peg$c42.test(input.charAt(peg$currPos))) {
             s0 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s0 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c39); }
+            if (peg$silentFails === 0) { peg$fail(peg$c43); }
           }
 
           return s0;
@@ -1278,12 +1372,12 @@
         function peg$parsehexDigit() {
           var s0;
 
-          if (peg$c40.test(input.charAt(peg$currPos))) {
+          if (peg$c44.test(input.charAt(peg$currPos))) {
             s0 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s0 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c41); }
+            if (peg$silentFails === 0) { peg$fail(peg$c45); }
           }
 
           return s0;
@@ -1294,21 +1388,21 @@
 
           s0 = peg$currPos;
           if (input.charCodeAt(peg$currPos) === 48) {
-            s1 = peg$c42;
+            s1 = peg$c46;
             peg$currPos++;
           } else {
             s1 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c43); }
+            if (peg$silentFails === 0) { peg$fail(peg$c47); }
           }
           if (s1 === peg$FAILED) {
             s1 = peg$currPos;
             s2 = peg$currPos;
-            if (peg$c44.test(input.charAt(peg$currPos))) {
+            if (peg$c48.test(input.charAt(peg$currPos))) {
               s3 = input.charAt(peg$currPos);
               peg$currPos++;
             } else {
               s3 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c45); }
+              if (peg$silentFails === 0) { peg$fail(peg$c49); }
             }
             if (s3 !== peg$FAILED) {
               s4 = [];
@@ -1335,7 +1429,7 @@
           }
           if (s1 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c46(s1);
+            s1 = peg$c50(s1);
           }
           s0 = s1;
 
@@ -1345,63 +1439,63 @@
         function peg$parsechar() {
           var s0, s1, s2, s3, s4, s5, s6, s7;
 
-          if (peg$c47.test(input.charAt(peg$currPos))) {
+          if (peg$c51.test(input.charAt(peg$currPos))) {
             s0 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s0 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c48); }
+            if (peg$silentFails === 0) { peg$fail(peg$c52); }
           }
           if (s0 === peg$FAILED) {
             s0 = peg$currPos;
-            if (input.substr(peg$currPos, 2) === peg$c49) {
-              s1 = peg$c49;
+            if (input.substr(peg$currPos, 2) === peg$c53) {
+              s1 = peg$c53;
               peg$currPos += 2;
             } else {
               s1 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c50); }
+              if (peg$silentFails === 0) { peg$fail(peg$c54); }
             }
             if (s1 !== peg$FAILED) {
               peg$reportedPos = s0;
-              s1 = peg$c51();
+              s1 = peg$c55();
             }
             s0 = s1;
             if (s0 === peg$FAILED) {
               s0 = peg$currPos;
-              if (input.substr(peg$currPos, 2) === peg$c52) {
-                s1 = peg$c52;
+              if (input.substr(peg$currPos, 2) === peg$c56) {
+                s1 = peg$c56;
                 peg$currPos += 2;
               } else {
                 s1 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c53); }
+                if (peg$silentFails === 0) { peg$fail(peg$c57); }
               }
               if (s1 !== peg$FAILED) {
                 peg$reportedPos = s0;
-                s1 = peg$c54();
+                s1 = peg$c58();
               }
               s0 = s1;
               if (s0 === peg$FAILED) {
                 s0 = peg$currPos;
-                if (input.substr(peg$currPos, 2) === peg$c55) {
-                  s1 = peg$c55;
+                if (input.substr(peg$currPos, 2) === peg$c59) {
+                  s1 = peg$c59;
                   peg$currPos += 2;
                 } else {
                   s1 = peg$FAILED;
-                  if (peg$silentFails === 0) { peg$fail(peg$c56); }
+                  if (peg$silentFails === 0) { peg$fail(peg$c60); }
                 }
                 if (s1 !== peg$FAILED) {
                   peg$reportedPos = s0;
-                  s1 = peg$c57();
+                  s1 = peg$c61();
                 }
                 s0 = s1;
                 if (s0 === peg$FAILED) {
                   s0 = peg$currPos;
-                  if (input.substr(peg$currPos, 2) === peg$c58) {
-                    s1 = peg$c58;
+                  if (input.substr(peg$currPos, 2) === peg$c62) {
+                    s1 = peg$c62;
                     peg$currPos += 2;
                   } else {
                     s1 = peg$FAILED;
-                    if (peg$silentFails === 0) { peg$fail(peg$c59); }
+                    if (peg$silentFails === 0) { peg$fail(peg$c63); }
                   }
                   if (s1 !== peg$FAILED) {
                     s2 = peg$currPos;
@@ -1438,7 +1532,7 @@
                     s2 = s3;
                     if (s2 !== peg$FAILED) {
                       peg$reportedPos = s0;
-                      s1 = peg$c60(s2);
+                      s1 = peg$c64(s2);
                       s0 = s1;
                     } else {
                       peg$currPos = s0;
@@ -1472,7 +1566,7 @@
           }
           if (s1 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c61(s1);
+            s1 = peg$c65(s1);
           }
           s0 = s1;
 
@@ -1518,12 +1612,11 @@
         // Defined first because it's used to build the format pattern.
         $$es5$$defineProperty(this, '_locale',  {value: this._resolveLocale(locales)});
 
-        var pluralFn = $$core$$MessageFormat.__localeData__[this._locale].pluralRuleFunction;
-
         // Compile the `ast` to a pattern that is highly optimized for repeated
         // `format()` invocations. **Note:** This passes the `locales` set provided
         // to the constructor instead of just the resolved locale.
-        var pattern = this._compilePattern(ast, locales, formats, pluralFn);
+        var pluralFn = this._findPluralRuleFunction(this._locale);
+        var pattern  = this._compilePattern(ast, locales, formats, pluralFn);
 
         // "Bind" `format()` method to `this` so it can be passed by reference like
         // the other `Intl` APIs.
@@ -1616,17 +1709,7 @@
             );
         }
 
-        if (!data.pluralRuleFunction) {
-            throw new Error(
-                'Locale data provided to IntlMessageFormat is missing a ' +
-                '`pluralRuleFunction` property'
-            );
-        }
-
-        // Message format locale data only requires the first part of the tag.
-        var locale = data.locale.toLowerCase().split('-')[0];
-
-        $$core$$MessageFormat.__localeData__[locale] = data;
+        $$core$$MessageFormat.__localeData__[data.locale.toLowerCase()] = data;
     }});
 
     // Defines `__parse()` static method as an exposed private.
@@ -1650,6 +1733,26 @@
     $$core$$MessageFormat.prototype._compilePattern = function (ast, locales, formats, pluralFn) {
         var compiler = new $$compiler$$default(locales, formats, pluralFn);
         return compiler.compile(ast);
+    };
+
+    $$core$$MessageFormat.prototype._findPluralRuleFunction = function (locale) {
+        var localeData = $$core$$MessageFormat.__localeData__;
+        var data       = localeData[locale.toLowerCase()];
+
+        // The locale data is de-duplicated, so we have to traverse the locale's
+        // hierarchy until we find a `pluralRuleFunction` to return.
+        while (data) {
+            if (data.pluralRuleFunction) {
+                return data.pluralRuleFunction;
+            }
+
+            data = data.parentLocale && localeData[data.parentLocale.toLowerCase()];
+        }
+
+        throw new Error(
+            'Locale data added to IntlMessageFormat is missing a ' +
+            '`pluralRuleFunction` for :' + locale
+        );
     };
 
     $$core$$MessageFormat.prototype._format = function (pattern, values) {
@@ -1705,51 +1808,89 @@
     };
 
     $$core$$MessageFormat.prototype._resolveLocale = function (locales) {
-        if (!locales) {
-            locales = $$core$$MessageFormat.defaultLocale;
-        }
-
         if (typeof locales === 'string') {
             locales = [locales];
         }
 
+        // Create a copy of the array so we can push on the default locale.
+        locales = (locales || []).concat($$core$$MessageFormat.defaultLocale);
+
         var localeData = $$core$$MessageFormat.__localeData__;
-        var i, len, locale;
+        var i, len, localeParts, data;
 
+        // Using the set of locales + the default locale, we look for the first one
+        // which that has been registered. When data does not exist for a locale, we
+        // traverse its ancestors to find something that's been registered within
+        // its hierarchy of locales. Since we lack the proper `parentLocale` data
+        // here, we must take a naive approach to traversal.
         for (i = 0, len = locales.length; i < len; i += 1) {
-            // We just need the root part of the langage tag.
-            locale = locales[i].split('-')[0].toLowerCase();
+            localeParts = locales[i].toLowerCase().split('-');
 
-            // Validate that the langage tag is structurally valid.
-            if (!/[a-z]{2,3}/.test(locale)) {
-                throw new Error(
-                    'Language tag provided to IntlMessageFormat is not ' +
-                    'structrually valid: ' + locale
-                );
-            }
+            while (localeParts.length) {
+                data = localeData[localeParts.join('-')];
+                if (data) {
+                    // Return the normalized locale string; e.g., we return "en-US",
+                    // instead of "en-us".
+                    return data.locale;
+                }
 
-            // Return the first locale for which we have CLDR data registered.
-            if ($$utils1$$hop.call(localeData, locale)) {
-                return locale;
+                localeParts.pop();
             }
         }
 
+        var defaultLocale = locales.pop();
         throw new Error(
             'No locale data has been added to IntlMessageFormat for: ' +
-            locales.join(', ')
+            locales.join(', ') + ', or the default locale: ' + defaultLocale
         );
     };
-    var $$en1$$default = {"locale":"en","pluralRuleFunction":function (n) {var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(i===1&&v===0)return"one";return"other";}};
+    var $$en1$$default = {"locale":"en","pluralRuleFunction":function (n,ord){var s=String(n).split("."),v0=!s[1],t0=Number(s[0])==n,n10=t0&&s[0].slice(-1),n100=t0&&s[0].slice(-2);if(ord)return n10==1&&n100!=11?"one":n10==2&&n100!=12?"two":n10==3&&n100!=13?"few":"other";return n==1&&v0?"one":"other"}};
 
     $$core$$default.__addLocaleData($$en1$$default);
     $$core$$default.defaultLocale = 'en';
 
     var intl$messageformat$$default = $$core$$default;
 
+    var $$diff$$round = Math.round;
+
+    function $$diff$$daysToYears(days) {
+        // 400 years have 146097 days (taking into account leap year rules)
+        return days * 400 / 146097;
+    }
+
+    var $$diff$$default = function (from, to) {
+        // Convert to ms timestamps.
+        from = +from;
+        to   = +to;
+
+        var millisecond = $$diff$$round(to - from),
+            second      = $$diff$$round(millisecond / 1000),
+            minute      = $$diff$$round(second / 60),
+            hour        = $$diff$$round(minute / 60),
+            day         = $$diff$$round(hour / 24),
+            week        = $$diff$$round(day / 7);
+
+        var rawYears = $$diff$$daysToYears(day),
+            month    = $$diff$$round(rawYears * 12),
+            year     = $$diff$$round(rawYears);
+
+        return {
+            millisecond: millisecond,
+            second     : second,
+            minute     : minute,
+            hour       : hour,
+            day        : day,
+            week       : week,
+            month      : month,
+            year       : year
+        };
+    };
+
     // Purposely using the same implementation as the Intl.js `Intl` polyfill.
     // Copyright 2013 Andy Earnshaw, MIT License
 
     var $$es51$$hop = Object.prototype.hasOwnProperty;
+    var $$es51$$toString = Object.prototype.toString;
 
     var $$es51$$realDefineProp = (function () {
         try { return !!Object.defineProperty({}, 'a', {}); }
@@ -1799,59 +1940,20 @@
 
         return -1;
     };
-    /*
-    Copyright (c) 2014, Yahoo! Inc. All rights reserved.
-    Copyrights licensed under the New BSD License.
-    See the accompanying LICENSE file for terms.
-    */
 
-    /* jslint esnext: true */
-
-    var $$diff$$round = Math.round;
-
-    function $$diff$$daysToYears (days) {
-        // 400 years have 146097 days (taking into account leap year rules)
-        return days * 400 / 146097;
-    }
-
-    var $$diff$$default = function (dfrom, dto) {
-        // Convert to ms timestamps.
-        dfrom = +dfrom;
-        dto   = +dto;
-
-        var millisecond = $$diff$$round(dto - dfrom),
-            second      = $$diff$$round(millisecond / 1000),
-            minute      = $$diff$$round(second / 60),
-            hour        = $$diff$$round(minute / 60),
-            day         = $$diff$$round(hour / 24),
-            week        = $$diff$$round(day / 7);
-
-        var rawYears = $$diff$$daysToYears(day),
-            month    = $$diff$$round(rawYears * 12),
-            year     = $$diff$$round(rawYears);
-
-        return {
-            millisecond: millisecond,
-            second     : second,
-            minute     : minute,
-            hour       : hour,
-            day        : day,
-            week       : week,
-            month      : month,
-            year       : year
-        };
+    var $$es51$$isArray = Array.isArray || function (obj) {
+        return $$es51$$toString.call(obj) === '[object Array]';
     };
 
+    var $$es51$$dateNow = Date.now || function () {
+        return new Date().getTime();
+    };
     var $$core1$$default = $$core1$$RelativeFormat;
 
     // -----------------------------------------------------------------------------
 
     var $$core1$$FIELDS = ['second', 'minute', 'hour', 'day', 'month', 'year'];
     var $$core1$$STYLES = ['best fit', 'numeric'];
-
-    var $$core1$$getTime = Date.now ? Date.now : function () {
-        return new Date().getTime();
-    };
 
     // -- RelativeFormat -----------------------------------------------------------
 
@@ -1860,24 +1962,25 @@
 
         // Make a copy of `locales` if it's an array, so that it doesn't change
         // since it's used lazily.
-        if (Object.prototype.toString.call(locales) === '[object Array]') {
+        if ($$es51$$isArray(locales)) {
             locales = locales.concat();
         }
 
         $$es51$$defineProperty(this, '_locale', {value: this._resolveLocale(locales)});
-        $$es51$$defineProperty(this, '_locales', {value: locales});
         $$es51$$defineProperty(this, '_options', {value: {
             style: this._resolveStyle(options.style),
             units: this._isValidUnits(options.units) && options.units
         }});
 
+        $$es51$$defineProperty(this, '_locales', {value: locales});
+        $$es51$$defineProperty(this, '_fields', {value: this._findFields(this._locale)});
         $$es51$$defineProperty(this, '_messages', {value: $$es51$$objCreate(null)});
 
         // "Bind" `format()` method to `this` so it can be passed by reference like
         // the other `Intl` APIs.
         var relativeFormat = this;
-        this.format = function format(date) {
-            return relativeFormat._format(date);
+        this.format = function format(date, options) {
+            return relativeFormat._format(date, options);
         };
     }
 
@@ -1891,25 +1994,15 @@
             );
         }
 
-        if (!data.fields) {
-            throw new Error(
-                'Locale data provided to IntlRelativeFormat is missing a ' +
-                '`fields` property value'
-            );
-        }
+        $$core1$$RelativeFormat.__localeData__[data.locale.toLowerCase()] = data;
 
         // Add data to IntlMessageFormat.
         intl$messageformat$$default.__addLocaleData(data);
-
-        // Relative format locale data only requires the first part of the tag.
-        var locale = data.locale.toLowerCase().split('-')[0];
-
-        $$core1$$RelativeFormat.__localeData__[locale] = data;
     }});
 
     // Define public `defaultLocale` property which can be set by the developer, or
-    // it will be set when the first RelativeFormat instance is created by leveraging
-    // the resolved locale from `Intl`.
+    // it will be set when the first RelativeFormat instance is created by
+    // leveraging the resolved locale from `Intl`.
     $$es51$$defineProperty($$core1$$RelativeFormat, 'defaultLocale', {
         enumerable: true,
         writable  : true,
@@ -1939,13 +2032,12 @@
     };
 
     $$core1$$RelativeFormat.prototype._compileMessage = function (units) {
-        // `this._locales` is the original set of locales the user specificed to the
+        // `this._locales` is the original set of locales the user specified to the
         // constructor, while `this._locale` is the resolved root locale.
         var locales        = this._locales;
         var resolvedLocale = this._locale;
 
-        var localeData   = $$core1$$RelativeFormat.__localeData__;
-        var field        = localeData[resolvedLocale].fields[units];
+        var field        = this._fields[units];
         var relativeTime = field.relativeTime;
         var future       = '';
         var past         = '';
@@ -1974,15 +2066,61 @@
         return new intl$messageformat$$default(message, locales);
     };
 
-    $$core1$$RelativeFormat.prototype._format = function (date) {
-        var now = $$core1$$getTime();
+    $$core1$$RelativeFormat.prototype._getMessage = function (units) {
+        var messages = this._messages;
+
+        // Create a new synthetic message based on the locale data from CLDR.
+        if (!messages[units]) {
+            messages[units] = this._compileMessage(units);
+        }
+
+        return messages[units];
+    };
+
+    $$core1$$RelativeFormat.prototype._getRelativeUnits = function (diff, units) {
+        var field = this._fields[units];
+
+        if (field.relative) {
+            return field.relative[diff];
+        }
+    };
+
+    $$core1$$RelativeFormat.prototype._findFields = function (locale) {
+        var localeData = $$core1$$RelativeFormat.__localeData__;
+        var data       = localeData[locale.toLowerCase()];
+
+        // The locale data is de-duplicated, so we have to traverse the locale's
+        // hierarchy until we find `fields` to return.
+        while (data) {
+            if (data.fields) {
+                return data.fields;
+            }
+
+            data = data.parentLocale && localeData[data.parentLocale.toLowerCase()];
+        }
+
+        throw new Error(
+            'Locale data added to IntlRelativeFormat is missing `fields` for :' +
+            locale
+        );
+    };
+
+    $$core1$$RelativeFormat.prototype._format = function (date, options) {
+        var now = options && options.now !== undefined ? options.now : $$es51$$dateNow();
 
         if (date === undefined) {
             date = now;
         }
 
-        // Determine if the `date` is valid, and throw a similar error to what
-        // `Intl.DateTimeFormat#format()` would throw.
+        // Determine if the `date` and optional `now` values are valid, and throw a
+        // similar error to what `Intl.DateTimeFormat#format()` would throw.
+        if (!isFinite(now)) {
+            throw new RangeError(
+                'The `now` option provided to IntlRelativeFormat#format() is not ' +
+                'in valid range.'
+            );
+        }
+
         if (!isFinite(date)) {
             throw new RangeError(
                 'The date value provided to IntlRelativeFormat#format() is not ' +
@@ -1995,13 +2133,13 @@
         var diffInUnits = diffReport[units];
 
         if (this._options.style !== 'numeric') {
-            var relativeUnits = this._resolveRelativeUnits(diffInUnits, units);
+            var relativeUnits = this._getRelativeUnits(diffInUnits, units);
             if (relativeUnits) {
                 return relativeUnits;
             }
         }
 
-        return this._resolveMessage(units).format({
+        return this._getMessage(units).format({
             '0' : Math.abs(diffInUnits),
             when: diffInUnits < 0 ? 'past' : 'future'
         });
@@ -2029,59 +2167,41 @@
     };
 
     $$core1$$RelativeFormat.prototype._resolveLocale = function (locales) {
-        if (!locales) {
-            locales = $$core1$$RelativeFormat.defaultLocale;
-        }
-
         if (typeof locales === 'string') {
             locales = [locales];
         }
 
-        var hop        = Object.prototype.hasOwnProperty;
+        // Create a copy of the array so we can push on the default locale.
+        locales = (locales || []).concat($$core1$$RelativeFormat.defaultLocale);
+
         var localeData = $$core1$$RelativeFormat.__localeData__;
-        var i, len, locale;
+        var i, len, localeParts, data;
 
+        // Using the set of locales + the default locale, we look for the first one
+        // which that has been registered. When data does not exist for a locale, we
+        // traverse its ancestors to find something that's been registered within
+        // its hierarchy of locales. Since we lack the proper `parentLocale` data
+        // here, we must take a naive approach to traversal.
         for (i = 0, len = locales.length; i < len; i += 1) {
-            // We just need the root part of the langage tag.
-            locale = locales[i].split('-')[0].toLowerCase();
+            localeParts = locales[i].toLowerCase().split('-');
 
-            // Validate that the langage tag is structurally valid.
-            if (!/[a-z]{2,3}/.test(locale)) {
-                throw new Error(
-                    'Language tag provided to IntlRelativeFormat is not ' +
-                    'structrually valid: ' + locale
-                );
-            }
+            while (localeParts.length) {
+                data = localeData[localeParts.join('-')];
+                if (data) {
+                    // Return the normalized locale string; e.g., we return "en-US",
+                    // instead of "en-us".
+                    return data.locale;
+                }
 
-            // Return the first locale for which we have CLDR data registered.
-            if (hop.call(localeData, locale)) {
-                return locale;
+                localeParts.pop();
             }
         }
 
+        var defaultLocale = locales.pop();
         throw new Error(
             'No locale data has been added to IntlRelativeFormat for: ' +
-            locales.join(', ')
+            locales.join(', ') + ', or the default locale: ' + defaultLocale
         );
-    };
-
-    $$core1$$RelativeFormat.prototype._resolveMessage = function (units) {
-        var messages = this._messages;
-
-        // Create a new synthetic message based on the locale data from CLDR.
-        if (!messages[units]) {
-            messages[units] = this._compileMessage(units);
-        }
-
-        return messages[units];
-    };
-
-    $$core1$$RelativeFormat.prototype._resolveRelativeUnits = function (diff, units) {
-        var field = $$core1$$RelativeFormat.__localeData__[this._locale].fields[units];
-
-        if (field.relative) {
-            return field.relative[diff];
-        }
     };
 
     $$core1$$RelativeFormat.prototype._resolveStyle = function (style) {
@@ -2113,7 +2233,7 @@
 
         return units;
     };
-    var $$en2$$default = {"locale":"en","pluralRuleFunction":function (n) {var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(i===1&&v===0)return"one";return"other";},"fields":{"second":{"displayName":"Second","relative":{"0":"now"},"relativeTime":{"future":{"one":"in {0} second","other":"in {0} seconds"},"past":{"one":"{0} second ago","other":"{0} seconds ago"}}},"minute":{"displayName":"Minute","relativeTime":{"future":{"one":"in {0} minute","other":"in {0} minutes"},"past":{"one":"{0} minute ago","other":"{0} minutes ago"}}},"hour":{"displayName":"Hour","relativeTime":{"future":{"one":"in {0} hour","other":"in {0} hours"},"past":{"one":"{0} hour ago","other":"{0} hours ago"}}},"day":{"displayName":"Day","relative":{"0":"today","1":"tomorrow","-1":"yesterday"},"relativeTime":{"future":{"one":"in {0} day","other":"in {0} days"},"past":{"one":"{0} day ago","other":"{0} days ago"}}},"month":{"displayName":"Month","relative":{"0":"this month","1":"next month","-1":"last month"},"relativeTime":{"future":{"one":"in {0} month","other":"in {0} months"},"past":{"one":"{0} month ago","other":"{0} months ago"}}},"year":{"displayName":"Year","relative":{"0":"this year","1":"next year","-1":"last year"},"relativeTime":{"future":{"one":"in {0} year","other":"in {0} years"},"past":{"one":"{0} year ago","other":"{0} years ago"}}}}};
+    var $$en2$$default = {"locale":"en","pluralRuleFunction":function (n,ord){var s=String(n).split("."),v0=!s[1],t0=Number(s[0])==n,n10=t0&&s[0].slice(-1),n100=t0&&s[0].slice(-2);if(ord)return n10==1&&n100!=11?"one":n10==2&&n100!=12?"two":n10==3&&n100!=13?"few":"other";return n==1&&v0?"one":"other"},"fields":{"year":{"displayName":"Year","relative":{"0":"this year","1":"next year","-1":"last year"},"relativeTime":{"future":{"one":"in {0} year","other":"in {0} years"},"past":{"one":"{0} year ago","other":"{0} years ago"}}},"month":{"displayName":"Month","relative":{"0":"this month","1":"next month","-1":"last month"},"relativeTime":{"future":{"one":"in {0} month","other":"in {0} months"},"past":{"one":"{0} month ago","other":"{0} months ago"}}},"day":{"displayName":"Day","relative":{"0":"today","1":"tomorrow","-1":"yesterday"},"relativeTime":{"future":{"one":"in {0} day","other":"in {0} days"},"past":{"one":"{0} day ago","other":"{0} days ago"}}},"hour":{"displayName":"Hour","relativeTime":{"future":{"one":"in {0} hour","other":"in {0} hours"},"past":{"one":"{0} hour ago","other":"{0} hours ago"}}},"minute":{"displayName":"Minute","relativeTime":{"future":{"one":"in {0} minute","other":"in {0} minutes"},"past":{"one":"{0} minute ago","other":"{0} minutes ago"}}},"second":{"displayName":"Second","relative":{"0":"now"},"relativeTime":{"future":{"one":"in {0} second","other":"in {0} seconds"},"past":{"one":"{0} second ago","other":"{0} seconds ago"}}}}};
 
     $$core1$$default.__addLocaleData($$en2$$default);
     $$core1$$default.defaultLocale = 'en';
@@ -2341,27 +2461,70 @@
             return obj;
         }
 
-        function formatDate(date, formatOptions, options) {
+        function formatDate(date, format, options) {
             date = new Date(date);
             assertIsDate(date, 'A date or timestamp must be provided to {{formatDate}}');
-            return simpleFormat('date', date, formatOptions, options);
+
+            if (!options) {
+                options = format;
+                format  = null;
+            }
+
+            var locales       = options.data.intl && options.data.intl.locales;
+            var formatOptions = getFormatOptions('date', format, options);
+
+            return $$helpers$$getDateTimeFormat(locales, formatOptions).format(date);
         }
 
-        function formatTime(date, formatOptions, options) {
+        function formatTime(date, format, options) {
             date = new Date(date);
             assertIsDate(date, 'A date or timestamp must be provided to {{formatTime}}');
-            return simpleFormat('time', date, formatOptions, options);
+
+            if (!options) {
+                options = format;
+                format  = null;
+            }
+
+            var locales       = options.data.intl && options.data.intl.locales;
+            var formatOptions = getFormatOptions('time', format, options);
+
+            return $$helpers$$getDateTimeFormat(locales, formatOptions).format(date);
         }
 
-        function formatRelative(date, formatOptions, options) {
+        function formatRelative(date, format, options) {
             date = new Date(date);
             assertIsDate(date, 'A date or timestamp must be provided to {{formatRelative}}');
-            return simpleFormat('relative', date, formatOptions, options);
+
+            if (!options) {
+                options = format;
+                format  = null;
+            }
+
+            var locales       = options.data.intl && options.data.intl.locales;
+            var formatOptions = getFormatOptions('relative', format, options);
+            var now           = options.hash.now;
+
+            // Remove `now` from the options passed to the `IntlRelativeFormat`
+            // constructor, because it's only used when calling `format()`.
+            delete formatOptions.now;
+
+            return $$helpers$$getRelativeFormat(locales, formatOptions).format(date, {
+                now: now
+            });
         }
 
-        function formatNumber(num, formatOptions, options) {
+        function formatNumber(num, format, options) {
             assertIsNumber(num, 'A number must be provided to {{formatNumber}}');
-            return simpleFormat('number', num, formatOptions, options);
+
+            if (!options) {
+                options = format;
+                format  = null;
+            }
+
+            var locales       = options.data.intl && options.data.intl.locales;
+            var formatOptions = getFormatOptions('number', format, options);
+
+            return $$helpers$$getNumberFormat(locales, formatOptions).format(num);
         }
 
         function formatMessage(message, options) {
@@ -2445,20 +2608,13 @@
             }
         }
 
-        function simpleFormat(type, value, formatOptions, helperOptions) {
-            if (!helperOptions) {
-                helperOptions = formatOptions;
-                formatOptions = null;
-            }
+        function getFormatOptions(type, format, options) {
+            var hash = options.hash;
+            var formatOptions;
 
-            var hash    = helperOptions.hash;
-            var data    = helperOptions.data;
-            var locales = data.intl && data.intl.locales;
-
-            if (formatOptions) {
-                if (typeof formatOptions === 'string') {
-                    formatOptions = intlGet('formats.' + type + '.' + formatOptions,
-                            helperOptions);
+            if (format) {
+                if (typeof format === 'string') {
+                    formatOptions = intlGet('formats.' + type + '.' + format, options);
                 }
 
                 formatOptions = $$utils$$extend({}, formatOptions, hash);
@@ -2466,20 +2622,10 @@
                 formatOptions = hash;
             }
 
-            switch(type) {
-                case 'date':
-                case 'time':
-                    return $$helpers$$getDateTimeFormat(locales, formatOptions).format(value);
-                case 'number':
-                    return $$helpers$$getNumberFormat(locales, formatOptions).format(value);
-                case 'relative':
-                    return $$helpers$$getRelativeFormat(locales, formatOptions).format(value);
-                default:
-                    throw new Error('Unrecognized simple format type: ' + type);
-            }
+            return formatOptions;
         }
     }
-    var $$en$$default = {"locale":"en","pluralRuleFunction":function (n) {var i=Math.floor(Math.abs(n)),v=n.toString().replace(/^[^.]*\.?/,"").length;n=Math.floor(n);if(i===1&&v===0)return"one";return"other";},"fields":{"second":{"displayName":"Second","relative":{"0":"now"},"relativeTime":{"future":{"one":"in {0} second","other":"in {0} seconds"},"past":{"one":"{0} second ago","other":"{0} seconds ago"}}},"minute":{"displayName":"Minute","relativeTime":{"future":{"one":"in {0} minute","other":"in {0} minutes"},"past":{"one":"{0} minute ago","other":"{0} minutes ago"}}},"hour":{"displayName":"Hour","relativeTime":{"future":{"one":"in {0} hour","other":"in {0} hours"},"past":{"one":"{0} hour ago","other":"{0} hours ago"}}},"day":{"displayName":"Day","relative":{"0":"today","1":"tomorrow","-1":"yesterday"},"relativeTime":{"future":{"one":"in {0} day","other":"in {0} days"},"past":{"one":"{0} day ago","other":"{0} days ago"}}},"month":{"displayName":"Month","relative":{"0":"this month","1":"next month","-1":"last month"},"relativeTime":{"future":{"one":"in {0} month","other":"in {0} months"},"past":{"one":"{0} month ago","other":"{0} months ago"}}},"year":{"displayName":"Year","relative":{"0":"this year","1":"next year","-1":"last year"},"relativeTime":{"future":{"one":"in {0} year","other":"in {0} years"},"past":{"one":"{0} year ago","other":"{0} years ago"}}}}};
+    var $$en$$default = {"locale":"en","pluralRuleFunction":function (n,ord){var s=String(n).split("."),v0=!s[1],t0=Number(s[0])==n,n10=t0&&s[0].slice(-1),n100=t0&&s[0].slice(-2);if(ord)return n10==1&&n100!=11?"one":n10==2&&n100!=12?"two":n10==3&&n100!=13?"few":"other";return n==1&&v0?"one":"other"},"fields":{"year":{"displayName":"Year","relative":{"0":"this year","1":"next year","-1":"last year"},"relativeTime":{"future":{"one":"in {0} year","other":"in {0} years"},"past":{"one":"{0} year ago","other":"{0} years ago"}}},"month":{"displayName":"Month","relative":{"0":"this month","1":"next month","-1":"last month"},"relativeTime":{"future":{"one":"in {0} month","other":"in {0} months"},"past":{"one":"{0} month ago","other":"{0} months ago"}}},"day":{"displayName":"Day","relative":{"0":"today","1":"tomorrow","-1":"yesterday"},"relativeTime":{"future":{"one":"in {0} day","other":"in {0} days"},"past":{"one":"{0} day ago","other":"{0} days ago"}}},"hour":{"displayName":"Hour","relativeTime":{"future":{"one":"in {0} hour","other":"in {0} hours"},"past":{"one":"{0} hour ago","other":"{0} hours ago"}}},"minute":{"displayName":"Minute","relativeTime":{"future":{"one":"in {0} minute","other":"in {0} minutes"},"past":{"one":"{0} minute ago","other":"{0} minutes ago"}}},"second":{"displayName":"Second","relative":{"0":"now"},"relativeTime":{"future":{"one":"in {0} second","other":"in {0} seconds"},"past":{"one":"{0} second ago","other":"{0} seconds ago"}}}}};
     function $$handlebars$intl$$__addLocaleData(data) {
         intl$messageformat$$default.__addLocaleData(data);
         intl$relativeformat$$default.__addLocaleData(data);
