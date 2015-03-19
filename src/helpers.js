@@ -150,9 +150,7 @@ function registerWith(Handlebars) {
 
         // Remove `now` from the options passed to the `IntlRelativeFormat`
         // constructor, because it's only used when calling `format()`.
-        if (formatOptions.hasOwnProperty('now')) {
-            delete formatOptions.now;
-        }
+        delete formatOptions.now;
 
         return getRelativeFormat(locales, formatOptions).format(date, {
             now: now
