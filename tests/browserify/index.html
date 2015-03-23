@@ -1,28 +1,25 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>HandlebarsIntl Browser Tests</title>
+    <title>HandlebarsIntl Browserify Tests</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
+    <link rel="stylesheet" href="../../node_modules/mocha/mocha.css" />
   </head>
   <body>
     <div id="mocha"></div>
-    <script src="../node_modules/intl/Intl.complete.js"></script>
+    <script src="../../node_modules/intl/Intl.complete.js"></script>
     <script>
       // Force use of Intl.js Polyfill to serve as a mock.
       Intl.NumberFormat   = IntlPolyfill.NumberFormat;
       Intl.DateTimeFormat = IntlPolyfill.DateTimeFormat;
     </script>
-    <script src="../node_modules/mocha/mocha.js"></script>
-    <script src="../node_modules/expect.js/index.js"></script>
-    <script src="../node_modules/handlebars/dist/handlebars.js"></script>
-    <script src="../dist/handlebars-intl-with-locales.js"></script>
+    <script src="../../node_modules/mocha/mocha.js"></script>
+    <script src="../../node_modules/expect.js/index.js"></script>
     <script>
-      HandlebarsIntl.registerWith(Handlebars);
       mocha.setup('bdd');
     </script>
-    <script src="helpers.js"></script>
+    <script src="../../tmp/browserify/app.js"></script>
     <script>
     (function () {
       var runner = mocha.run();
