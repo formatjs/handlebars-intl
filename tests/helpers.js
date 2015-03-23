@@ -259,7 +259,6 @@ describe('Helper `formatRelative`', function () {
     });
 });
 
-
 describe('Helper `formatMessage`', function () {
     it('should be added to Handlebars', function () {
         expect(Handlebars.helpers).to.have.keys('formatMessage');
