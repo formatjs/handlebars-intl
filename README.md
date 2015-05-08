@@ -33,9 +33,9 @@ Overview
 There are many examples [on the website][Handlebars Intl], but here's a comprehensive one:
 
 ```handlebars
-{{formatMessage (intlGet "post.meta")
+{{formatMessage (intlGet "messages.post.meta")
     num=post.comments.length
-    ago=(formatRelative post.data)}}
+    ago=(formatRelative post.date)}}
 ```
 
 ```js
