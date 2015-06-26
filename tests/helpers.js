@@ -57,6 +57,13 @@ describe('Helper `formatNumber`', function () {
             expect(tmpl({ NUM: 40000.004 })).to.equal('40,000.004');
         });
 
+        it('should support number as a function', function() {
+            var tmpl = intlBlock('{{formatNumber numFn}}', {locales: 'en-US'});
+            expect(tmpl({
+                numFn: function() { return 4; }
+            })).to.equal('4');
+        });
+
         describe('in another locale', function () {
             it('should return a string', function () {
                 var tmpl = intlBlock('{{formatNumber 4}}', {locales: 'de-DE'});
@@ -185,6 +192,13 @@ describe('Helper `formatDate`', function () {
         var tmpl = intlBlock('{{formatDate 0}}', {locales: 'en-US'});
         expect(tmpl()).to.equal(new Intl.DateTimeFormat('en').format(0));
     });
+
+    it('should support date as a function', function() {
+        var tmpl = intlBlock('{{formatDate dateFn}}', {locales: 'en-US'});
+        expect(tmpl({
+            dateFn: function() { return timeStamp; }
+        })).to.equal('1/23/2014');
+    });
 });
 
 describe('Helper `formatTime`', function () {
@@ -218,6 +232,13 @@ describe('Helper `formatTime`', function () {
     it('should return a formatted string of just the time', function () {
         var tmpl = intlBlock('{{formatTime ' + timeStamp + ' hour="numeric" minute="numeric" timeZone="UTC"}}', {locales: 'en-US'});
         expect(tmpl()).to.equal('11:00 PM');
+    });
+
+    it('should support date as a function', function() {
+        var tmpl = intlBlock('{{formatTime dateFn}}', {locales: 'en-US'});
+        expect(tmpl({
+            dateFn: function() { return timeStamp; }
+        })).to.equal('1/23/2014');
     });
 });
 
@@ -256,6 +277,13 @@ describe('Helper `formatRelative`', function () {
     it('should format the epoch timestamp', function () {
         var tmpl = intlBlock('{{formatRelative 0 now=1000}}', {locales: 'en-US'});
         expect(tmpl()).to.equal('1 second ago');
+    });
+
+    it('should support date as a function', function() {
+        var tmpl = intlBlock('{{formatRelative dateFn}}', {locales: 'en-US'});
+        expect(tmpl({
+            dateFn: function() { return tomorrow; }
+        })).to.equal('tomorrow');
     });
 });
 
@@ -332,6 +360,17 @@ describe('Helper `formatMessage`', function () {
         });
 
         expect(out).to.equal('This is my 3rd birthday.');
+    });
+
+    it('should support message as a function', function () {
+        var tmpl = intlBlock('{{formatMessage messageFn firstName=firstName lastName=lastName}}', {locales: 'en-US'}),
+            out  = tmpl({
+                messageFn: function() { return 'Hi, my name is {firstName} {lastName}.'; },
+                firstName: 'Anthony',
+                lastName : 'Pipkin'
+            });
+
+        expect(out).to.equal('Hi, my name is Anthony Pipkin.');
     });
 });
 
