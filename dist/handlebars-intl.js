@@ -2240,6 +2240,32 @@
 
     var intl$relativeformat$$default = $$core1$$default;
 
+    var $$es52$$bind = Function.prototype.bind || function (oThis) {
+        if (typeof this !== 'function') {
+          // closest thing possible to the ECMAScript 5
+          // internal IsCallable function
+          throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable');
+        }
+
+        var aArgs   = Array.prototype.slice.call(arguments, 1),
+            fToBind = this,
+            fNOP    = function() {},
+            fBound  = function() {
+              return fToBind.apply(this instanceof fNOP
+                     ? this
+                     : oThis,
+                     aArgs.concat(Array.prototype.slice.call(arguments)));
+            };
+
+        if (this.prototype) {
+          // native functions don't have a prototype
+          fNOP.prototype = this.prototype;
+        }
+        fBound.prototype = new fNOP();
+
+        return fBound;
+    };
+
     // Purposely using the same implementation as the Intl.js `Intl` polyfill.
     // Copyright 2013 Andy Earnshaw, MIT License
 
@@ -2277,6 +2303,7 @@
 
         return obj;
     };
+
     var intl$format$cache$$default = intl$format$cache$$createFormatCache;
 
     // -----------------------------------------------------------------------------
@@ -2290,8 +2317,7 @@
             var format  = cacheId && cache[cacheId];
 
             if (!format) {
-                format = $$es52$$objCreate(FormatConstructor.prototype);
-                FormatConstructor.apply(format, args);
+                format = new ($$es52$$bind.apply(FormatConstructor, [null].concat(args)))();
 
                 if (cacheId) {
                     cache[cacheId] = format;
