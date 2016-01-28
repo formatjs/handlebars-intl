@@ -48,7 +48,7 @@
     "grunt-extract-cldr-data": "2.1.1",
     "grunt-json-remove-fields": "git://github.com/ericf/grunt-json-remove-fields#improve-files-and-output",
     "grunt-saucelabs": "^8.3.2",
-    "handlebars": "^3.0.0",
+    "handlebars": "^4.0.5",
     "intl": "^0.1.4",
     "istanbul": "^0.3.2",
     "mocha": "^2.0.1",
