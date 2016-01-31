@@ -106,6 +106,9 @@ function registerWith(Handlebars) {
     }
 
     function formatDate(date, format, options) {
+        if (typeof date === 'function') {
+            date = date.call(this);
+        }
         date = new Date(date);
         assertIsDate(date, 'A date or timestamp must be provided to {{formatDate}}');
 
@@ -121,6 +124,9 @@ function registerWith(Handlebars) {
     }
 
     function formatTime(date, format, options) {
+        if (typeof date === 'function') {
+            date = date.call(this);
+        }
         date = new Date(date);
         assertIsDate(date, 'A date or timestamp must be provided to {{formatTime}}');
 
@@ -136,6 +142,9 @@ function registerWith(Handlebars) {
     }
 
     function formatRelative(date, format, options) {
+        if (typeof date === 'function') {
+            date = date.call(this);
+        }
         date = new Date(date);
         assertIsDate(date, 'A date or timestamp must be provided to {{formatRelative}}');
 
@@ -158,6 +167,9 @@ function registerWith(Handlebars) {
     }
 
     function formatNumber(num, format, options) {
+        if (typeof num === 'function') {
+            num = num.call(this);
+        }
         assertIsNumber(num, 'A number must be provided to {{formatNumber}}');
 
         if (!options) {
@@ -175,6 +187,9 @@ function registerWith(Handlebars) {
         if (!options) {
             options = message;
             message = null;
+        }
+        if (typeof message === 'function') {
+            message = message.call(this);
         }
 
         var hash = options.hash;
