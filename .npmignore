@@ -1,5 +1,4 @@
-coverage/
-tests/
-tmp/
-.travis.yml
+tests
+coverage
 Gruntfile.js
+.travis.yml
