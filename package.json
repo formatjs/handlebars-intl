@@ -1,67 +1,54 @@
 {
-  "name": "handlebars-intl",
-  "version": "1.1.2",
-  "description": "Handlebars helpers for internationalization.",
+  "name": "handlebars-helper-intl",
+  "version": "0.1.1",
+  "description": "handlebars helpers for internationalization",
   "keywords": [
     "intl",
     "i18n",
     "handlebars"
   ],
-  "author": "Eric Ferraiuolo <edf@ericf.me>",
+  "author": "Anthony Pipkin <a.pipkin@yahoo.com>",
   "contributors": [
     "Drew Folta <drew@folta.net>",
-    "Caridy Patino <caridy@gmail.com>",
-    "Anthony Pipkin <a.pipkin@yahoo.com>"
+    "Eric Ferraiuolo <eferraiuolo@gmail.com>",
+    "Caridy Patino <caridy@gmail.com>"
+  ],
+  "licenses": [
+    {
+      "type": "Yahoo BSD",
+      "url": "https://github.com/yahoo/handlebars-helper-intl/blob/master/LICENSE"
+    }
   ],
   "bugs": {
-    "url": "https://github.com/yahoo/handlebars-intl/issues"
+    "url": "https://github.com/yahoo/handlebars-helper-intl/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:yahoo/handlebars-intl.git"
+    "url": "git@github.com:yahoo/handlebars-helper-intl.git"
   },
-  "main": "index.js",
-  "jsnext:main": "src/main.js",
-  "browser": {
-    "./lib/locales": false,
-    "./lib/locales.js": false
-  },
-  "dependencies": {
-    "intl-format-cache": "2.0.5",
-    "intl-messageformat": "1.1.0",
-    "intl-relativeformat": "1.1.0"
-  },
-  "devDependencies": {
-    "benchmark": "^1.0.0",
-    "expect.js": "^0.3.1",
-    "grunt": "^0.4.5",
-    "grunt-benchmark": "^0.3.0",
-    "grunt-browserify": "^3.5.1",
-    "grunt-bundle-jsnext-lib": "^0.5.0",
-    "grunt-cli": "^0.1.13",
-    "grunt-contrib-clean": "^0.6.0",
-    "grunt-contrib-concat": "^0.5.0",
-    "grunt-contrib-connect": "^0.9.0",
-    "grunt-contrib-copy": "^0.8.0",
-    "grunt-contrib-jshint": "^0.11.0",
-    "grunt-contrib-uglify": "^0.8.0",
-    "grunt-extract-cldr-data": "2.1.1",
-    "grunt-json-remove-fields": "git://github.com/ericf/grunt-json-remove-fields#improve-files-and-output",
-    "grunt-saucelabs": "^8.3.2",
-    "handlebars": "^4.0.5",
-    "intl": "^0.1.4",
-    "istanbul": "^0.3.2",
-    "mocha": "^2.0.1",
-    "xunit-file": "0.0.6"
-  },
-  "scripts": {
-    "prepublish": "grunt",
-    "test": "istanbul cover -x lib/locales.js -- ./node_modules/mocha/bin/_mocha tests/runner.js --reporter spec",
-    "travis": "istanbul cover -x lib/locales.js -- _mocha tests/runner.js --reporter spec && ./saucelabs.sh"
-  },
-  "homepage": "https://github.com/yahoo/handlebars-intl",
+  "main": "lib/helpers.js",
   "directories": {
     "test": "tests"
   },
-  "license": "BSD-3-Clause"
+  "dependencies": {
+    "intl-messageformat": "~0.1.0"
+  },
+  "devDependencies": {
+    "chai": "1.8.*",
+    "grunt": "0.4.*",
+    "grunt-cli": "0.1.*",
+    "grunt-contrib-copy": "0.5.*",
+    "grunt-contrib-jshint": "0.7.*",
+    "grunt-contrib-uglify": "0.2.*",
+    "handlebars": "1.3.*",
+    "istanbul": "0.1.*",
+    "mocha": "1.15.*",
+    "intl": "*",
+    "benchmark": "~1.0.0",
+    "xunit-file": "*"
+  },
+  "scripts": {
+    "pretest": "grunt jshint build",
+    "test": "istanbul cover -- _mocha tests/ --reporter spec"
+  }
 }
