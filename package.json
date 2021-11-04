@@ -1,6 +1,6 @@
 {
-  "name": "handlebars-helper-intl",
-  "version": "0.1.1",
+  "name": "@flickr/handlebars-helper-intl",
+  "version": "0.1.2",
   "description": "handlebars helpers for internationalization",
   "keywords": [
     "intl",
@@ -20,14 +20,15 @@
     }
   ],
   "bugs": {
-    "url": "https://github.com/yahoo/handlebars-helper-intl/issues"
+    "url": "https://github.com/flickr/handlebars-intl/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:yahoo/handlebars-helper-intl.git"
+    "url": "git+ssh://git@github.com/flickr/handlebars-intl.git"
   },
   "main": "lib/helpers.js",
   "directories": {
+    "lib": "lib",
     "test": "tests"
   },
   "dependencies": {
@@ -50,5 +51,7 @@
   "scripts": {
     "pretest": "grunt jshint build",
     "test": "istanbul cover -- _mocha tests/ --reporter spec"
-  }
+  },
+  "homepage": "https://github.com/flickr/handlebars-intl#readme",
+  "license": "UNLICENSED"
 }
