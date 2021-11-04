@@ -1,5 +1,5 @@
 {
-  "name": "@flickr/handlebars-helper-intl",
+  "name": "@flickr/handlebars-intl",
   "version": "0.1.2",
   "description": "handlebars helpers for internationalization",
   "keywords": [

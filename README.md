@@ -1,4 +1,4 @@
-handlebars-helper-intl
+handlebars-intl
 ======================
 
 Handlebars helpers for internationalization.
@@ -11,12 +11,12 @@ Handlebars helpers for internationalization.
 
 ### Browser
 
-1. Install with [bower](http://bower.io/): `bower install handlebars-helper-intl`
+1. Install with [bower](http://bower.io/): `bower install handlebars-intl`
 2. Load the scripts into your page. (It does not matter which order the scripts are loaded in.)
 
     ```html
     <script src="handlebars.js"></script>
-    <script src="handlebars-helper-intl.js"></script>
+    <script src="handlebars-intl.js"></script>
     ```
 
 3. Register the helpers:
@@ -28,13 +28,13 @@ Handlebars helpers for internationalization.
 
 ### Node/CommonJS
 
-1. You can install the helpers with npm: `npm install handlebars-helper-intl`
+1. You can install the helpers with npm: `npm install handlebars-intl`
 2. Load in the module and register it:
 
     ```javascript
     var Handlebars = require('handlebars');
     global.Intl = require('intl');
-    require('handlebars-helper-intl').register(Handlebars);
+    require('handlebars-intl').register(Handlebars);
     ```
 
     **NOTE:**  Since node (as of 0.10) doesn't provide the global `Intl` object
@@ -48,7 +48,7 @@ Handlebars helpers for internationalization.
 3. Load in the module and register it:
 
     ```javascript
-    define(['handlebars', 'handlebars-helper-intl'], function(Handlebars, HandlebarsHelperIntl) {
+    define(['handlebars', 'handlebars-intl'], function(Handlebars, HandlebarsHelperIntl) {
         HandlebarsHelperIntl.register(Handlebars);
     });
     ```
