@@ -32,7 +32,7 @@
     "test": "tests"
   },
   "dependencies": {
-    "intl-messageformat": "~0.1.0"
+    "intl-messageformat": "^9.11.4"
   },
   "devDependencies": {
     "chai": "1.8.*",

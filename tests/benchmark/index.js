@@ -1,14 +1,11 @@
 /* global Intl */
 'use strict';
 
-global.Intl || (global.Intl = require('intl'));
-
 var Benchmark         = require('benchmark'),
     IntlMessageFormat = require('intl-messageformat'),
     Handlebars        = require('handlebars'),
     hbsIntlHelpers    = require('../../');
 
-require('intl-messageformat/locale-data/en');
 hbsIntlHelpers.registerWith(Handlebars);
 
 var intlNumber        = Handlebars.helpers.intlNumber,
